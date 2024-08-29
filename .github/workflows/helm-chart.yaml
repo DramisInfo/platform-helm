@@ -1,0 +1,40 @@
+name: Build, Test, and Publish Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.7.1
+
+    - name: Lint Helm chart
+      run: helm lint ./platform-core
+
+    - name: Run Helm tests
+      run: helm unittest ./platform-core
+
+    - name: Package Helm chart
+      run: helm package ./platform-core
+
+    # - name: Publish Helm chart
+    #   env:
+    #     HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
+    #     HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
+    #     HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
+    #   run: |
+    #     helm repo add my-repo $HELM_REPO_URL --username $HELM_REPO_USERNAME --password $HELM_REPO_PASSWORD
+    #     helm push ./path/to/your/chart-*.tgz my-repo

@@ -42,4 +42,4 @@ jobs:
           HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
         run: |
           helm repo add platform $HELM_REPO_URL --username $HELM_REPO_USERNAME --password $HELM_REPO_PASSWORD
-          helm push ./platform-core-*.tgz platform
+          helm push ./platform-core-*.tgz platform --insecure-skip-tls-verify

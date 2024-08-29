@@ -21,6 +21,9 @@ jobs:
       with:
         version: v3.7.1
 
+    - name: Install helm-unittest plugin
+      run: helm plugin install https://github.com/quintush/helm-unittest
+
     - name: Lint Helm chart
       run: helm lint ./platform-core
 

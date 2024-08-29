@@ -37,7 +37,7 @@ jobs:
 
       - name: Publish Helm chart
         env:
-          HELM_REPO_URL: https://registry.platform.dramisinfo.com/
+          HELM_REPO_URL: https://registry.platform.dramisinfo.com/platform
           HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
           HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
         run: |

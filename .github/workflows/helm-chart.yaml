@@ -24,7 +24,13 @@ jobs:
         run: helm version
 
       - name: Install helm-unittest plugin
-        run: helm plugin install https://github.com/quintush/helm-unittest
+        run: |
+          helm plugin list | grep "unittest"
+          if ! helm plugin list | grep -q "unittest"; then
+              helm plugin install https://github.com/quintush/helm-unittest
+          else
+              echo "Helm unittest plugin is already installed."
+          fi
 
       - name: Lint Helm chart
         run: helm lint ./platform-core

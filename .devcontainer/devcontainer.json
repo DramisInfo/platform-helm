@@ -16,9 +16,11 @@
     }
   },
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
   ],
-  "postCreateCommand": "git config --global --add safe.directory /workspace && pre-commit install",
+  "postCreateCommand": "git config --global --add safe.directory /workspace",
+  "postStartCommand": "k3d cluster delete local; k3d cluster create local --api-port 172.17.0.1:6443; exit",
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind"
 }

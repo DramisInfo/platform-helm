@@ -1,0 +1,17 @@
+version: "3"
+
+tasks:
+  helm-lint:
+    cmds:
+      - echo "Running Helm lint..."
+      - helm lint ./platform-core
+
+  helm-unittest:
+    cmds:
+      - echo "Running Helm unittests..."
+      - helm unittest ./platform-core
+
+  pre-commit:
+    cmds:
+      - task helm-lint
+      - task helm-unittest

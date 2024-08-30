@@ -11,3 +11,8 @@ repos:
         name: Helm Lint
         entry: bash -c 'cd platform-core && helm lint .'
         language: system
+
+      - id: helm-unittest
+        name: Helm unittest
+        entry: bash -c 'cd platform-core && helm unittest .'
+        language: system

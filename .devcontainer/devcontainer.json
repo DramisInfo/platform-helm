@@ -15,7 +15,10 @@
       }
     }
   },
-  "postCreateCommand": "pre-commit install",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+  ],
+  // "postCreateCommand": "pre-commit install",
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind"
 }

@@ -1,22 +1,18 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    curl \
-    helm \
-    alsa-utils \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y curl gnupg lsb-release git python3-pip
 
-# Install Task
-RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+# Install Helm
+RUN curl https://baltocdn.com/helm/signing.asc | apt-key add - && \
+    apt-get install -y apt-transport-https --no-install-recommends && \
+    echo "deb https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list && \
+    apt-get update && \
+    apt-get install -y helm
 
 # Install pre-commit
 RUN pip3 install pre-commit
-
-# Install helm-unittest plugin
-RUN helm plugin install https://github.com/quintush/helm-unittest
 
 # Set the working directory
 WORKDIR /workspace
@@ -24,7 +20,7 @@ WORKDIR /workspace
 # Copy the repository files
 COPY . /workspace
 
-# Run pre-commit install
+# Install pre-commit hooks
 RUN pre-commit install
 
 # Define the entrypoint

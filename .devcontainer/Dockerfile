@@ -20,8 +20,5 @@ WORKDIR /workspace
 # Copy the repository files
 COPY . /workspace
 
-# Install pre-commit hooks
-RUN pre-commit install && chmod +x .git/hooks/pre-commit
-
 # Define the entrypoint
 ENTRYPOINT ["/bin/bash"]

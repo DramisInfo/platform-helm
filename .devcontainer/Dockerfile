@@ -41,5 +41,8 @@ WORKDIR /workspace
 # Copy the repository files
 COPY . /workspace
 
+#run pre-commit install
+RUN pre-commit install
+
 # Define the entrypoint
 ENTRYPOINT ["/bin/bash"]

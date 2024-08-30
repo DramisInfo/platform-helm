@@ -5,9 +5,9 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
 
-  # - repo: local
-  #   hooks:
-  #     - id: helm-lint
-  #       name: Helm Lint
-  #       entry: helm lint platform-core
-  #       language: system
+  - repo: local
+    hooks:
+      - id: helm-lint
+        name: Helm Lint
+        entry: bash -c 'cd platform-core && helm lint .'
+        language: system

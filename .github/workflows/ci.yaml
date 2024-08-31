@@ -35,18 +35,21 @@ jobs:
       - name: Run Helm tests
         run: helm unittest ./platform-core
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16.x"
+          node-version: "lts/*"
 
-      - name: Install semantic-release
-        run: npm install -g semantic-release @semantic-release/git @semantic-release/github
+      - name: Install dependencies
+        run: npm clean-install
 
-      - name: Run semantic-release
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+
+      - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: semantic-release
+          GITHUB_TOKEN: ${{ secrets.Gh_TOKEN }}
+        run: npx semantic-release
 
       - name: Package Helm chart
         run: helm package ./platform-core

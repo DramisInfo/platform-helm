@@ -38,6 +38,19 @@ jobs:
       - name: Package Helm chart
         run: helm package ./platform-core
 
+      - name: Install semantic-release
+        run: npm install -g semantic-release @semantic-release/git @semantic-release/github
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: semantic-release
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+
       - name: Publish Helm chart
         env:
           HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}

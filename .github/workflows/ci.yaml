@@ -1,9 +1,6 @@
 name: Build, Test, and Publish Helm Chart
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main

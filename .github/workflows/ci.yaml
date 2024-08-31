@@ -9,9 +9,9 @@ on:
       - main
 
 jobs:
-  build-test-publish:
+  test-packate-publish:
     runs-on: self-hosted
-
+    name: Build, Test, and Publish Helm Chart
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

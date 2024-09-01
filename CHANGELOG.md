@@ -1,3 +1,10 @@
+## [0.3.5](https://github.com/DramisInfo/platform-helm/compare/v0.3.4...v0.3.5) (2024-09-01)
+
+
+### Bug Fixes
+
+* change workflow and publish in ci ([1703213](https://github.com/DramisInfo/platform-helm/commit/1703213d993f33f67fbacaa7a8d284301656c0ef))
+
 ## [0.3.4](https://github.com/DramisInfo/platform-helm/compare/v0.3.3...v0.3.4) (2024-09-01)
 
 

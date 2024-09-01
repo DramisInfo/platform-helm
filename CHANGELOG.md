@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/DramisInfo/platform-helm/compare/v0.2.0...v0.3.0) (2024-09-01)
+
+
+### Features
+
+* Publish helm chart when new release is published ([808a3c5](https://github.com/DramisInfo/platform-helm/commit/808a3c56b6199d2f0a1fe0f76150d4fcc921a07d))
+
 # [0.2.0](https://github.com/DramisInfo/platform-helm/compare/v0.1.1...v0.2.0) (2024-09-01)
 
 

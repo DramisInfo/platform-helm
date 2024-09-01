@@ -109,3 +109,16 @@ jobs:
           export HELM_EXPERIMENTAL_OCI=1
           echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
           helm push ./platform-core-*.tgz $HELM_REPO_URL
+  update-git:
+    runs-on: self-hosted
+    name: Update Git
+    needs: release
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      statuses: write
+      deployments: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3

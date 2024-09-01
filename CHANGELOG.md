@@ -1,3 +1,10 @@
+## [0.4.11](https://github.com/DramisInfo/platform-helm/compare/v0.4.10...v0.4.11) (2024-09-01)
+
+
+### Bug Fixes
+
+* use artifact from previous job ([019e2bf](https://github.com/DramisInfo/platform-helm/commit/019e2bf2f241f2d93c89273b645b8f65c946fbe6))
+
 ## [0.4.10](https://github.com/DramisInfo/platform-helm/compare/v0.4.9...v0.4.10) (2024-09-01)
 
 

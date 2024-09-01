@@ -35,8 +35,12 @@ jobs:
       - name: Run Helm tests
         run: helm unittest ./platform-core
 
+      - name: Generate CalVer version
+        id: calver
+        run: echo "::set-output name=version::$(date +'%Y.%m.%d')"
+
       - name: Package Helm chart
-        run: helm package ./platform-core --version 0.1.0 --app-version 0.1.0
+        run: helm package ./platform-core --version ${{ steps.calver.outputs.version }} --app-version ${{ steps.calver.outputs.version }}
 
       - name: Publish Helm chart
         env:

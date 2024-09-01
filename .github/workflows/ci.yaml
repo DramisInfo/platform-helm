@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test-packate-publish:
+  test:
     runs-on: self-hosted
     name: Build, Test, and Publish Helm Chart
     steps:
@@ -35,19 +35,44 @@ jobs:
       - name: Run Helm tests
         run: helm unittest ./platform-core
 
-      - name: Generate CalVer version
-        id: calver
-        run: echo "::set-output name=version::$(date +'%Y.%m.%d')"
+      # - name: Package Helm chart
+      #   run: helm package ./platform-core --version ${{ steps.calver.outputs.version }} --app-version ${{ steps.calver.outputs.version }}
 
-      - name: Package Helm chart
-        run: helm package ./platform-core --version ${{ steps.calver.outputs.version }} --app-version ${{ steps.calver.outputs.version }}
+      # - name: Publish Helm chart
+      #   env:
+      #     HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
+      #     HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
+      #     HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
+      #   run: |
+      #     export HELM_EXPERIMENTAL_OCI=1
+      #     echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
+      #     helm push ./platform-core-*.tgz $HELM_REPO_URL
+  release:
+    runs-on: self-hosted
+    name: Release
+    needs: test
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      statuses: write
+      deployments: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Publish Helm chart
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: npm clean-install
+
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+
+      - name: Release
         env:
-          HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
-          HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
-          HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
-        run: |
-          export HELM_EXPERIMENTAL_OCI=1
-          echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
-          helm push ./platform-core-*.tgz $HELM_REPO_URL
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

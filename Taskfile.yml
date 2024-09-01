@@ -1,0 +1,56 @@
+version: "3"
+
+tasks:
+  install-prerequisites:
+    cmds:
+      - |
+        # Install kind
+        if ! command -v kind &> /dev/null; then
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+        fi
+      - |
+        # Install kubectl
+        if ! command -v kubectl &> /dev/null; then
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+        fi
+      - |
+        # Install helm
+        if ! command -v helm &> /dev/null; then
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        fi
+
+  create-cluster:
+    cmds:
+      - kind delete cluster --name kind || true
+      - kind get clusters | grep -q "kind" || kind create cluster --name kind # --config kind-config.yaml
+
+  helm-dependency-update:
+    cmds:
+      - helm dependency update platform-core
+      - for dir in $(find platform-core/charts/ -maxdepth 1 -mindepth 1 -type d); do helm dependency update $dir; done
+
+  helm-lint:
+    cmds:
+      - helm lint platform-core
+
+  helm-dry-run:
+    cmds:
+      - helm install --dry-run platform-core platform-core > .helm-dry-run
+
+  helm-install:
+    cmds:
+      - helm upgrade --install platform-core platform-core
+
+  ci:
+    cmds:
+      - task install-prerequisites
+      - task create-cluster
+      - task helm-dependency-update
+      - task helm-lint
+      - task helm-dry-run
+      - task helm-install
+      - kubectl get pods --all-namespaces

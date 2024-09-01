@@ -19,40 +19,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Helm
+      - name: Install Task
         run: |
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-      - name: Verify Helm installation
-        run: helm version
+      - name: Run CI tasks
+        run: task ci
 
-      - name: Install helm-unittest plugin
-        run: |
-          helm plugin list | grep "unittest"
-          if ! helm plugin list | grep -q "unittest"; then
-              helm plugin install https://github.com/quintush/helm-unittest
-          else
-              echo "Helm unittest plugin is already installed."
-          fi
-
-      - name: Lint Helm chart
-        run: helm lint ./platform-core
-
-      - name: Run Helm tests
-        run: helm unittest ./platform-core
-
-      # - name: Package Helm chart
-      #   run: helm package ./platform-core --version ${{ steps.calver.outputs.version }} --app-version ${{ steps.calver.outputs.version }}
-
-      # - name: Publish Helm chart
-      #   env:
-      #     HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
-      #     HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
-      #     HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
-      #   run: |
-      #     export HELM_EXPERIMENTAL_OCI=1
-      #     echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
-      #     helm push ./platform-core-*.tgz $HELM_REPO_URL
   release:
     runs-on: self-hosted
     name: Release

@@ -1,3 +1,10 @@
+## [0.3.8](https://github.com/DramisInfo/platform-helm/compare/v0.3.7...v0.3.8) (2024-09-01)
+
+
+### Bug Fixes
+
+* add new stage to update platform tools repo and apply the new release on the dev cluster ([c303ac0](https://github.com/DramisInfo/platform-helm/commit/c303ac011b79d64944fce2efe77c85d81a3ae608))
+
 ## [0.3.7](https://github.com/DramisInfo/platform-helm/compare/v0.3.6...v0.3.7) (2024-09-01)
 
 

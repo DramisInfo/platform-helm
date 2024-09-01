@@ -1,3 +1,10 @@
+## [0.4.5](https://github.com/DramisInfo/platform-helm/compare/v0.4.4...v0.4.5) (2024-09-01)
+
+
+### Bug Fixes
+
+* remove application ([387b5cb](https://github.com/DramisInfo/platform-helm/commit/387b5cbd22ecf4d4354c13336e3e2c073019c4b9))
+
 ## [0.4.4](https://github.com/DramisInfo/platform-helm/compare/v0.4.3...v0.4.4) (2024-09-01)
 
 

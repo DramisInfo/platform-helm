@@ -26,6 +26,12 @@ jobs:
       - name: Run CI tasks
         run: task ci
 
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Helm chart
+          path: ./platform-core-*.tgz
+
   release:
     runs-on: self-hosted
     name: Release

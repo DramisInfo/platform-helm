@@ -40,4 +40,8 @@ jobs:
         env:
           HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
           HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
-        run: helm push ./platform-core-*.tgz $HELM_REPO_URL --username $HELM_REPO_USERNAME --password $HELM_REPO_PASSWORD
+          HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
+        run: |
+          export HELM_EXPERIMENTAL_OCI=1
+          echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
+          helm push ./platform-core-*.tgz $HELM_REPO_URL

@@ -1,9 +1,0 @@
-dependencies:
-- name: cert-manager
-  repository: file://charts/cert-manager
-  version: 0.1.0
-- name: cluster-issuer
-  repository: file://charts/cluster-issuer
-  version: 0.1.0
-digest: sha256:b0147ca842ceddaf2089b81d635e0c622b6fb71dc4e4f39203a3bccf525db590
-generated: "2024-09-01T02:10:42.860813014-04:00"

@@ -1,3 +1,11 @@
+## [0.4.10](https://github.com/DramisInfo/platform-helm/compare/v0.4.9...v0.4.10) (2024-09-01)
+
+
+### Bug Fixes
+
+* remove tgz files from repository ([5483bda](https://github.com/DramisInfo/platform-helm/commit/5483bda8cd7068611e41aa5f0cc06801c106436c))
+* update gitignore to remove chart packages ([d1ff14e](https://github.com/DramisInfo/platform-helm/commit/d1ff14e181483913854dbcf16660d1dd0dc740fa))
+
 ## [0.4.9](https://github.com/DramisInfo/platform-helm/compare/v0.4.8...v0.4.9) (2024-09-01)
 
 

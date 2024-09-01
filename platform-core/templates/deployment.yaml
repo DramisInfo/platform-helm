@@ -36,7 +36,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: vault-{{ .Values.clusterName }}
+
 spec:
+  ingressClassName: nginx
   rules:
     - host: test.{{ .Values.clusterName }}.dramisinfo.com
       http:
@@ -47,4 +51,8 @@ spec:
           service:
             name: nginx-service
             port:
-          number: 80
+              number: 80
+  tls:
+    - hosts:
+        - argocd.{{ .Values.clusterName }}.dramisinfo.com
+      secretName: argocd-{{ .Values.clusterName }}-server-tls # as expected by argocd-server

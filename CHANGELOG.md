@@ -1,3 +1,10 @@
+## [0.4.6](https://github.com/DramisInfo/platform-helm/compare/v0.4.5...v0.4.6) (2024-09-01)
+
+
+### Bug Fixes
+
+* change hook name ([f593fa0](https://github.com/DramisInfo/platform-helm/commit/f593fa001938cbd8ed04a0791438c88c68b657b8))
+
 ## [0.4.5](https://github.com/DramisInfo/platform-helm/compare/v0.4.4...v0.4.5) (2024-09-01)
 
 

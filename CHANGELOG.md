@@ -1,3 +1,10 @@
+## [0.3.9](https://github.com/DramisInfo/platform-helm/compare/v0.3.8...v0.3.9) (2024-09-01)
+
+
+### Bug Fixes
+
+* run on self-hosted ([7fcff69](https://github.com/DramisInfo/platform-helm/commit/7fcff6911ccf30cc2b23549bc0c6da04f3f14d22))
+
 ## [0.3.8](https://github.com/DramisInfo/platform-helm/compare/v0.3.7...v0.3.8) (2024-09-01)
 
 

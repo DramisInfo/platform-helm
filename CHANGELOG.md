@@ -1,3 +1,13 @@
+## [0.4.9](https://github.com/DramisInfo/platform-helm/compare/v0.4.8...v0.4.9) (2024-09-01)
+
+
+### Bug Fixes
+
+* missing docker in runner ([ddfe9ed](https://github.com/DramisInfo/platform-helm/commit/ddfe9ed328a7104432da05ecf7b6eadb9098107b))
+* run CI on ubuntu ([19e38a0](https://github.com/DramisInfo/platform-helm/commit/19e38a05f1e78f3b018a8352dd8164d28aa7b937))
+* update kind version ([4bad86e](https://github.com/DramisInfo/platform-helm/commit/4bad86e74e5574f4418e9a267a123438451d55db))
+* update package ([c4749d8](https://github.com/DramisInfo/platform-helm/commit/c4749d812d610010febf3c41ebbe68327331c712))
+
 ## [0.4.8](https://github.com/DramisInfo/platform-helm/compare/v0.4.7...v0.4.8) (2024-09-01)
 
 

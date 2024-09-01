@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/DramisInfo/platform-helm/compare/v0.4.1...v0.4.2) (2024-09-01)
+
+
+### Bug Fixes
+
+* adding hooks for cluster issuer ([9571ef1](https://github.com/DramisInfo/platform-helm/commit/9571ef181ba44fc7f7685adb44ae488306646588))
+
 ## [0.4.1](https://github.com/DramisInfo/platform-helm/compare/v0.4.0...v0.4.1) (2024-09-01)
 
 

@@ -111,7 +111,7 @@ jobs:
           helm push ./platform-core-*.tgz $HELM_REPO_URL
 
   update-platform-tools:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     name: Update platform-tools
     needs: release
     steps:

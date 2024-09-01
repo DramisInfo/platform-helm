@@ -1,3 +1,10 @@
+## [0.4.8](https://github.com/DramisInfo/platform-helm/compare/v0.4.7...v0.4.8) (2024-09-01)
+
+
+### Bug Fixes
+
+* add cluster issuer ([7e65376](https://github.com/DramisInfo/platform-helm/commit/7e65376a152d4d3598ca63b0d522361d72073ab6))
+
 ## [0.4.7](https://github.com/DramisInfo/platform-helm/compare/v0.4.6...v0.4.7) (2024-09-01)
 
 

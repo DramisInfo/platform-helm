@@ -13,6 +13,8 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      statuses: write
+      deployments: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

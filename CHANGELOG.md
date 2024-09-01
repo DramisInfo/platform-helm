@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/DramisInfo/platform-helm/compare/v0.3.0...v0.3.1) (2024-09-01)
+
+
+### Bug Fixes
+
+* change release type ([2a59f17](https://github.com/DramisInfo/platform-helm/commit/2a59f17cfd8b409c9e7694a8018dce7f23d86d8d))
+
 # [0.3.0](https://github.com/DramisInfo/platform-helm/compare/v0.2.0...v0.3.0) (2024-09-01)
 
 

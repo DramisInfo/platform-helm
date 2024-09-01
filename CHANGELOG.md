@@ -1,3 +1,10 @@
+## [0.3.12](https://github.com/DramisInfo/platform-helm/compare/v0.3.11...v0.3.12) (2024-09-01)
+
+
+### Bug Fixes
+
+* test deployment with clustername value ([559082f](https://github.com/DramisInfo/platform-helm/commit/559082f76d314b702d934f9a9e75a1410ecd52d9))
+
 ## [0.3.11](https://github.com/DramisInfo/platform-helm/compare/v0.3.10...v0.3.11) (2024-09-01)
 
 

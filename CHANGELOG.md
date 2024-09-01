@@ -1,3 +1,10 @@
+## [0.3.14](https://github.com/DramisInfo/platform-helm/compare/v0.3.13...v0.3.14) (2024-09-01)
+
+
+### Bug Fixes
+
+* ingress is broken ([d0ae80a](https://github.com/DramisInfo/platform-helm/commit/d0ae80a51eadc1e50614cd33751933641e205815))
+
 ## [0.3.13](https://github.com/DramisInfo/platform-helm/compare/v0.3.12...v0.3.13) (2024-09-01)
 
 

@@ -98,7 +98,7 @@ jobs:
         run: helm version
 
       - name: Package Helm chart
-        run: helm package ./platform-core --version ${{ env.VERSION }}" --app-version ${{ env.VERSION }}"
+        run: helm package ./platform-core --version ${{ env.VERSION }} --app-version ${{ env.VERSION }}
 
       - name: Publish Helm chart
         env:

@@ -1,3 +1,10 @@
+## [0.3.13](https://github.com/DramisInfo/platform-helm/compare/v0.3.12...v0.3.13) (2024-09-01)
+
+
+### Bug Fixes
+
+* use PAT instead of workflow token ([68a712e](https://github.com/DramisInfo/platform-helm/commit/68a712e20240bffcd1b05a17ccc4178f2831fc0e))
+
 ## [0.3.12](https://github.com/DramisInfo/platform-helm/compare/v0.3.11...v0.3.12) (2024-09-01)
 
 

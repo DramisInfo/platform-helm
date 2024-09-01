@@ -2,9 +2,9 @@ version: "3"
 
 tasks:
   install-prerequisites:
+    silent: true
     cmds:
       - |
-        sudo rm /usr/local/bin/kind || true
         # Install kind
         if ! command -v kind &> /dev/null; then
           curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
@@ -54,6 +54,10 @@ tasks:
     cmds:
       - helm upgrade --install platform-core platform-core
 
+  package-chart:
+    cmds:
+      - helm package platform-core
+
   ci:
     cmds:
       - task install-prerequisites
@@ -62,4 +66,5 @@ tasks:
       - task helm-lint
       - task helm-dry-run
       - task helm-install
+      - task package-chart
       - kubectl get pods --all-namespaces

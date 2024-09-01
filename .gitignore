@@ -1,2 +1,3 @@
-# Ignore npm modules
 node_modules/
+**/*.tgz
+platform-core/charts/*.tgz

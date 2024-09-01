@@ -1,3 +1,10 @@
+## [0.3.11](https://github.com/DramisInfo/platform-helm/compare/v0.3.10...v0.3.11) (2024-09-01)
+
+
+### Bug Fixes
+
+* clear templates ([1ec4a5d](https://github.com/DramisInfo/platform-helm/commit/1ec4a5d6f5a3e675ed044b155affde48eb627beb))
+
 ## [0.3.10](https://github.com/DramisInfo/platform-helm/compare/v0.3.9...v0.3.10) (2024-09-01)
 
 

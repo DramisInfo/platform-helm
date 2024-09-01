@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/DramisInfo/platform-helm/compare/v0.4.0...v0.4.1) (2024-09-01)
+
+
+### Bug Fixes
+
+* crd dependency ([3b579c8](https://github.com/DramisInfo/platform-helm/commit/3b579c84d4cdc59561c9e71eff23062a9e913d0c))
+* dependency ([bd86cc6](https://github.com/DramisInfo/platform-helm/commit/bd86cc6667b90ce8b5649d3de89f775ce0fa744e))
+* test ([ec6a552](https://github.com/DramisInfo/platform-helm/commit/ec6a5527c360ab8cbcc19d7e13f1e4020b170570))
+
 # [0.4.0](https://github.com/DramisInfo/platform-helm/compare/v0.3.15...v0.4.0) (2024-09-01)
 
 

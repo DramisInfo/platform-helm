@@ -51,7 +51,7 @@ jobs:
           path: ./
 
       - name: List files
-        run: ll
+        run: ls
 
       - name: Publish Helm chart
         env:

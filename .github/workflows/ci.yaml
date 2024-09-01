@@ -44,6 +44,11 @@ jobs:
     name: Publish Helm chart
     needs: test
     steps:
+      - name: Clean workspace
+        run: |
+          rm -rf *
+          rm -rf .[^.] .??*
+
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:

@@ -43,6 +43,8 @@ jobs:
     runs-on: self-hosted
     name: Publish Helm chart
     needs: test
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
     steps:
       - name: Clean workspace
         run: |
@@ -73,7 +75,7 @@ jobs:
         run: |
           FILENAME=$(ls platform-core-*.tgz)
           VERSION=$(echo $FILENAME | sed -n 's/platform-core-\(.*\)\.tgz/\1/p')
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   update-platform-tools:
     runs-on: self-hosted
@@ -88,8 +90,9 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Update platform-core.yaml with new version
+        env:
+          NEW_VERSION: ${{ needs.release.outputs.version }}
         run: |
-          NEW_VERSION=$(cat ${{ steps.extract_version.outputs.version }})
           sed -i "s/targetRevision: \".*\"/targetRevision: \"$NEW_VERSION\"/" platform-tools/overlays/dev/patches/platform-core.yaml
 
       - name: Commit and push changes

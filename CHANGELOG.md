@@ -1,3 +1,10 @@
+## [0.4.7](https://github.com/DramisInfo/platform-helm/compare/v0.4.6...v0.4.7) (2024-09-01)
+
+
+### Bug Fixes
+
+* remove cluster issuer ([7c275d4](https://github.com/DramisInfo/platform-helm/commit/7c275d4a5824c4056639fed866c5502733519485))
+
 ## [0.4.6](https://github.com/DramisInfo/platform-helm/compare/v0.4.5...v0.4.6) (2024-09-01)
 
 

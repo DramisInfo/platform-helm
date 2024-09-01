@@ -31,44 +31,19 @@ jobs:
         with:
           name: Helm chart
           path: ./platform-core-*.tgz
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Publish Helm chart"
+          git push origin main
 
   release:
     runs-on: self-hosted
-    name: Release
+    name: Publish Helm chart
     needs: test
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      statuses: write
-      deployments: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "lts/*"
-
-      - name: Install dependencies
-        run: npm clean-install
-
-      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
-        run: npm audit signatures
-
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npx semantic-release
-
-      - name: Retrieve version
-        id: get_version
-        run: echo "VERSION=$(cat .version)" >> $GITHUB_ENV
-
-      - name: Print version
-        run: echo "The released version is ${{ env.VERSION }}"
-
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
@@ -81,10 +56,16 @@ jobs:
           HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
           HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
         run: |
-          mv platform-core-*.tgz platform-core-${{ env.VERSION }}.tgz
           export HELM_EXPERIMENTAL_OCI=1
           echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
           helm push ./platform-core-*.tgz $HELM_REPO_URL
+
+      - name: Extract version from .tgz file name
+        id: extract_version
+        run: |
+          FILENAME=$(ls platform-core-*.tgz)
+          VERSION=$(echo $FILENAME | sed -n 's/platform-core-\(.*\)\.tgz/\1/p')
+          echo "::set-output name=version::$VERSION"
 
   update-platform-tools:
     runs-on: self-hosted
@@ -100,7 +81,7 @@ jobs:
 
       - name: Update platform-core.yaml with new version
         run: |
-          NEW_VERSION=$(cat .version)
+          NEW_VERSION=$(cat ${{ steps.extract_version.outputs.version }})
           sed -i "s/targetRevision: \".*\"/targetRevision: \"$NEW_VERSION\"/" platform-tools/overlays/dev/patches/platform-core.yaml
 
       - name: Commit and push changes

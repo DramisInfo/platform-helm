@@ -54,6 +54,18 @@ tasks:
     cmds:
       - helm upgrade --install platform-core platform-core
 
+  increment-chart-version:
+    cmds:
+      - |
+        #!/bin/bash
+        CHART_FILE="platform-core/Chart.yaml"
+        VERSION=$(grep '^version:' $CHART_FILE | awk '{print $2}')
+        VERSION_PARTS=(${VERSION//./ })
+        PATCH_VERSION=$((VERSION_PARTS[2] + 1))
+        NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$PATCH_VERSION"
+        sed -i "s/^version: .*/version: $NEW_VERSION/" $CHART_FILE
+        echo "Updated chart version to $NEW_VERSION"
+
   package-chart:
     cmds:
       - helm package platform-core
@@ -66,5 +78,6 @@ tasks:
       - task helm-lint
       - task helm-dry-run
       - task helm-install
+      - task increment-chart-version
       - task package-chart
       - kubectl get pods --all-namespaces

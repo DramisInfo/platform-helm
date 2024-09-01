@@ -69,15 +69,11 @@ jobs:
       - name: Print version
         run: echo "The released version is ${{ env.VERSION }}"
 
-      - name: Install Helm
-        run: |
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      - name: Verify Helm installation
-        run: helm version
-
-      - name: Package Helm chart
-        run: helm package ./platform-core --version ${{ env.VERSION }} --app-version ${{ env.VERSION }}
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: Helm chart
+          path: ./
 
       - name: Publish Helm chart
         env:

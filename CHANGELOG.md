@@ -1,3 +1,10 @@
+## [0.3.4](https://github.com/DramisInfo/platform-helm/compare/v0.3.3...v0.3.4) (2024-09-01)
+
+
+### Bug Fixes
+
+* change permission ([07359a7](https://github.com/DramisInfo/platform-helm/commit/07359a7e260cd5d993b6d3941cfe97e95bb725c7))
+
 ## [0.3.3](https://github.com/DramisInfo/platform-helm/compare/v0.3.2...v0.3.3) (2024-09-01)
 
 

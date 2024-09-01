@@ -4,10 +4,9 @@ kind: ClusterIssuer
 metadata:
   name: vault-{{ .Values.global.clusterName }}
   namespace: cert-manager
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "-90"
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "1"
 spec:
   acme:
     # You must replace this email address with your own.

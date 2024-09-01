@@ -1,4 +1,4 @@
-name: Build, Test, and Publish Helm Chart
+name: CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     runs-on: self-hosted
-    name: Build, Test, and Publish Helm Chart
+    name: Build and Test
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

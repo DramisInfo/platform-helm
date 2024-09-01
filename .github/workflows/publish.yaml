@@ -1,18 +1,13 @@
-name: Release
+name: Publish Helm Chart
 
 on:
   release:
-    types: [released]
+    types: [published]
+
 jobs:
   release:
     runs-on: self-hosted
-    name: Release
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      statuses: write
-      deployments: write
+    name: Package and Publish Helm Chart
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

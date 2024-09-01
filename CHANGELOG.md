@@ -1,3 +1,10 @@
+## [0.3.7](https://github.com/DramisInfo/platform-helm/compare/v0.3.6...v0.3.7) (2024-09-01)
+
+
+### Bug Fixes
+
+* change image ([853dc68](https://github.com/DramisInfo/platform-helm/commit/853dc6883b09a65d9143d2d647d968abf89b5c7a))
+
 ## [0.3.6](https://github.com/DramisInfo/platform-helm/compare/v0.3.5...v0.3.6) (2024-09-01)
 
 

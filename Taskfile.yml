@@ -4,6 +4,7 @@ tasks:
   install-prerequisites:
     cmds:
       - |
+        sudo rm /usr/local/bin/kind || true
         # Install kind
         if ! command -v kind &> /dev/null; then
           curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64

@@ -1,3 +1,10 @@
+## [0.4.3](https://github.com/DramisInfo/platform-helm/compare/v0.4.2...v0.4.3) (2024-09-01)
+
+
+### Bug Fixes
+
+* lasjdlkdjf ([fd15864](https://github.com/DramisInfo/platform-helm/commit/fd158643fc2d3a7b218a9d8d82aafbb5709a30c3))
+
 ## [0.4.2](https://github.com/DramisInfo/platform-helm/compare/v0.4.1...v0.4.2) (2024-09-01)
 
 

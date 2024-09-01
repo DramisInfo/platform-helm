@@ -1,3 +1,10 @@
+## [0.3.2](https://github.com/DramisInfo/platform-helm/compare/v0.3.1...v0.3.2) (2024-09-01)
+
+
+### Bug Fixes
+
+* change release workflow to trigger on release type: released ([dada45f](https://github.com/DramisInfo/platform-helm/commit/dada45f9730ddc997b39294b6939db4050a7191c))
+
 ## [0.3.1](https://github.com/DramisInfo/platform-helm/compare/v0.3.0...v0.3.1) (2024-09-01)
 
 

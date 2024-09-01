@@ -1,41 +1,8 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: cert-manager
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-wave: "-100"
-
-spec:
-  destination:
-    namespace: cert-manager
-    server: "https://kubernetes.default.svc"
-  project: default
-  source:
-    repoURL: "https://charts.jetstack.io"
-    targetRevision: "1.x"
-    chart: cert-manager
-    helm:
-      values: |
-        installCRDs: true
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - SkipHooks=true
-      - Timeout=600
-      - Validate=false
-      - Wait=true
-      - PruneEmpty=true
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: vault-{{ .Values.clusterName }}
+  name: vault-{{ .Values.global.clusterName }}
   namespace: cert-manager
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -63,6 +30,6 @@ spec:
             subscriptionID: c1d22d5c-418b-4bd9-ba23-5e806c376b56
             tenantID: b66f9c3b-d384-4932-92fd-444edca3620f
             resourceGroupName: rg-dns
-            hostedZoneName: {{ .Values.clusterName }}.dramisinfo.com
+            hostedZoneName: {{ .Values.global.clusterName }}.dramisinfo.com
             # Azure Cloud Environment, default to AzurePublicCloud
             environment: AzurePublicCloud

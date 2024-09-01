@@ -37,12 +37,12 @@ kind: Ingress
 metadata:
   name: nginx-ingress
   annotations:
-    cert-manager.io/cluster-issuer: vault-{{ .Values.clusterName }}
+    cert-manager.io/cluster-issuer: vault-{{ .Values.global.clusterName }}
 
 spec:
   ingressClassName: nginx
   rules:
-    - host: test.{{ .Values.clusterName }}.dramisinfo.com
+    - host: test.{{ .Values.global.clusterName }}.dramisinfo.com
       http:
         paths:
           - path: /
@@ -54,5 +54,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - argocd.{{ .Values.clusterName }}.dramisinfo.com
-      secretName: argocd-{{ .Values.clusterName }}-server-tls # as expected by argocd-server
+        - argocd.{{ .Values.global.clusterName }}.dramisinfo.com
+      secretName: argocd-{{ .Values.global.clusterName }}-server-tls # as expected by argocd-server

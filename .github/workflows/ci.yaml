@@ -50,6 +50,9 @@ jobs:
           name: Helm chart
           path: ./
 
+      - name: List files
+        run: ll
+
       - name: Publish Helm chart
         env:
           HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}

@@ -34,3 +34,16 @@ jobs:
 
       - name: Run Helm tests
         run: helm unittest ./platform-core
+
+      - name: Package Helm chart
+        run: helm package ./platform-core --version 0.1.0 --app-version 0.1.0
+
+      - name: Publish Helm chart
+        env:
+          HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
+          HELM_REPO_USERNAME: ${{ secrets.HELM_REPO_USERNAME }}
+          HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}
+        run: |
+          export HELM_EXPERIMENTAL_OCI=1
+          echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
+          helm push ./platform-core-*.tgz $HELM_REPO_URL

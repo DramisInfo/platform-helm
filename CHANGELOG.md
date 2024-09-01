@@ -1,3 +1,10 @@
+## [0.4.4](https://github.com/DramisInfo/platform-helm/compare/v0.4.3...v0.4.4) (2024-09-01)
+
+
+### Bug Fixes
+
+* check with dependency ([93538bb](https://github.com/DramisInfo/platform-helm/commit/93538bb5d9b3f8acaf77dea4da1208f8a47b713d))
+
 ## [0.4.3](https://github.com/DramisInfo/platform-helm/compare/v0.4.2...v0.4.3) (2024-09-01)
 
 

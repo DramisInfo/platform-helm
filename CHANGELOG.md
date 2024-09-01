@@ -1,3 +1,10 @@
+## [0.3.15](https://github.com/DramisInfo/platform-helm/compare/v0.3.14...v0.3.15) (2024-09-01)
+
+
+### Bug Fixes
+
+* ingress format ([90f3d24](https://github.com/DramisInfo/platform-helm/commit/90f3d24d2d49d13d5eb7ee828feb9edf17a4a0a5))
+
 ## [0.3.14](https://github.com/DramisInfo/platform-helm/compare/v0.3.13...v0.3.14) (2024-09-01)
 
 

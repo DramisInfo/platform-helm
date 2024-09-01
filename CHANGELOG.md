@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/DramisInfo/platform-helm/compare/v0.3.15...v0.4.0) (2024-09-01)
+
+
+### Features
+
+* add cert-manager ([23886c0](https://github.com/DramisInfo/platform-helm/commit/23886c0798c9054b18e853a96166abee518f7922))
+
 ## [0.3.15](https://github.com/DramisInfo/platform-helm/compare/v0.3.14...v0.3.15) (2024-09-01)
 
 

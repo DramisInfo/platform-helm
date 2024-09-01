@@ -1,3 +1,10 @@
+## [0.3.6](https://github.com/DramisInfo/platform-helm/compare/v0.3.5...v0.3.6) (2024-09-01)
+
+
+### Bug Fixes
+
+* typo on version for packaging ([2f4e477](https://github.com/DramisInfo/platform-helm/commit/2f4e477d1929252badd07775d107ac271e4cee94))
+
 ## [0.3.5](https://github.com/DramisInfo/platform-helm/compare/v0.3.4...v0.3.5) (2024-09-01)
 
 

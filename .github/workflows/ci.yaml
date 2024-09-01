@@ -120,7 +120,7 @@ jobs:
         with:
           repository: DramisInfo/platform-tools
           path: platform-tools
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Update platform-core.yaml with new version
         run: |

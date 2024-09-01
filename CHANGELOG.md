@@ -1,3 +1,10 @@
+## [0.3.10](https://github.com/DramisInfo/platform-helm/compare/v0.3.9...v0.3.10) (2024-09-01)
+
+
+### Bug Fixes
+
+* change token for the the update on platform-tool repo ([a39e115](https://github.com/DramisInfo/platform-helm/commit/a39e115ec7316dfa6b20b282975fe6f3f981817e))
+
 ## [0.3.9](https://github.com/DramisInfo/platform-helm/compare/v0.3.8...v0.3.9) (2024-09-01)
 
 

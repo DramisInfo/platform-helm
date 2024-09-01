@@ -112,6 +112,7 @@ jobs:
 
   update-platform-tools:
     runs-on: ubuntu-latest
+    name: Update platform-tools
     needs: release
     steps:
       - name: Checkout platform-tools repository

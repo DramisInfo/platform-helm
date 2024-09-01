@@ -109,16 +109,28 @@ jobs:
           export HELM_EXPERIMENTAL_OCI=1
           echo $HELM_REPO_PASSWORD | helm registry login harbor.platform.dramisinfo.com --username $HELM_REPO_USERNAME --password-stdin
           helm push ./platform-core-*.tgz $HELM_REPO_URL
-  update-git:
-    runs-on: self-hosted
-    name: Update Git
+
+  update-platform-tools:
+    runs-on: ubuntu-latest
     needs: release
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      statuses: write
-      deployments: write
     steps:
-      - name: Checkout code
+      - name: Checkout platform-tools repository
         uses: actions/checkout@v3
+        with:
+          repository: DramisInfo/platform-tools
+          path: platform-tools
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update platform-core.yaml with new version
+        run: |
+          NEW_VERSION=$(cat .version)
+          sed -i "s/targetRevision: \".*\"/targetRevision: \"$NEW_VERSION\"/" platform-tools/overlays/dev/patches/platform-core.yaml
+
+      - name: Commit and push changes
+        run: |
+          cd platform-tools
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add overlays/dev/patches/platform-core.yaml
+          git commit -m "Update platform-core to version $NEW_VERSION"
+          git push origin main

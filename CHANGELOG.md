@@ -1,3 +1,10 @@
+## [0.4.12](https://github.com/DramisInfo/platform-helm/compare/v0.4.11...v0.4.12) (2024-09-01)
+
+
+### Bug Fixes
+
+* rename package file ([b0e2ffb](https://github.com/DramisInfo/platform-helm/commit/b0e2ffbaf573560ffb650ed76aace86d0636b016))
+
 ## [0.4.11](https://github.com/DramisInfo/platform-helm/compare/v0.4.10...v0.4.11) (2024-09-01)
 
 

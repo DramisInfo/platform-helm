@@ -4,3 +4,5 @@ cert-manager:
 
 ingress-nginx:
   namespaceOverride: ingress-nginx
+  controller:
+    replicaCount: 2

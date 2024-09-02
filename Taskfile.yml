@@ -46,6 +46,10 @@ tasks:
     cmds:
       - helm lint platform-core
 
+  create-namespaces:
+    cmds:
+      - kubectl apply -f namespaces
+
   helm-dry-run:
     cmds:
       - helm install --dry-run platform-core platform-core > .helm-dry-run
@@ -77,6 +81,7 @@ tasks:
       - task helm-lint
       - task create-cluster
       - task helm-dry-run
+      - task create-namespaces
       - task helm-install
       - task increment-chart-version
       - task package-chart

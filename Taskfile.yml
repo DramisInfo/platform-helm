@@ -73,9 +73,9 @@ tasks:
   ci:
     cmds:
       - task install-prerequisites
-      - task create-cluster
       - task helm-dependency-update
       - task helm-lint
+      - task create-cluster
       - task helm-dry-run
       - task helm-install
       - task increment-chart-version

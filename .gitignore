@@ -1,3 +1,4 @@
 node_modules/
 **/*.tgz
 platform-core/charts/*.tgz
+.helm-dry-run

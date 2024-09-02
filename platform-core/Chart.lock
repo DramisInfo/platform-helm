@@ -3,4 +3,4 @@ dependencies:
   repository: file://charts/bootstrap
   version: 0.1.0
 digest: sha256:09eb8ac06e280847cd7d4a0917fc89d4fbd7cb8ecc8a4d58a67e8d6115f7e59c
-generated: "2024-09-01T11:21:51.357314883-04:00"
+generated: "2024-09-02T01:15:49.024142357-04:00"

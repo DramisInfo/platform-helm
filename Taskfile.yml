@@ -107,8 +107,6 @@ tasks:
       - task create-cluster
       - task run-k9s
       - task argocd-install
-      - task helm-dry-run
-      - task create-namespaces
       - task helm-install
       - task increment-chart-version
       - task package-chart

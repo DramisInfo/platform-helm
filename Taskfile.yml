@@ -117,6 +117,16 @@ tasks:
   deploy-dev-app:
     cmds:
       - |
+        cat <<EOF | kubectl -n argocd delete -f - || true
+        ---
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: platform-tools
+          namespace: argocd
+        EOF
+
+      - |
         cat <<EOF | kubectl -n argocd apply -f -
         ---
         apiVersion: argoproj.io/v1alpha1
@@ -126,16 +136,17 @@ tasks:
           namespace: argocd
           finalizers:
             - resources-finalizer.argocd.argoproj.io
-
+          annotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true    
         spec:
           destination:
             namespace: platform-tools
             server: "https://kubernetes.default.svc"
           project: default
           source:
-            repoURL: "https://github.com/DramisInfo/platform-tools.git"
+            repoURL: "https://github.com/DramisInfo/platform-helm.git"
             targetRevision: HEAD
-            path: overlays/dev
+            path: platform-core
           syncPolicy:
             automated:
               prune: true
@@ -148,7 +159,6 @@ tasks:
               - Wait=true
               - PruneEmpty=true
         EOF
-
 
   dev-local:
     cmds:

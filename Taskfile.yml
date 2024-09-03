@@ -113,3 +113,49 @@ tasks:
       - task increment-chart-version
       - task package-chart
       # - kubectl get pods --all-namespaces
+
+  deploy-dev-app:
+    cmds:
+      - |
+        cat <<EOF | kubectl -n argocd apply -f -
+        ---
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: platform-tools
+          namespace: argocd
+          finalizers:
+            - resources-finalizer.argocd.argoproj.io
+
+        spec:
+          destination:
+            namespace: platform-tools
+            server: "https://kubernetes.default.svc"
+          project: default
+          source:
+            repoURL: "https://github.com/DramisInfo/platform-tools.git"
+            targetRevision: HEAD
+            path: overlays/dev
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
+              - SkipHooks=true
+              - Timeout=600
+              - Validate=false
+              - Wait=true
+              - PruneEmpty=true
+        EOF
+
+
+  dev-local:
+    cmds:
+      - task delete-cluster
+      - task helm-dependency-update
+      - task helm-lint
+      - task create-cluster
+      - task run-k9s
+      - task argocd-install
+      - task deploy-dev-app

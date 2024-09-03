@@ -106,10 +106,10 @@ tasks:
     cmds:
       - task helm-dependency-update
       - task helm-lint
-      - task create-cluster
-      - task run-k9s
-      - task argocd-install
-      - task helm-install
+      # - task create-cluster
+      # - task run-k9s
+      # - task argocd-install
+      # - task helm-install
       - task increment-chart-version
       - task package-chart
-      - kubectl get pods --all-namespaces
+      # - kubectl get pods --all-namespaces

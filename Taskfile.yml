@@ -100,6 +100,7 @@ tasks:
       - task: install-prerequisites
       - task: delete-cluster
       - task: ci-local
+      - task: delete-cluster
 
   ci-local:
     cmds:

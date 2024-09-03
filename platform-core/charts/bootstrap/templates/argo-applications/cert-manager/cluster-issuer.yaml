@@ -6,6 +6,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": "1"
+    "helm.sh/hook-timeout": "5m"
 spec:
   acme:
     email: frederic.simard@dramisinfo.com

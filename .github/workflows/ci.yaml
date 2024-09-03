@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     name: Build and Test
     permissions:
       contents: write

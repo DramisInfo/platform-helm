@@ -16,6 +16,7 @@ tasks:
         if ! command -v helm &> /dev/null; then
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
         fi
+        helm version
       - |
         # Install Docker
         if ! command -v docker &> /dev/null; then

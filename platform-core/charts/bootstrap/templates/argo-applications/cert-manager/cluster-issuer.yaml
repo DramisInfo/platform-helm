@@ -4,8 +4,6 @@ metadata:
   name: vault-{{ .Values.global.clusterName }}
   namespace: cert-manager
   annotations:
-    "helm.sh/hook": post-install
-    "helm.sh/hook-weight": "1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   acme:

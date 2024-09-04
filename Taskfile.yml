@@ -36,6 +36,7 @@ tasks:
       - k3d cluster delete ci-cluster
 
   create-cluster:
+    silent: true
     cmds:
       - |
         # Create cluster if it doesn't already exist
@@ -164,3 +165,7 @@ tasks:
       - task create-argoapp
       - task wait-for-argo-apps
       - kubectl get pods --all-namespaces
+
+  local-argo-apply:
+    cmds:
+      - sed 's/{{ .Values.global.clusterName }}/dev/g' platform-core/charts/bootstrap/templates/argo-applications/$APPLICATION/$APPLICATION.yaml | kubectl apply -f -

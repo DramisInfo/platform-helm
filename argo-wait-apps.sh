@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAMESPACE="argocd"
-TIMEOUT=120  # 2 minute
+TIMEOUT=120  # 2 minutes in seconds
 INTERVAL=5  # Check every 5 seconds
 ELAPSED=0
 declare -A PREV_STATUS
@@ -20,6 +20,11 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
     APP_NAME=$(echo "$line" | awk -F': ' '{print $1}')
     APP_STATUS=$(echo "$line" | awk -F': ' '{print $2}')
     
+    # Skip the platform-core application
+    if [ "$APP_NAME" == "platform-core" ]; then
+      continue
+    fi
+    
     if [ "${PREV_STATUS[$APP_NAME]}" != "$APP_STATUS" ]; then
       if [ "$APP_STATUS" == "Healthy" ]; then
         echo -e "Application $APP_NAME status changed: ${PREV_STATUS[$APP_NAME]} -> ${GREEN}$APP_STATUS${NC}"
@@ -28,8 +33,8 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
       else
         echo -e "Application $APP_NAME status changed: ${PREV_STATUS[$APP_NAME]} -> ${RED}$APP_STATUS${NC}"
       fi
-      PREV_STATUS[$APP_NAME]=$APP_STATUS
       ELAPSED=0
+      PREV_STATUS[$APP_NAME]=$APP_STATUS
     fi
   done <<< "$CURRENT_STATUS"
   

@@ -151,8 +151,8 @@ tasks:
       - task: delete-cluster
       - task: ci-local
       - task: delete-cluster
-      - task: package-chart
       - task: increment-chart-version
+      - task: package-chart
 
   ci-local:
     cmds:

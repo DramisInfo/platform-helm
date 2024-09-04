@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAMESPACE="argocd"
-TIMEOUT=60  # 1 minute
+TIMEOUT=120  # 2 minute
 INTERVAL=5  # Check every 5 seconds
 ELAPSED=0
 declare -A PREV_STATUS

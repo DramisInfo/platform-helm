@@ -151,6 +151,8 @@ tasks:
       - task: delete-cluster
       - task: ci-local
       - task: delete-cluster
+      - task: package-chart
+      - task: increment-chart-version
 
   ci-local:
     cmds:
@@ -161,16 +163,4 @@ tasks:
       - task argocd-install
       - task create-argoapp
       - task wait-for-argo-apps
-      - task increment-chart-version
-      - task package-chart
       - kubectl get pods --all-namespaces
-
-  dev-local:
-    cmds:
-      - task delete-cluster
-      - task helm-dependency-update
-      - task helm-lint
-      - task create-cluster
-      - task run-k9s
-      - task argocd-install
-      - task deploy-dev-app

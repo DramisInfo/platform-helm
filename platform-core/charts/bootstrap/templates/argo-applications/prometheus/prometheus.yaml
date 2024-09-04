@@ -1,0 +1,36 @@
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: prometheus
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+# spec:
+#   destination:
+#     namespace: monitoring
+#     server: "https://kubernetes.default.svc"
+#   project: default
+#   source:
+#     repoURL: "https://prometheus-community.github.io/helm-charts"
+#     targetRevision: "25.27.0"
+#     chart: prometheus
+#     helm:
+#       valuesObject:
+#         server:
+#           ingress:
+#             enabled: true
+#             annotations:
+#               cert-manager.io/cluster-issuer: "vault-issuer"
+#               kubernetes.io/ingress.class: "nginx"
+#               nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+#       - SkipHooks=true
+#       - Timeout=600
+#       - Validate=false
+#       - Wait=true
+#       - PruneEmpty=true

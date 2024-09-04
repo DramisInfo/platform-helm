@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAMESPACE="argocd"
-TIMEOUT=120  # 2 minutes in seconds
+TIMEOUT=60  # 1 minute
 INTERVAL=5  # Check every 5 seconds
 ELAPSED=0
 declare -A PREV_STATUS
@@ -29,6 +29,7 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
         echo -e "Application $APP_NAME status changed: ${PREV_STATUS[$APP_NAME]} -> ${RED}$APP_STATUS${NC}"
       fi
       PREV_STATUS[$APP_NAME]=$APP_STATUS
+      ELAPSED=0
     fi
   done <<< "$CURRENT_STATUS"
   

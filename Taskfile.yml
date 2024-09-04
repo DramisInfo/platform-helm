@@ -150,22 +150,25 @@ tasks:
     cmds:
       - task: install-prerequisites
       - task: delete-cluster
-      - task: ci-local
+      - task: helm-dependency-update
+      - task: helm-lint
+      - task: create-cluster
+      - task: argocd-install
+      - task: create-argoapp
+      - task: wait-for-argo-apps
       - task: delete-cluster
       - task: increment-chart-version
       - task: package-chart
 
-  ci-local:
+  init:
     cmds:
-      - task helm-dependency-update
-      - task helm-lint
-      - task create-cluster
-      - task run-k9s
-      - task argocd-install
-      - task create-argoapp
-      - task wait-for-argo-apps
-      - kubectl get pods --all-namespaces
-
-  local-argo-apply:
-    cmds:
-      - sed 's/{{ .Values.global.clusterName }}/dev/g' platform-core/charts/bootstrap/templates/argo-applications/$APPLICATION/$APPLICATION.yaml | kubectl apply -f -
+      - task: helm-dependency-update
+      - task: helm-lint
+      - task: delete-cluster
+      - task: create-cluster
+      - task: run-k9s
+      - task: argocd-install
+      - task: create-argoapp
+      - task: wait-for-argo-apps
+      - kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+      - kubectl port-forward service/argocd-server -n argocd 8080:443

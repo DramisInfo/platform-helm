@@ -1,22 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cert-manager
+  name: atlas
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
-    namespace: cert-manager
+    namespace: atlas
     server: "https://kubernetes.default.svc"
   project: default
   source:
-    repoURL: "https://charts.jetstack.io"
-    targetRevision: "1.15.3"
-    chart: cert-manager
-    helm:
-      values: |
-        installCRDs: true
+    repoURL: "ghcr.io/ariga/charts"
+    targetRevision: "0.5.0"
+    chart: atlas-operator
   syncPolicy:
     automated:
       prune: true

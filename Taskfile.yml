@@ -2,6 +2,7 @@ version: "3"
 
 tasks:
   install-prerequisites:
+    description: Install kubectl, helm, docker, k3d
     silent: true
     cmds:
       - |
@@ -32,10 +33,13 @@ tasks:
         fi
 
   delete-cluster:
+    description: Delete k3d cluster
+    silent: true
     cmds:
       - k3d cluster delete ci-cluster
 
   create-cluster:
+    description: Create k3d cluster
     silent: true
     cmds:
       - |
@@ -45,23 +49,33 @@ tasks:
         fi
 
   helm-dependency-update:
+    description: Update helm dependencies
+    silent: true
     cmds:
       - helm dependency update platform-core
       - for dir in $(find platform-core/charts/ -maxdepth 1 -mindepth 1 -type d); do helm dependency update $dir; done
 
   helm-lint:
+    description: Lint helm charts
+    silent: true
     cmds:
       - helm lint platform-core
 
   create-namespaces:
+    description: Create namespaces
+    silent: true
     cmds:
       - kubectl apply -f namespaces
 
   helm-dry-run:
+    description: Run helm install --dry-run
+    silent: true
     cmds:
       - helm install --dry-run platform-core platform-core > .helm-dry-run
 
   argocd-install:
+    description: Install ArgoCD
+    silent: true
     cmds:
       - |
         kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
@@ -69,10 +83,14 @@ tasks:
         helm upgrade --install argocd argo/argo-cd -n argocd --wait -f argocd-custom-values.yaml
 
   helm-install:
+    description: Install helm chart
+    silent: true
     cmds:
       - helm upgrade --install platform-core platform-core
 
   increment-chart-version:
+    description: Increment chart version
+    silent: true
     cmds:
       - |
         #!/bin/bash
@@ -85,17 +103,22 @@ tasks:
         echo "Updated chart version to $NEW_VERSION"
 
   package-chart:
+    description: Package helm chart
+    silent: true
     cmds:
       - rm -f platform-core-*.tgz
       - helm package platform-core
 
   run-k9s:
+    description: Run k9s
+    silent: true
     cmds:
       - |
         if command -v wt.exe &> /dev/null; then
-          wt.exe -w 0 -p "Ubuntu" -- wsl.exe -d Ubuntu-22.04 -- /home/linuxbrew/.linuxbrew/bin/k9s --command pods --all-namespaces --headless
+          wt.exe -w 0 nt -p "Ubuntu" -- wsl.exe -d Ubuntu-22.04 -- /home/linuxbrew/.linuxbrew/bin/k9s --command pods --all-namespaces --headless
         fi
   create-argoapp:
+    description: Create ArgoCD application
     silent: true
     cmds:
       - |
@@ -143,6 +166,8 @@ tasks:
         EOF
 
   wait-for-argo-apps:
+    description: Wait for ArgoCD applications to sync
+    silent: true
     cmds:
       - |
         ./argo-wait-apps.sh
@@ -166,9 +191,8 @@ tasks:
       - task: helm-lint
       - task: delete-cluster
       - task: create-cluster
-      - task: run-k9s
       - task: argocd-install
       - task: create-argoapp
       - task: wait-for-argo-apps
-      - kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+      - kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
       - kubectl port-forward service/argocd-server -n argocd 8080:443

@@ -2,7 +2,7 @@ apiVersion: v2
 name: platform-core
 description: Helm chart for the platform-core application
 type: application
-version: 0.2.26
+version: 0.2.27
 appVersion: 1.6.0
 dependencies:
   - name: bootstrap

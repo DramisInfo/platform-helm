@@ -55,7 +55,11 @@ spec:
         dashboards:
           default:
             kubernetes:
-              gnetId: 10000
+              gnetId: 1860
+              revision: 37
+              datasource: Prometheus
+            ArgoCD:
+              gnetId: 14584
               revision: 1
               datasource: Prometheus
   syncPolicy:

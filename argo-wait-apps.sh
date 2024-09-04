@@ -1,8 +1,8 @@
 #!/bin/bash
 
 NAMESPACE="argocd"
-TIMEOUT=300  # 5 minutes in seconds
-INTERVAL=10  # Check every 10 seconds
+TIMEOUT=60  # 5 minutes in seconds
+INTERVAL=5  # Check every 10 seconds
 ELAPSED=0
 PREV_STATUS=""
 

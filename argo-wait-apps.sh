@@ -21,7 +21,7 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
     APP_STATUS=$(echo "$line" | awk -F': ' '{print $2}')
     
     # Skip the platform-core application
-    if [ "$APP_NAME" == "platform-core" ]; then
+    if [ "$APP_NAME" == "platform-tools" ]; then
       continue
     fi
     

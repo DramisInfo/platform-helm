@@ -1,8 +1,8 @@
 global:
   clusterName: "dev"
 
-crossplane:
-  enabled: false
-
-atlas:
-  enabled: false
+bootstrap:
+  crossplane:
+    enabled: true
+  atlas:
+    enabled: true

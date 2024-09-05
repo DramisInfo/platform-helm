@@ -1,3 +1,4 @@
+{{- if .Values.atlas.enabled -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -25,3 +26,4 @@ spec:
       - Validate=false
       - Wait=true
       - PruneEmpty=true
+{{- end -}}

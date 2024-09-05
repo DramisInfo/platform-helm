@@ -152,6 +152,14 @@ tasks:
             repoURL: "https://github.com/DramisInfo/platform-helm.git"
             targetRevision: HEAD
             path: platform-core
+            helm:
+              valuesObject:
+                global:
+                  clusterName: "dev"
+                crossplane:
+                  enabled: true
+                atlas:
+                  enabled: true
           syncPolicy:
             automated:
               prune: true

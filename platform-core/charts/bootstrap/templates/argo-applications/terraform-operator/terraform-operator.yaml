@@ -8,7 +8,7 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
-    namespace: terraform-operator
+    namespace: hcp-terraform-operator
     server: "https://kubernetes.default.svc"
   project: default
   source:
@@ -26,4 +26,5 @@ spec:
       - Validate=false
       - Wait=true
       - PruneEmpty=true
-{{- end -}}
+      - ServerSideApply=true
+{{- end }}

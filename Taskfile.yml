@@ -202,5 +202,5 @@ tasks:
       - task: argocd-install
       - task: create-argoapp
       - kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-      - kubectl port-forward service/argocd-server -n argocd 8080:443 &
+      - kubectl port-forward service/argocd-server -n argocd 8080:443 > portforward.log 2>&1 &
       - task: wait-for-argo-apps

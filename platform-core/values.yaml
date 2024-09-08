@@ -8,3 +8,5 @@ bootstrap:
     enabled: true
   terraformOperator:
     enabled: true
+  externalSecretOperator:
+    enabled: true

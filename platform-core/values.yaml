@@ -6,3 +6,5 @@ bootstrap:
     enabled: true
   atlas:
     enabled: true
+  terraformOperator:
+    enabled: true

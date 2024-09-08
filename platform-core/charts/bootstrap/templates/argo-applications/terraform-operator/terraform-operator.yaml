@@ -1,0 +1,29 @@
+{{- if .Values.terraformOperator.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: terraform-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: terraform-operator
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://helm.releases.hashicorp.com"
+    targetRevision: "2.6.1"
+    chart: hcp-terraform-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

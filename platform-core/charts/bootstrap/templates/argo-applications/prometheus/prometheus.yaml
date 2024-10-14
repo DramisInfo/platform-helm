@@ -1,3 +1,4 @@
+{{- if .Values.prometheus.enabled -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -41,3 +42,4 @@ spec:
       - Validate=false
       - Wait=true
       - PruneEmpty=true
+{{- end -}}

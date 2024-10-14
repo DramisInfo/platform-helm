@@ -3,10 +3,16 @@ global:
 
 bootstrap:
   crossplane:
-    enabled: true
+    enabled: false
   atlas:
-    enabled: true
+    enabled: false
   terraformOperator:
-    enabled: true
+    enabled: false
   externalSecretOperator:
-    enabled: true
+    enabled: false
+  prometheus:
+    enabled: false
+  grafana:
+    enabled: false
+  loki:
+    enabled: false

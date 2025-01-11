@@ -2,6 +2,9 @@ global:
   clusterName: "dev"
 
 bootstrap:
+  clusterIssuer:
+    letsencrypt:
+      enabled: false
   crossplane:
     enabled: false
   atlas:

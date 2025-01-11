@@ -23,3 +23,40 @@ spec:
             resourceGroupName: rg-dns
             hostedZoneName: {{ .Values.global.clusterName }}.dramisinfo.com
             environment: AzurePublicCloud
+---
+{{- if .Values.bootstrap.clusterIssuer.letsencrypt.enabled }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-platform
+  namespace: cert-manager
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-90"
+spec:
+  acme:
+    # You must replace this email address with your own.
+    # Let's Encrypt will use this to contact you about expiring
+    # certificates, and issues related to your account.
+    email: frederic.simard@dramisinfo.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: example-issuer-account-key
+    # Add a single challenge solver, HTTP01 using nginx
+    solvers:
+      - dns01:
+          azureDNS:
+            clientID: e427ae4e-a6c9-4c19-bb08-bd5f3ad2f133
+            clientSecretSecretRef:
+              # The following is the secret we created in Kubernetes. Issuer will use this to present challenge to Azure DNS.
+              name: azuredns-config
+              key: client-secret
+            subscriptionID: c1d22d5c-418b-4bd9-ba23-5e806c376b56
+            tenantID: b66f9c3b-d384-4932-92fd-444edca3620f
+            resourceGroupName: rg-dns
+            hostedZoneName: platform.dramisinfo.com
+            # Azure Cloud Environment, default to AzurePublicCloud
+            environment: AzurePublicCloud
+{{- end }}

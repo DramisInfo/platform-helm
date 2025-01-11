@@ -182,7 +182,6 @@ tasks:
   ci:
     cmds:
       - task: install-prerequisites
-      - task: delete-cluster
       - task: helm-dependency-update
       - task: helm-lint
       - task: create-cluster

@@ -31,13 +31,13 @@ jobs:
         with:
           name: Helm chart
           path: ./platform-core-*.tgz
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Publish Helm chart"
-          git push origin main
+      # - name: Commit and push changes
+      #   run: |
+      #     git config --global user.name "github-actions[bot]"
+      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      #     git add .
+      #     git commit -m "Publish Helm chart"
+      #     git push origin main
 
   release:
     runs-on: self-hosted

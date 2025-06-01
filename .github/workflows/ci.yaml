@@ -42,15 +42,16 @@ jobs:
 
   release:
     runs-on: self-hosted
-    name: Publish Helm chart
+    name: Create Git Tag
     needs: test
     outputs:
       version: ${{ steps.extract_version.outputs.version }}
     steps:
-      - name: Clean workspace
-        run: |
-          rm -rf *
-          rm -rf .[^.] .??*
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -58,25 +59,21 @@ jobs:
           name: Helm chart
           path: ./
 
-      - name: List files
-        run: ls
-
-      - name: Publish Helm chart
-        env:
-          HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
-          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
-          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
-        run: |
-          export HELM_EXPERIMENTAL_OCI=1
-          echo $HARBOR_PASSWORD | helm registry login registry.platform.dramisinfo.com --username $HARBOR_USERNAME --password-stdin
-          helm push ./platform-core-*.tgz $HELM_REPO_URL
-
       - name: Extract version from .tgz file name
         id: extract_version
         run: |
           FILENAME=$(ls platform-core-*.tgz)
           VERSION=$(echo $FILENAME | sed -n 's/platform-core-\(.*\)\.tgz/\1/p')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push git tag
+        env:
+          VERSION: ${{ steps.extract_version.outputs.version }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "Release version $VERSION"
+          git push origin "v$VERSION"
 
   update-platform-tools:
     runs-on: self-hosted
@@ -94,7 +91,7 @@ jobs:
         env:
           NEW_VERSION: ${{ needs.release.outputs.version }}
         run: |
-          sed -i "s/targetRevision: \".*\"/targetRevision: \"$NEW_VERSION\"/" platform-tools/overlays/dev/patches/platform-core.yaml
+          sed -i "s/targetRevision: \".*\"/targetRevision: \"v$NEW_VERSION\"/" platform-tools/overlays/dev/patches/platform-core.yaml
 
       - name: Commit and push changes
         run: |
@@ -102,5 +99,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add overlays/dev/patches/platform-core.yaml
-          git commit -m "Update platform-core to version $NEW_VERSION"
+          git commit -m "Update platform-core to version v$NEW_VERSION"
           git push origin main

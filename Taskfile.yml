@@ -150,7 +150,7 @@ tasks:
           project: default
           source:
             repoURL: "https://github.com/DramisInfo/platform-helm.git"
-            targetRevision: HEAD
+            targetRevision: "HEAD"  # Use specific tag like v0.2.51 for production
             path: platform-core
             helm:
               valuesObject:

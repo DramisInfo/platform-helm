@@ -1,6 +1,6 @@
 dependencies:
 - name: bootstrap
   repository: file://charts/bootstrap
-  version: 0.1.1
-digest: sha256:a87bdbb1a174b87bf35b8b9b994d46840429d114962b098e4f60e0bf7bd2d3c0
-generated: "2024-09-03T08:35:45.037229933-04:00"
+  version: 0.6.0
+digest: sha256:8fefd1a19033fd582d3ff63d6f181577b9963aafffd4b2b3cedc9429c5821ab7
+generated: "2025-06-01T10:31:26.104954661-04:00"

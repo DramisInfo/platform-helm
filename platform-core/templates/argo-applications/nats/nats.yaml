@@ -58,17 +58,10 @@ spec:
             memory: 2Gi
           env:
             GOMEMLIMIT: 2GiB
+        {{- if .Values.bootstrap.nats.gateway.enabled }}
         service:
-          {{- if .Values.bootstrap.nats.gateway.enabled }}
           type: LoadBalancer
-          ports:
-            client: 4222
-            cluster: 6222
-            monitor: 8222
-            gateway: 7222
-          {{- else }}
-          type: ClusterIP
-          {{- end }}
+        {{- end }}
         natsBox:
           enabled: true
   syncPolicy:

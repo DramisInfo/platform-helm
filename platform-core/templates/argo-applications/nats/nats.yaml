@@ -21,10 +21,6 @@ spec:
           cluster:
             enabled: true
             replicas: 3
-            {{- if .Values.bootstrap.nats.gateway.enabled }}
-            merge:
-              name: {{ .Values.global.clusterName | quote }}
-            {{- end }}
           jetstream:
             enabled: true
             fileStore:

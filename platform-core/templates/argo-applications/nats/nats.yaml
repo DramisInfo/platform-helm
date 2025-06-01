@@ -38,18 +38,14 @@ spec:
             name: {{ .Values.global.clusterName | quote }}
             {{- end }}
             {{- if .Values.bootstrap.nats.gateway.gateways }}
-            merge:
-              gateways:
-                {{- range .Values.bootstrap.nats.gateway.gateways }}
-                - name: {{ .name | quote }}
-                  url: {{ .url | quote }}
-                {{- end }}
+            gateways:
+              {{- range .Values.bootstrap.nats.gateway.gateways }}
+              - name: {{ .name | quote }}
+                url: {{ .url | quote }}
+              {{- end }}
             {{- end }}
             {{- if .Values.bootstrap.nats.gateway.advertise }}
-            patch:
-              - op: add
-                path: /advertise
-                value: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
+            advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
             {{- end }}
           {{- end }}
         container:
@@ -71,7 +67,11 @@ spec:
         service:
           merge:
             spec:
+              {{- if .Values.bootstrap.nats.gateway.enabled }}
+              type: LoadBalancer
+              {{- else }}
               type: ClusterIP
+              {{- end }}
           {{- if .Values.bootstrap.nats.gateway.enabled }}
           ports:
             gateway:

@@ -23,16 +23,17 @@ bootstrap:
     enabled: true
     gateway:
       enabled: false
-      # Name of this cluster in the gateway mesh
+      # Name of this cluster in the gateway mesh (defaults to global.clusterName)
       name: ""
       # List of remote gateways to connect to
       gateways: []
-        # Example:
+        # Example for multi-cluster setup:
         # - name: "east-cluster"
-        #   url: "nats://east.example.com:7222"
+        #   url: "nats://nats-gateway-east.example.com:7222"
         # - name: "west-cluster"
-        #   url: "nats://west.example.com:7222"
-      # Optional: Override the advertise address for this gateway
+        #   url: "nats://nats-gateway-west.example.com:7222"
+      # External address for other clusters to reach this gateway
+      # This should be the LoadBalancer IP/hostname that other clusters can access
       advertise: ""
-      # Optional: Gateway port (defaults to 7222)
+      # Gateway port (defaults to 7222)
       port: 7222

@@ -1,34 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: vault-issuer
-  namespace: cert-manager
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  acme:
-    email: frederic.simard@dramisinfo.com
-    server: https://vault.platform.dramisinfo.com/v1/pki/acme/directory
-    privateKeySecretRef:
-      name: example-issuer-account-key
-    solvers:
-      - dns01:
-          azureDNS:
-            clientID: e427ae4e-a6c9-4c19-bb08-bd5f3ad2f133
-            clientSecretSecretRef:
-              name: azuredns-config
-              key: client-secret
-            subscriptionID: c1d22d5c-418b-4bd9-ba23-5e806c376b56
-            tenantID: b66f9c3b-d384-4932-92fd-444edca3620f
-            resourceGroupName: rg-dns
-            hostedZoneName: {{ .Values.global.clusterName }}.dramisinfo.com
-            environment: AzurePublicCloud
----
-{{- if .Values.clusterIssuer.letsencrypt.enabled }}
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-platform
+  name: letsencrypt-prd
   namespace: cert-manager
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -56,7 +29,6 @@ spec:
             subscriptionID: c1d22d5c-418b-4bd9-ba23-5e806c376b56
             tenantID: b66f9c3b-d384-4932-92fd-444edca3620f
             resourceGroupName: rg-dns
-            hostedZoneName: platform.dramisinfo.com
+            hostedZoneName: {{ .Values.global.clusterName }}.dramisinfo.com
             # Azure Cloud Environment, default to AzurePublicCloud
             environment: AzurePublicCloud
-{{- end }}

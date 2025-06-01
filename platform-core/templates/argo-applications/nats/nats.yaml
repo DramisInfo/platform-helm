@@ -26,6 +26,32 @@ spec:
             fileStore:
               pvc:
                 size: 10Gi
+          {{- if .Values.bootstrap.nats.gateway.enabled }}
+          gateway:
+            enabled: true
+            {{- if .Values.bootstrap.nats.gateway.port }}
+            port: {{ .Values.bootstrap.nats.gateway.port }}
+            {{- end }}
+            {{- if .Values.bootstrap.nats.gateway.name }}
+            name: {{ .Values.bootstrap.nats.gateway.name | quote }}
+            {{- else }}
+            name: {{ .Values.global.clusterName | quote }}
+            {{- end }}
+            {{- if .Values.bootstrap.nats.gateway.gateways }}
+            merge:
+              gateways:
+                {{- range .Values.bootstrap.nats.gateway.gateways }}
+                - name: {{ .name | quote }}
+                  url: {{ .url | quote }}
+                {{- end }}
+            {{- end }}
+            {{- if .Values.bootstrap.nats.gateway.advertise }}
+            patch:
+              - op: add
+                path: /advertise
+                value: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
+            {{- end }}
+          {{- end }}
         container:
           env:
             GOMEMLIMIT: 2GiB
@@ -46,6 +72,11 @@ spec:
           merge:
             spec:
               type: ClusterIP
+          {{- if .Values.bootstrap.nats.gateway.enabled }}
+          ports:
+            gateway:
+              enabled: true
+          {{- end }}
         natsBox:
           enabled: true
   syncPolicy:

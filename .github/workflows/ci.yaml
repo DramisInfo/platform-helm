@@ -4,41 +4,185 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: self-hosted
-    name: Build and Test
+  lint:
+    runs-on: ubuntu-latest
+    name: Helm Lint
     # Skip if commit message contains [skip ci] or [ci skip]
     if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      statuses: write
-      deployments: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install Task
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Lint Helm chart
+        run: helm lint platform-core
+
+      - name: Validate Helm template
+        run: helm template platform-core platform-core --validate
+
+  test-combinations:
+    runs-on: ubuntu-latest
+    name: Test Chart Combinations
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        test-scenario:
+          - name: "minimal"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                nats:
+                  enabled: true
+          - name: "monitoring-stack"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                prometheus:
+                  enabled: true
+                grafana:
+                  enabled: true
+                loki:
+                  enabled: true
+                nats:
+                  enabled: true
+          - name: "security-stack"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                clusterIssuer:
+                  letsencrypt:
+                    enabled: true
+                externalSecretOperator:
+                  enabled: true
+                nats:
+                  enabled: true
+          - name: "infrastructure-stack"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                crossplane:
+                  enabled: true
+                terraformOperator:
+                  enabled: true
+                atlas:
+                  enabled: true
+                nats:
+                  enabled: true
+          - name: "nats-gateway"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                nats:
+                  enabled: true
+                  gateway:
+                    enabled: true
+                    name: "test-cluster"
+                    port: 7222
+          - name: "full-stack"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                clusterIssuer:
+                  letsencrypt:
+                    enabled: true
+                crossplane:
+                  enabled: true
+                atlas:
+                  enabled: true
+                terraformOperator:
+                  enabled: true
+                externalSecretOperator:
+                  enabled: true
+                prometheus:
+                  enabled: true
+                grafana:
+                  enabled: true
+                loki:
+                  enabled: true
+                nats:
+                  enabled: true
+                  gateway:
+                    enabled: true
+                    name: "test-cluster"
+                    port: 7222
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Create values file
         run: |
-          sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+          cat > test-values.yaml << 'EOF'
+          ${{ matrix.test-scenario.values }}
+          EOF
 
-      - name: Run CI tasks
-        run: task ci
+      - name: Test Helm template with ${{ matrix.test-scenario.name }} configuration
+        run: |
+          echo "Testing ${{ matrix.test-scenario.name }} configuration..."
+          helm template platform-core platform-core -f test-values.yaml --validate
+
+      - name: Dry run installation with ${{ matrix.test-scenario.name }} configuration
+        run: |
+          helm install --dry-run --debug platform-core-test platform-core -f test-values.yaml
+
+  package:
+    runs-on: ubuntu-latest
+    name: Package Chart
+    needs: [lint, test-combinations]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Package Helm chart
+        run: |
+          helm package platform-core
+          ls -la *.tgz
+
+      - name: Upload chart package
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-chart-package
+          path: "*.tgz"
+          retention-days: 30
 
   release:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     name: Automatic Version Bump and Release
-    needs: test
-    if: ${{ needs.test.result == 'success' }}
+    needs: [lint, test-combinations, package]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.bump_version.outputs.new_version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -120,12 +264,13 @@ jobs:
           git push origin "v$NEW_VERSION"
 
   update-platform-tools:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     name: Update platform-tools
     needs: release
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout platform-tools repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: DramisInfo/platform-tools
           path: platform-tools
@@ -138,6 +283,8 @@ jobs:
           sed -i "s/targetRevision: \".*\"/targetRevision: \"v$NEW_VERSION\"/" platform-tools/overlays/dev/patches/platform-core.yaml
 
       - name: Commit and push changes
+        env:
+          NEW_VERSION: ${{ needs.release.outputs.version }}
         run: |
           cd platform-tools
           git config --global user.name "github-actions[bot]"

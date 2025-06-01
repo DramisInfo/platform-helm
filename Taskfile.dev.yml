@@ -1,0 +1,176 @@
+version: "3"
+
+tasks:
+  install-prerequisites:
+    description: Install kubectl, helm, docker, k3d for local development
+    silent: true
+    cmds:
+      - |
+        # Install kubectl
+        if ! command -v kubectl &> /dev/null; then
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+        fi
+      - |
+        # Install helm
+        if ! command -v helm &> /dev/null; then
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        fi
+        helm version
+      - |
+        # Install Docker
+        if ! command -v docker &> /dev/null; then
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sh get-docker.sh
+          sudo usermod -aG docker $USER
+          newgrp docker
+        fi
+      - |
+        # Install k3d
+        if ! command -v k3d &> /dev/null; then
+          curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
+        fi
+
+  delete-cluster:
+    description: Delete k3d cluster
+    silent: true
+    cmds:
+      - k3d cluster delete dev-cluster || true
+
+  create-cluster:
+    description: Create k3d cluster for development
+    silent: true
+    cmds:
+      - |
+        # Create cluster if it doesn't already exist
+        if ! k3d cluster list | grep -q dev-cluster; then
+          k3d cluster create dev-cluster --config k3d-config.yaml --wait
+        fi
+
+  helm-lint:
+    description: Lint helm charts
+    silent: true
+    cmds:
+      - helm lint platform-core
+
+  helm-template:
+    description: Test helm template generation
+    silent: true
+    cmds:
+      - helm template platform-core platform-core --validate
+
+  helm-dry-run:
+    description: Run helm install --dry-run
+    silent: true
+    cmds:
+      - helm install --dry-run platform-core platform-core
+
+  helm-install:
+    description: Install helm chart to local cluster
+    silent: true
+    cmds:
+      - helm upgrade --install platform-core platform-core --create-namespace
+
+  package-chart:
+    description: Package helm chart
+    silent: true
+    cmds:
+      - rm -f platform-core-*.tgz
+      - helm package platform-core
+
+  test-minimal:
+    description: Test minimal configuration
+    silent: true
+    cmds:
+      - |
+        cat > test-values-minimal.yaml << 'EOF'
+        global:
+          clusterName: "dev"
+        bootstrap:
+          nats:
+            enabled: true
+        EOF
+      - helm template platform-core platform-core -f test-values-minimal.yaml --validate
+      - helm install --dry-run platform-core-minimal platform-core -f test-values-minimal.yaml
+
+  test-monitoring:
+    description: Test monitoring stack configuration
+    silent: true
+    cmds:
+      - |
+        cat > test-values-monitoring.yaml << 'EOF'
+        global:
+          clusterName: "dev"
+        bootstrap:
+          prometheus:
+            enabled: true
+          grafana:
+            enabled: true
+          loki:
+            enabled: true
+          nats:
+            enabled: true
+        EOF
+      - helm template platform-core platform-core -f test-values-monitoring.yaml --validate
+      - helm install --dry-run platform-core-monitoring platform-core -f test-values-monitoring.yaml
+
+  test-full:
+    description: Test full stack configuration
+    silent: true
+    cmds:
+      - |
+        cat > test-values-full.yaml << 'EOF'
+        global:
+          clusterName: "dev"
+        bootstrap:
+          clusterIssuer:
+            letsencrypt:
+              enabled: true
+          crossplane:
+            enabled: true
+          atlas:
+            enabled: true
+          terraformOperator:
+            enabled: true
+          externalSecretOperator:
+            enabled: true
+          prometheus:
+            enabled: true
+          grafana:
+            enabled: true
+          loki:
+            enabled: true
+          nats:
+            enabled: true
+            gateway:
+              enabled: true
+              name: "dev-cluster"
+              port: 7222
+        EOF
+      - helm template platform-core platform-core -f test-values-full.yaml --validate
+      - helm install --dry-run platform-core-full platform-core -f test-values-full.yaml
+
+  test-all:
+    description: Run all local tests
+    cmds:
+      - task: helm-lint
+      - task: helm-template
+      - task: test-minimal
+      - task: test-monitoring
+      - task: test-full
+      - task: package-chart
+
+  dev:
+    description: Set up local development environment
+    cmds:
+      - task: install-prerequisites
+      - task: create-cluster
+      - task: helm-install
+
+  clean:
+    description: Clean up development environment
+    cmds:
+      - task: delete-cluster
+      - rm -f test-values-*.yaml
+      - rm -f platform-core-*.tgz

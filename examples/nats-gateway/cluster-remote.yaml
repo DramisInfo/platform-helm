@@ -1,0 +1,30 @@
+# Remote Cluster Configuration  
+# This represents the secondary cluster in a two-cluster setup
+
+global:
+  clusterName: "remote-cluster"
+
+bootstrap:
+  # Enable core platform components
+  cert-manager:
+    enabled: true
+  ingress-nginx:
+    enabled: true
+  
+  # NATS with gateway configuration
+  nats:
+    enabled: true
+    gateway:
+      enabled: true
+      name: "remote-cluster"
+      gateways:
+        - name: "main-cluster"
+          url: "nats://nats-gateway-main.example.com:7222"
+      advertise: "nats-gateway-remote.example.com:7222"
+      port: 7222
+
+  # Optional: Enable other platform components
+  prometheus:
+    enabled: true
+  grafana:
+    enabled: true

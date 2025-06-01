@@ -1,10 +1,47 @@
 # Platform Helm
 
-A comprehensive Kubernetes platform deployment solution using Helm charts and ArgoCD for GitOps-based infrastructure management.
+A comprehensive Kubernetes platform deployment solution using Helm charts for GitOps-based infrastructure management.
 
 ## Overview
 
-This repository provides a unified platform deployment solution that packages and manages essential Kubernetes platform tools through Helm charts. It leverages ArgoCD for GitOps-style deployments and includes automated CI/CD workflows for continuous delivery.
+This repository provides a unified platform deployment solution that packages and manages essential Kubernetes platform tools through Helm charts. It includes automated CI/CD workflows with matrix testing for multiple configuration scenarios.
+
+## CI/CD Workflow
+
+The CI workflow has been optimized for efficiency and reliability:
+
+### Features
+- **Public GitHub Runners**: Uses `ubuntu-latest` runners for better reliability and cost efficiency
+- **Matrix Testing**: Tests multiple Helm chart configurations in parallel
+- **Fast Feedback**: Separate lint and test stages for quick validation
+- **Automated Versioning**: Conventional commit-based semantic versioning
+- **Artifact Management**: Packaged charts are saved as build artifacts
+
+### Test Scenarios
+
+The CI automatically tests the following configuration combinations:
+
+1. **Minimal**: Basic NATS-only setup
+2. **Monitoring Stack**: Prometheus, Grafana, Loki + NATS
+3. **Security Stack**: Certificate management and secrets + NATS
+4. **Infrastructure Stack**: Crossplane, Terraform Operator, Atlas + NATS
+5. **NATS Gateway**: NATS with gateway configuration
+6. **Full Stack**: All components enabled
+
+### Local Development
+
+For local testing, use the development Taskfile:
+
+```bash
+# Run all tests locally
+task -t Taskfile.dev.yml test-all
+
+# Set up local development environment
+task -t Taskfile.dev.yml dev
+
+# Clean up
+task -t Taskfile.dev.yml clean
+```
 
 ## Architecture
 
@@ -118,7 +155,155 @@ bootstrap:
     enabled: false
   nats:
     enabled: true
+    gateway:
+      enabled: false
+      name: "main-cluster"
+      gateways:
+        - name: "east-cluster"
+          url: "nats://east.example.com:7222"
+        - name: "west-cluster"
+          url: "nats://west.example.com:7222"
+      advertise: "main.example.com:7222"
+      port: 7222
 ```
+
+### NATS Configuration
+
+The platform includes NATS as a cloud-native messaging system with JetStream for stream processing. NATS supports both clustering for high availability within a single Kubernetes cluster and gateway connectivity for creating superclusters across multiple regions or environments.
+
+#### Basic NATS Configuration
+
+```yaml
+bootstrap:
+  nats:
+    enabled: true  # Enable NATS deployment
+```
+
+This deploys a 3-replica NATS cluster with:
+- JetStream enabled for stream processing
+- 10Gi persistent storage for JetStream file store
+- Cluster routes for high availability
+- NATS Box utility container for administration
+
+#### Gateway Configuration for Supercluster
+
+To connect multiple NATS clusters across different Kubernetes clusters or regions into a unified supercluster, configure gateways:
+
+```yaml
+bootstrap:
+  nats:
+    enabled: true
+    gateway:
+      enabled: true
+      name: "us-east"                    # Name of this cluster in the gateway mesh
+      gateways:                          # Remote clusters to connect to
+        - name: "us-west"
+          url: "nats://us-west.example.com:7222"
+        - name: "eu-central"
+          url: "nats://eu-central.example.com:7222"
+      advertise: "us-east.example.com:7222"  # How other clusters reach this one
+      port: 7222                         # Gateway port (default: 7222)
+```
+
+#### Gateway Configuration Options
+
+| Field | Description | Required | Default |
+|-------|-------------|----------|---------|
+| `enabled` | Enable gateway functionality | No | `false` |
+| `name` | Name of this cluster in the gateway mesh | No | Uses `global.clusterName` |
+| `gateways` | List of remote gateways to connect to | No | `[]` |
+| `advertise` | External address for other clusters to reach this gateway | No | Auto-detected |
+| `port` | Gateway port | No | `7222` |
+
+#### Multi-Region Supercluster Example
+
+For a global deployment with clusters in multiple regions:
+
+**US East Cluster (`values-us-east.yaml`):**
+```yaml
+global:
+  clusterName: "us-east"
+
+bootstrap:
+  nats:
+    enabled: true
+    gateway:
+      enabled: true
+      name: "us-east"
+      gateways:
+        - name: "us-west"
+          url: "nats://nats-gateway-us-west.example.com:7222"
+        - name: "eu-central"
+          url: "nats://nats-gateway-eu-central.example.com:7222"
+      advertise: "nats-gateway-us-east.example.com:7222"
+```
+
+**US West Cluster (`values-us-west.yaml`):**
+```yaml
+global:
+  clusterName: "us-west"
+
+bootstrap:
+  nats:
+    enabled: true
+    gateway:
+      enabled: true
+      name: "us-west"
+      gateways:
+        - name: "us-east"
+          url: "nats://nats-gateway-us-east.example.com:7222"
+        - name: "eu-central"
+          url: "nats://nats-gateway-eu-central.example.com:7222"
+      advertise: "nats-gateway-us-west.example.com:7222"
+```
+
+**EU Central Cluster (`values-eu-central.yaml`):**
+```yaml
+global:
+  clusterName: "eu-central"
+
+bootstrap:
+  nats:
+    enabled: true
+    gateway:
+      enabled: true
+      name: "eu-central"
+      gateways:
+        - name: "us-east"
+          url: "nats://nats-gateway-us-east.example.com:7222"
+        - name: "us-west"
+          url: "nats://nats-gateway-us-west.example.com:7222"
+      advertise: "nats-gateway-eu-central.example.com:7222"
+```
+
+#### Gateway Network Requirements
+
+When configuring gateways, ensure:
+
+1. **DNS Resolution**: Each cluster can resolve the advertise addresses of other clusters
+2. **Network Connectivity**: Port 7222 (or custom port) is accessible between clusters
+3. **Load Balancer**: Use a LoadBalancer service type for external gateway access:
+
+```yaml
+# Add to your values file for external gateway access
+bootstrap:
+  nats:
+    gateway:
+      enabled: true
+      # ... other gateway config
+```
+
+The NATS Helm chart will automatically:
+- Expose the gateway port (7222) through the service
+- Configure gateway routes in the NATS configuration
+- Enable inter-cluster message routing
+
+#### Benefits of NATS Supercluster
+
+- **Global Message Distribution**: Messages published in any cluster are available across all connected clusters
+- **Local Performance**: Clients connect to their local cluster for optimal latency
+- **Fault Tolerance**: If one cluster becomes unavailable, others continue operating
+- **JetStream Replication**: Stream data can be replicated across regions for disaster recovery
 
 ### Domain Configuration
 

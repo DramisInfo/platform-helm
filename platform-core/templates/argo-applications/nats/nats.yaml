@@ -17,6 +17,7 @@ spec:
     chart: nats
     helm:
       valuesObject:
+        nameOverride: {{ printf "nats-%s" .Values.global.clusterName | quote }}
         config:
           cluster:
             enabled: true
@@ -24,6 +25,12 @@ spec:
             {{- if .Values.bootstrap.nats.gateway.enabled }}
             merge:
               name: {{ printf "%s-cluster" .Values.global.clusterName | quote }}
+              routes:
+                {{- $natsName := printf "nats-%s" .Values.global.clusterName }}
+                {{- $headlessService := printf "%s-headless" $natsName }}
+                - {{ printf "nats://%s-0.%s:6222" $natsName $headlessService | quote }}
+                - {{ printf "nats://%s-1.%s:6222" $natsName $headlessService | quote }}
+                - {{ printf "nats://%s-2.%s:6222" $natsName $headlessService | quote }}
             {{- end }}
           jetstream:
             enabled: true

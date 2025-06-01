@@ -10,6 +10,8 @@ jobs:
   test:
     runs-on: self-hosted
     name: Build and Test
+    # Skip if commit message contains [skip ci] or [ci skip]
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
     permissions:
       contents: write
       issues: write
@@ -29,10 +31,11 @@ jobs:
 
   release:
     runs-on: self-hosted
-    name: Create Git Tag
+    name: Automatic Version Bump and Release
     needs: test
+    if: ${{ needs.test.result == 'success' }}
     outputs:
-      version: ${{ steps.extract_version.outputs.version }}
+      version: ${{ steps.bump_version.outputs.new_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,20 +43,81 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from Chart.yaml
-        id: extract_version
+      - name: Determine version bump type
+        id: bump_type
         run: |
-          VERSION=$(grep '^version:' platform-core/Chart.yaml | awk '{print $2}')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Get the latest commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+          
+          # Determine bump type based on conventional commits
+          if echo "$COMMIT_MSG" | grep -qE "^(feat|feature)(\(.+\))?!:|^BREAKING CHANGE:|breaking change"; then
+            echo "bump_type=major" >> $GITHUB_OUTPUT
+            echo "Detected MAJOR version bump (breaking change)"
+          elif echo "$COMMIT_MSG" | grep -qE "^feat(\(.+\))?:|^feature(\(.+\))?:"; then
+            echo "bump_type=minor" >> $GITHUB_OUTPUT
+            echo "Detected MINOR version bump (new feature)"
+          else
+            echo "bump_type=patch" >> $GITHUB_OUTPUT
+            echo "Detected PATCH version bump (bug fix/other)"
+          fi
 
-      - name: Create and push git tag
+      - name: Bump version in Chart.yaml
+        id: bump_version
         env:
-          VERSION: ${{ steps.extract_version.outputs.version }}
+          BUMP_TYPE: ${{ steps.bump_type.outputs.bump_type }}
+        run: |
+          CHART_FILE="platform-core/Chart.yaml"
+          CURRENT_VERSION=$(grep '^version:' $CHART_FILE | awk '{print $2}')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Parse version components
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Increment version based on bump type
+          case $BUMP_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+          
+          # Update Chart.yaml
+          sed -i "s/^version: .*/version: $NEW_VERSION/" $CHART_FILE
+          
+          # Output for next steps
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version bump
+        env:
+          NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v$VERSION" -m "Release version $VERSION"
-          git push origin "v$VERSION"
+          git add platform-core/Chart.yaml
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git push origin main
+
+      - name: Create and push git tag
+        env:
+          NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
+        run: |
+          git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
+          git push origin "v$NEW_VERSION"
 
   update-platform-tools:
     runs-on: self-hosted

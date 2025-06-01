@@ -27,8 +27,8 @@ jobs:
       - name: Lint Helm chart
         run: helm lint platform-core
 
-      - name: Validate Helm template
-        run: helm template platform-core platform-core --validate
+      - name: Test Helm template generation
+        run: helm template platform-core platform-core
 
   test-combinations:
     runs-on: ubuntu-latest
@@ -140,16 +140,16 @@ jobs:
       - name: Test Helm template with ${{ matrix.test-scenario.name }} configuration
         run: |
           echo "Testing ${{ matrix.test-scenario.name }} configuration..."
-          helm template platform-core platform-core -f test-values.yaml --validate
+          helm template platform-core platform-core -f test-values.yaml
 
-      - name: Dry run installation with ${{ matrix.test-scenario.name }} configuration
+      - name: Test Helm lint with ${{ matrix.test-scenario.name }} configuration
         run: |
-          helm install --dry-run --debug platform-core-test platform-core -f test-values.yaml
+          helm lint platform-core -f test-values.yaml
 
   package:
     runs-on: ubuntu-latest
     name: Package Chart
-    needs: [lint, test-combinations]
+    needs: [lint, test-combinations, integration-test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -171,10 +171,111 @@ jobs:
           path: "*.tgz"
           retention-days: 30
 
+  integration-test:
+    runs-on: ubuntu-latest
+    name: Integration Test with K8s
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        test-scenario:
+          - name: "minimal"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                nats:
+                  enabled: true
+          - name: "monitoring-stack"
+            values: |
+              global:
+                clusterName: "test"
+              bootstrap:
+                prometheus:
+                  enabled: true
+                grafana:
+                  enabled: true
+                loki:
+                  enabled: true
+                nats:
+                  enabled: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Create k8s Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: test-cluster
+          wait: 60s
+
+      - name: Create values file
+        run: |
+          cat > test-values.yaml << 'EOF'
+          ${{ matrix.test-scenario.values }}
+          EOF
+
+      - name: Test Helm template with validation on ${{ matrix.test-scenario.name }}
+        run: |
+          echo "Testing ${{ matrix.test-scenario.name }} configuration with K8s validation..."
+          helm template platform-core platform-core -f test-values.yaml --validate
+
+      - name: Dry run installation with ${{ matrix.test-scenario.name }} configuration
+        run: |
+          helm install --dry-run --debug platform-core-test platform-core -f test-values.yaml
+
+      - name: Test actual installation (without dependencies)
+        run: |
+          # Create a minimal test version that doesn't require external dependencies
+          cat > minimal-test-values.yaml << 'EOF'
+          global:
+            clusterName: "test"
+          bootstrap:
+            # Disable all components that require external dependencies for this test
+            nats:
+              enabled: false
+            prometheus:
+              enabled: false
+            grafana:
+              enabled: false
+            loki:
+              enabled: false
+            crossplane:
+              enabled: false
+            terraformOperator:
+              enabled: false
+            atlas:
+              enabled: false
+            externalSecretOperator:
+              enabled: false
+            clusterIssuer:
+              letsencrypt:
+                enabled: false
+          EOF
+          
+          # Test the installation process
+          helm install platform-core-test platform-core -f minimal-test-values.yaml --wait --timeout=5m
+          
+          # Verify installation
+          kubectl get all -A
+          
+          # Clean up
+          helm uninstall platform-core-test
+
   release:
     runs-on: ubuntu-latest
     name: Automatic Version Bump and Release
-    needs: [lint, test-combinations, package]
+    needs: [lint, test-combinations, integration-test, package]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write

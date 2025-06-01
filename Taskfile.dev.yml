@@ -161,6 +161,18 @@ tasks:
       - task: test-full
       - task: package-chart
 
+  ci-local:
+    description: Run local CI tests (no K8s required)
+    cmds:
+      - ./scripts/local-ci.sh
+
+  ci-full:
+    description: Run full CI tests with K8s cluster
+    cmds:
+      - task: create-cluster
+      - task: test-all
+      - task: delete-cluster
+
   dev:
     description: Set up local development environment
     cmds:

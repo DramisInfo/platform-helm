@@ -29,28 +29,25 @@ spec:
           {{- if .Values.bootstrap.nats.gateway.enabled }}
           gateway:
             enabled: true
-            {{- if .Values.bootstrap.nats.gateway.name }}
-            merge:
-              name: {{ .Values.bootstrap.nats.gateway.name | quote }}
-            {{- else }}
-            merge:
-              name: {{ .Values.global.clusterName | quote }}
-            {{- end }}
-            {{- if .Values.bootstrap.nats.gateway.advertise }}
-            merge:
-              advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
-            {{- end }}
             {{- if .Values.bootstrap.nats.gateway.port }}
             port: {{ .Values.bootstrap.nats.gateway.port }}
             {{- end }}
-            {{- if .Values.bootstrap.nats.gateway.gateways }}
             merge:
+              {{- if .Values.bootstrap.nats.gateway.name }}
+              name: {{ .Values.bootstrap.nats.gateway.name | quote }}
+              {{- else }}
+              name: {{ .Values.global.clusterName | quote }}
+              {{- end }}
+              {{- if .Values.bootstrap.nats.gateway.advertise }}
+              advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
+              {{- end }}
+              {{- if .Values.bootstrap.nats.gateway.gateways }}
               gateways:
                 {{- range .Values.bootstrap.nats.gateway.gateways }}
                 - name: {{ .name | quote }}
                   url: {{ .url | quote }}
                 {{- end }}
-            {{- end }}
+              {{- end }}
           {{- end }}
         container:
           image:
@@ -70,6 +67,9 @@ spec:
           merge:
             spec:
               type: LoadBalancer
+          ports:
+            gateway:
+              enabled: true
         {{- end }}
         natsBox:
           enabled: true

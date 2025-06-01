@@ -64,11 +64,11 @@ jobs:
       - name: Publish Helm chart
         env:
           HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
-          HELM_USERNAME: ${{ secrets.HARBOR_USERNAME }}
-          HELM_PASSWORD: ${{ secrets.HELM_PASSWORD }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOT_PASSWORD }}
         run: |
           export HELM_EXPERIMENTAL_OCI=1
-          echo $HELM_PASSWORD | helm registry login registry.platform.dramisinfo.com --username $HELM_USERNAME --password-stdin
+          echo $HARBOR_PASSWORD | helm registry login registry.platform.dramisinfo.com --username $HARBOR_USERNAME --password-stdin
           helm push ./platform-core-*.tgz $HELM_REPO_URL
 
       - name: Extract version from .tgz file name

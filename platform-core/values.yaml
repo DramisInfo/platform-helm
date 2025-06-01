@@ -20,4 +20,4 @@ bootstrap:
   loki:
     enabled: false
   nats:
-    enabled: false
+    enabled: true

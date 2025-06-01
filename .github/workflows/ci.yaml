@@ -65,7 +65,7 @@ jobs:
         env:
           HELM_REPO_URL: ${{ secrets.HELM_REPO_URL }}
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
-          HARBOR_PASSWORD: ${{ secrets.HARBOT_PASSWORD }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
           export HELM_EXPERIMENTAL_OCI=1
           echo $HARBOR_PASSWORD | helm registry login registry.platform.dramisinfo.com --username $HARBOR_USERNAME --password-stdin

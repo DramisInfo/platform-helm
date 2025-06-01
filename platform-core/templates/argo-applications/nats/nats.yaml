@@ -13,29 +13,34 @@ spec:
   project: default
   source:
     repoURL: "https://nats-io.github.io/k8s/helm/charts/"
-    targetRevision: "1.2.6"
+    targetRevision: "1.3.7"
     chart: nats
     helm:
       valuesObject:
-        config:
-          cluster:
-            enabled: true
-            replicas: 3
+        nats:
+          image:
+            tag: "2.11.4"
           jetstream:
             enabled: true
             fileStore:
               pvc:
                 size: 10Gi
+          cluster:
+            enabled: true
+            replicas: 3
           {{- if .Values.bootstrap.nats.gateway.enabled }}
           gateway:
             enabled: true
-            {{- if .Values.bootstrap.nats.gateway.port }}
-            port: {{ .Values.bootstrap.nats.gateway.port }}
-            {{- end }}
             {{- if .Values.bootstrap.nats.gateway.name }}
             name: {{ .Values.bootstrap.nats.gateway.name | quote }}
             {{- else }}
             name: {{ .Values.global.clusterName | quote }}
+            {{- end }}
+            {{- if .Values.bootstrap.nats.gateway.advertise }}
+            advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
+            {{- end }}
+            {{- if .Values.bootstrap.nats.gateway.port }}
+            port: {{ .Values.bootstrap.nats.gateway.port }}
             {{- end }}
             {{- if .Values.bootstrap.nats.gateway.gateways }}
             gateways:
@@ -44,38 +49,25 @@ spec:
                 url: {{ .url | quote }}
               {{- end }}
             {{- end }}
-            {{- if .Values.bootstrap.nats.gateway.advertise }}
-            advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
-            {{- end }}
           {{- end }}
-        container:
+          limits:
+            cpu: "500m"
+            memory: 2Gi
+          requests:
+            cpu: "500m"
+            memory: 2Gi
           env:
             GOMEMLIMIT: 2GiB
-          merge:
-            resources:
-              requests:
-                cpu: "500m"
-                memory: 2Gi
-              limits:
-                cpu: "500m"
-                memory: 2Gi
-        podTemplate:
-          topologySpreadConstraints:
-            kubernetes.io/hostname:
-              maxSkew: 1
-              whenUnsatisfiable: DoNotSchedule
         service:
-          merge:
-            spec:
-              {{- if .Values.bootstrap.nats.gateway.enabled }}
-              type: LoadBalancer
-              {{- else }}
-              type: ClusterIP
-              {{- end }}
           {{- if .Values.bootstrap.nats.gateway.enabled }}
+          type: LoadBalancer
           ports:
-            gateway:
-              enabled: true
+            client: 4222
+            cluster: 6222
+            monitor: 8222
+            gateway: 7222
+          {{- else }}
+          type: ClusterIP
           {{- end }}
         natsBox:
           enabled: true

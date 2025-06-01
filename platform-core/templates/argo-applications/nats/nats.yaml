@@ -17,50 +17,59 @@ spec:
     chart: nats
     helm:
       valuesObject:
-        nats:
-          image:
-            tag: "2.11.4"
+        config:
+          cluster:
+            enabled: true
+            replicas: 3
           jetstream:
             enabled: true
             fileStore:
               pvc:
                 size: 10Gi
-          cluster:
-            enabled: true
-            replicas: 3
           {{- if .Values.bootstrap.nats.gateway.enabled }}
           gateway:
             enabled: true
             {{- if .Values.bootstrap.nats.gateway.name }}
-            name: {{ .Values.bootstrap.nats.gateway.name | quote }}
+            merge:
+              name: {{ .Values.bootstrap.nats.gateway.name | quote }}
             {{- else }}
-            name: {{ .Values.global.clusterName | quote }}
+            merge:
+              name: {{ .Values.global.clusterName | quote }}
             {{- end }}
             {{- if .Values.bootstrap.nats.gateway.advertise }}
-            advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
+            merge:
+              advertise: {{ .Values.bootstrap.nats.gateway.advertise | quote }}
             {{- end }}
             {{- if .Values.bootstrap.nats.gateway.port }}
             port: {{ .Values.bootstrap.nats.gateway.port }}
             {{- end }}
             {{- if .Values.bootstrap.nats.gateway.gateways }}
-            gateways:
-              {{- range .Values.bootstrap.nats.gateway.gateways }}
-              - name: {{ .name | quote }}
-                url: {{ .url | quote }}
-              {{- end }}
+            merge:
+              gateways:
+                {{- range .Values.bootstrap.nats.gateway.gateways }}
+                - name: {{ .name | quote }}
+                  url: {{ .url | quote }}
+                {{- end }}
             {{- end }}
           {{- end }}
-          limits:
-            cpu: "500m"
-            memory: 2Gi
-          requests:
-            cpu: "500m"
-            memory: 2Gi
+        container:
+          image:
+            tag: "2.11.4-alpine"
+          merge:
+            resources:
+              limits:
+                cpu: "500m"
+                memory: 2Gi
+              requests:
+                cpu: "500m"
+                memory: 2Gi
           env:
             GOMEMLIMIT: 2GiB
         {{- if .Values.bootstrap.nats.gateway.enabled }}
         service:
-          type: LoadBalancer
+          merge:
+            spec:
+              type: LoadBalancer
         {{- end }}
         natsBox:
           enabled: true

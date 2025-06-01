@@ -77,6 +77,19 @@ tasks:
         helm repo add argo https://argoproj.github.io/argo-helm
         helm upgrade --install argocd argo/argo-cd -n argocd --wait -f argocd-custom-values.yaml
 
+  cert-manager-install:
+    description: Install cert-manager
+    silent: true
+    cmds:
+      - |
+        kubectl create namespace cert-manager --dry-run=client -o yaml | kubectl apply -f -
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo update
+        helm upgrade --install cert-manager jetstack/cert-manager \
+          --namespace cert-manager \
+          --set installCRDs=true \
+          --wait
+
   helm-install:
     description: Install helm chart
     silent: true
@@ -137,10 +150,6 @@ tasks:
               valuesObject:
                 global:
                   clusterName: "dev"
-                crossplane:
-                  enabled: true
-                atlas:
-                  enabled: true
           syncPolicy:
             automated:
               prune: true
@@ -166,6 +175,7 @@ tasks:
       - task: helm-lint
       - task: create-cluster
       - task: argocd-install
+      - task: cert-manager-install
       - task: create-argoapp
       - task: wait-for-argo-apps
       - task: delete-cluster
@@ -174,10 +184,8 @@ tasks:
   init:
     cmds:
       - task: helm-lint
-      - task: delete-cluster
       - task: create-cluster
       - task: argocd-install
+      - task: cert-manager-install
       - task: create-argoapp
-      - kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-      - kubectl port-forward service/argocd-server -n argocd 8080:443 > portforward.log 2>&1 &
       - task: wait-for-argo-apps

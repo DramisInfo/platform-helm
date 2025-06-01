@@ -29,6 +29,7 @@ The platform includes the following configurable tools:
 | **Prometheus** | Monitoring and alerting | ⚙️ Configurable |
 | **Grafana** | Visualization and dashboards | ⚙️ Configurable |
 | **Loki** | Log aggregation | ⚙️ Configurable |
+| **NATS** | Cloud-native messaging system with JetStream | ⚙️ Configurable |
 
 ## Repository Structure
 
@@ -46,6 +47,7 @@ The platform includes the following configurable tools:
 │       │       ├── grafana/
 │       │       ├── ingress-nginx/
 │       │       ├── loki/
+│       │       ├── nats/
 │       │       ├── prometheus/
 │       │       └── terraform-operator/
 │       └── values.yaml         # Bootstrap configuration
@@ -114,6 +116,8 @@ bootstrap:
     enabled: true
   loki:
     enabled: false
+  nats:
+    enabled: true
 ```
 
 ### Domain Configuration

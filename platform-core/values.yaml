@@ -19,3 +19,5 @@ bootstrap:
     enabled: false
   loki:
     enabled: false
+  nats:
+    enabled: false

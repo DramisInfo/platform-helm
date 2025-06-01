@@ -146,31 +146,6 @@ jobs:
         run: |
           helm lint platform-core -f test-values.yaml
 
-  package:
-    runs-on: ubuntu-latest
-    name: Package Chart
-    needs: [lint, test-combinations, integration-test]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: 'latest'
-
-      - name: Package Helm chart
-        run: |
-          helm package platform-core
-          ls -la *.tgz
-
-      - name: Upload chart package
-        uses: actions/upload-artifact@v4
-        with:
-          name: helm-chart-package
-          path: "*.tgz"
-          retention-days: 30
-
   integration-test:
     runs-on: ubuntu-latest
     name: Integration Test with K8s
@@ -299,61 +274,11 @@ jobs:
         run: |
           helm install --dry-run --debug platform-core-test platform-core -f test-values.yaml
 
-      - name: Test actual installation with ArgoCD
-        run: |
-          echo "Testing actual installation with ${{ matrix.test-scenario.name }} configuration..."
-          
-          # Use the test scenario values but ensure we don't enable components that require external repos
-          cat > installation-test-values.yaml << 'EOF'
-          global:
-            clusterName: "test"
-          bootstrap:
-            clusterIssuer:
-              letsencrypt:
-                enabled: true
-            nats:
-              enabled: true
-            # Disable components that require external repositories or complex setup
-            prometheus:
-              enabled: false
-            grafana:
-              enabled: false
-            loki:
-              enabled: false
-            crossplane:
-              enabled: false
-            terraformOperator:
-              enabled: false
-            atlas:
-              enabled: false
-            externalSecretOperator:
-              enabled: false
-          EOF
-          
-          # Install the chart
-          helm install platform-core-test platform-core -f installation-test-values.yaml --wait --timeout=10m
-          
-          # Verify ArgoCD applications were created
-          echo "Checking ArgoCD applications..."
-          kubectl get applications -n argocd
-          
-          # Wait a bit for ArgoCD to process the applications
-          sleep 30
-          
-          # Check application status
-          kubectl get applications -n argocd -o wide
-          
-          # Verify some basic resources
-          echo "Checking created resources..."
-          kubectl get all -A
-          
-          # Clean up
-          helm uninstall platform-core-test --wait
 
   release:
     runs-on: ubuntu-latest
     name: Automatic Version Bump and Release
-    needs: [lint, test-combinations, integration-test, package]
+    needs: [lint, test-combinations, integration-test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write

@@ -1,7 +1,0 @@
-cert-manager:
-  installCRDs: true
-  namespace: cert-manager
-# ingress-nginx:
-#   namespaceOverride: ingress-nginx
-#   controller:
-#     replicaCount: 2

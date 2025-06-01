@@ -48,12 +48,7 @@ tasks:
           k3d cluster create ci-cluster --config k3d-config.yaml --wait
         fi
 
-  helm-dependency-update:
-    description: Update helm dependencies
-    silent: true
-    cmds:
-      - helm dependency update platform-core
-      - for dir in $(find platform-core/charts/ -maxdepth 1 -mindepth 1 -type d); do helm dependency update $dir; done
+
 
   helm-lint:
     description: Lint helm charts
@@ -182,7 +177,6 @@ tasks:
   ci:
     cmds:
       - task: install-prerequisites
-      - task: helm-dependency-update
       - task: helm-lint
       - task: create-cluster
       - task: argocd-install
@@ -194,7 +188,6 @@ tasks:
 
   init:
     cmds:
-      - task: helm-dependency-update
       - task: helm-lint
       - task: delete-cluster
       - task: create-cluster

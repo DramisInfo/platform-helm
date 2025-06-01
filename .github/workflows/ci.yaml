@@ -219,6 +219,71 @@ jobs:
           cluster_name: test-cluster
           wait: 60s
 
+      - name: Install cert-manager
+        run: |
+          echo "Installing cert-manager..."
+          kubectl create namespace cert-manager
+          helm repo add jetstack https://charts.jetstack.io
+          helm repo update
+          helm install cert-manager jetstack/cert-manager \
+            --namespace cert-manager \
+            --set installCRDs=true \
+            --wait \
+            --timeout=5m
+
+      - name: Install ArgoCD
+        run: |
+          echo "Installing ArgoCD..."
+          kubectl create namespace argocd
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
+          
+          # Create minimal ArgoCD values for testing
+          cat > argocd-values.yaml << 'EOF'
+          global:
+            logging:
+              level: warn
+          configs:
+            params:
+              server.insecure: true
+          server:
+            extraArgs:
+              - --insecure
+          controller:
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+          repoServer:
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 200m
+                memory: 256Mi
+          applicationSet:
+            enabled: false
+          notifications:
+            enabled: false
+          EOF
+          
+          helm install argocd argo/argo-cd \
+            --namespace argocd \
+            --values argocd-values.yaml \
+            --wait \
+            --timeout=10m
+
+      - name: Wait for ArgoCD to be ready
+        run: |
+          echo "Waiting for ArgoCD to be ready..."
+          kubectl wait --for=condition=Ready pods -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+          kubectl wait --for=condition=Ready pods -l app.kubernetes.io/name=argocd-application-controller -n argocd --timeout=300s
+          kubectl wait --for=condition=Ready pods -l app.kubernetes.io/name=argocd-repo-server -n argocd --timeout=300s
+
       - name: Create values file
         run: |
           cat > test-values.yaml << 'EOF'
@@ -234,16 +299,21 @@ jobs:
         run: |
           helm install --dry-run --debug platform-core-test platform-core -f test-values.yaml
 
-      - name: Test actual installation (without dependencies)
+      - name: Test actual installation with ArgoCD
         run: |
-          # Create a minimal test version that doesn't require external dependencies
-          cat > minimal-test-values.yaml << 'EOF'
+          echo "Testing actual installation with ${{ matrix.test-scenario.name }} configuration..."
+          
+          # Use the test scenario values but ensure we don't enable components that require external repos
+          cat > installation-test-values.yaml << 'EOF'
           global:
             clusterName: "test"
           bootstrap:
-            # Disable all components that require external dependencies for this test
+            clusterIssuer:
+              letsencrypt:
+                enabled: true
             nats:
-              enabled: false
+              enabled: true
+            # Disable components that require external repositories or complex setup
             prometheus:
               enabled: false
             grafana:
@@ -258,19 +328,27 @@ jobs:
               enabled: false
             externalSecretOperator:
               enabled: false
-            clusterIssuer:
-              letsencrypt:
-                enabled: false
           EOF
           
-          # Test the installation process
-          helm install platform-core-test platform-core -f minimal-test-values.yaml --wait --timeout=5m
+          # Install the chart
+          helm install platform-core-test platform-core -f installation-test-values.yaml --wait --timeout=10m
           
-          # Verify installation
+          # Verify ArgoCD applications were created
+          echo "Checking ArgoCD applications..."
+          kubectl get applications -n argocd
+          
+          # Wait a bit for ArgoCD to process the applications
+          sleep 30
+          
+          # Check application status
+          kubectl get applications -n argocd -o wide
+          
+          # Verify some basic resources
+          echo "Checking created resources..."
           kubectl get all -A
           
           # Clean up
-          helm uninstall platform-core-test
+          helm uninstall platform-core-test --wait
 
   release:
     runs-on: ubuntu-latest

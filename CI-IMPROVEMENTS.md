@@ -7,11 +7,12 @@ The CI workflow has been completely redesigned to be more efficient and remove d
 ## ✅ What Was Fixed
 
 ### 1. **Kubernetes Validation Issue**
-- **Problem**: `helm template --validate` was failing because GitHub Actions runners don't have Kubernetes clusters
+- **Problem**: `helm template --validate` was failing because GitHub Actions runners don't have Kubernetes clusters, and the chart creates ArgoCD applications
 - **Solution**: 
   - Removed `--validate` flag from basic template tests
-  - Added dedicated integration test job with Kind cluster for validation
+  - Added dedicated integration test job with Kind cluster, ArgoCD, and cert-manager
   - Created separate test scenarios with and without K8s requirements
+  - Install ArgoCD and cert-manager in integration tests before chart validation
 
 ### 2. **Self-hosted to Public Runners**
 - **Before**: All jobs used `runs-on: self-hosted`

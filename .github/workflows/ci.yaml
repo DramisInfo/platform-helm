@@ -264,6 +264,7 @@ jobs:
           cd platform-tools
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add overlays/dev/patches/platform-core.yaml
+          git add overlays/cace-1-dev/patches/platform-core.yaml
+          git add overlays/cace-2-dev/patches/platform-core.yaml
           git commit -m "Update platform-core to version v$NEW_VERSION"
           git push origin main

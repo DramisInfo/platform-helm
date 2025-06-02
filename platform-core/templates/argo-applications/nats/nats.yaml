@@ -17,7 +17,6 @@ spec:
     chart: nats
     helm:
       valuesObject:
-        nameOverride: {{ printf "nats-%s" .Values.global.clusterName | quote }}
         config:
           cluster:
             enabled: true

@@ -21,6 +21,20 @@ bootstrap:
     enabled: false
   nats:
     enabled: true
+    jetstream:
+      enabled: true
+      # File storage configuration for JetStream
+      fileStore:
+        enabled: true
+        # Persistent Volume size for file storage
+        size: 10Gi
+        # Storage class (leave empty for default)
+        storageClassName: ""
+      # Memory storage configuration for JetStream
+      memoryStore:
+        enabled: true
+        # Maximum size for memory storage
+        maxSize: 1Gi
     gateway:
       enabled: false
       # Name of this cluster in the gateway mesh (defaults to global.clusterName)

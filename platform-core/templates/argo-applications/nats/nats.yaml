@@ -26,6 +26,29 @@ spec:
             merge:
               name: {{ printf "%s-cluster" .Values.global.clusterName | quote }}
             {{- end }}
+          {{- if .Values.bootstrap.nats.jetstream.enabled }}
+          jetstream:
+            enabled: true
+            {{- if .Values.bootstrap.nats.jetstream.fileStore.enabled }}
+            fileStore:
+              enabled: true
+              dir: /data
+              {{- if .Values.bootstrap.nats.jetstream.fileStore.size }}
+              pvc:
+                size: {{ .Values.bootstrap.nats.jetstream.fileStore.size | quote }}
+                {{- if .Values.bootstrap.nats.jetstream.fileStore.storageClassName }}
+                storageClassName: {{ .Values.bootstrap.nats.jetstream.fileStore.storageClassName | quote }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.bootstrap.nats.jetstream.memoryStore.enabled }}
+            memoryStore:
+              enabled: true
+              {{- if .Values.bootstrap.nats.jetstream.memoryStore.maxSize }}
+              maxSize: {{ .Values.bootstrap.nats.jetstream.memoryStore.maxSize | quote }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
           {{- if .Values.bootstrap.nats.gateway.enabled }}
           gateway:
             enabled: true

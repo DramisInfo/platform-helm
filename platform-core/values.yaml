@@ -35,6 +35,11 @@ bootstrap:
         enabled: true
         # Maximum size for memory storage
         maxSize: 1Gi
+    nack:
+      enabled: true
+      # NATS URL for NACK controller to connect to
+      # Defaults to the NATS service in the same cluster
+      natsUrl: ""
     gateway:
       enabled: false
       # Name of this cluster in the gateway mesh (defaults to global.clusterName)

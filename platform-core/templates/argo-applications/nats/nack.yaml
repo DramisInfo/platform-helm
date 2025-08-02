@@ -1,0 +1,102 @@
+{{- if and .Values.bootstrap.nats.enabled .Values.bootstrap.nats.nack.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: nats
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://nats-io.github.io/k8s/helm/charts/"
+    targetRevision: "0.19.0"
+    chart: nack
+    helm:
+      valuesObject:
+        jetstream:
+          enabled: true
+          nats:
+            {{- if .Values.bootstrap.nats.nack.natsUrl }}
+            url: {{ .Values.bootstrap.nats.nack.natsUrl | quote }}
+            {{- else }}
+            url: {{ printf "nats://%s.nats.svc.cluster.local:4222" .Values.global.clusterName | quote }}
+            {{- end }}
+        # Restrict controller to watch only its namespace (set to false for cluster-wide)
+        namespaced: false
+        # RBAC permissions for the controller
+        rbacRules: |
+          rules:
+          - apiGroups:
+            - ''
+            resources:
+            - events
+            verbs:
+            - create
+            - update
+            - patch
+          - apiGroups:
+            - ''
+            resources:
+            - secrets
+            verbs:
+            - get
+            - watch
+            - list
+          - apiGroups:
+            - jetstream.nats.io
+            resources:
+            - streams
+            - streams/status
+            - objectstores
+            - objectstores/status
+            - keyvalues
+            - keyvalues/status
+            - consumers
+            - consumers/status
+            - streamtemplates
+            - streamtemplates/status
+            - accounts
+            - accounts/status
+            verbs:
+            - create
+            - get
+            - list
+            - watch
+            - patch
+            - update
+            - delete
+        # Security context for better security
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          fsGroup: 1000
+        containerSecurityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        # Resource limits for the controller
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

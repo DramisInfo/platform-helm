@@ -23,7 +23,7 @@ spec:
             {{- if .Values.bootstrap.nats.nack.natsUrl }}
             url: {{ .Values.bootstrap.nats.nack.natsUrl | quote }}
             {{- else }}
-            url: {{ printf "nats://%s.nats.svc.cluster.local:4222" .Values.global.clusterName | quote }}
+            url: {{ printf "nats://nats-%s.nats.svc.cluster.local:4222" .Values.global.clusterName | quote }}
             {{- end }}
         # Restrict controller to watch only its namespace (set to false for cluster-wide)
         namespaced: false

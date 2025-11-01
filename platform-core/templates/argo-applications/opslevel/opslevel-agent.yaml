@@ -1,0 +1,33 @@
+{{- if .Values.bootstrap.opslevelAgent.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opslevel-agent
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: opslevel-agent
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://opslevel.github.io/helm-charts"
+    targetRevision: "latest"
+    chart: opslevel-agent
+    helm:
+      valuesObject:
+        agent:
+          integration: {{ .Values.global.clusterName | quote }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

@@ -19,6 +19,10 @@ bootstrap:
     enabled: false
   loki:
     enabled: false
+  opslevel:
+    enabled: false
+  opslevelAgent:
+    enabled: false
   nats:
     enabled: true
     jetstream:

@@ -67,6 +67,7 @@ The platform includes the following configurable tools:
 | **Grafana** | Visualization and dashboards | ⚙️ Configurable |
 | **Loki** | Log aggregation | ⚙️ Configurable |
 | **NATS** | Cloud-native messaging system with JetStream | ⚙️ Configurable |
+| **OpsLevel** | Internal developer portal and service catalog | ⚙️ Configurable |
 
 ## Repository Structure
 
@@ -85,6 +86,7 @@ The platform includes the following configurable tools:
 │       │       ├── ingress-nginx/
 │       │       ├── loki/
 │       │       ├── nats/
+│       │       ├── opslevel/
 │       │       ├── prometheus/
 │       │       └── terraform-operator/
 │       └── values.yaml         # Bootstrap configuration
@@ -152,6 +154,10 @@ bootstrap:
   grafana:
     enabled: true
   loki:
+    enabled: false
+  opslevel:
+    enabled: false
+  opslevelAgent:
     enabled: false
   nats:
     enabled: true
@@ -304,6 +310,27 @@ The NATS Helm chart will automatically:
 - **Local Performance**: Clients connect to their local cluster for optimal latency
 - **Fault Tolerance**: If one cluster becomes unavailable, others continue operating
 - **JetStream Replication**: Stream data can be replicated across regions for disaster recovery
+
+### OpsLevel Configuration
+
+OpsLevel is an AI-powered internal developer portal that provides service catalog management, engineering standards enforcement, and automated Kubernetes resource discovery.
+
+To enable OpsLevel:
+
+```yaml
+bootstrap:
+  opslevel:
+    enabled: true
+  opslevelAgent:
+    enabled: true
+```
+
+The platform automatically configures:
+- Domain: `opslevel-{clusterName}.dramisinfo.com`
+- Ingress with TLS via cert-manager
+- Integration alias based on cluster name
+
+For detailed information, see the [OpsLevel integration documentation](docs/OPSLEVEL.md).
 
 ### Domain Configuration
 

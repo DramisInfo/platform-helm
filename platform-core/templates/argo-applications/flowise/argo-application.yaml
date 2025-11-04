@@ -1,0 +1,46 @@
+{{- if .Values.bootstrap.flowise.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flowise
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: flowise
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://cowboysysop.github.io/charts/"
+    targetRevision: "6.0.0"
+    chart: flowise
+    helm:
+      valuesObject:
+        ingress:
+          enabled: true
+          ingressClassName: "nginx"
+          annotations:
+            cert-manager.io/cluster-issuer: "letsencrypt-prd"
+          hosts:
+            - host: flowise.{{ .Values.global.clusterName }}.dramisinfo.com
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: flowise-tls
+              hosts:
+                - flowise.{{ .Values.global.clusterName }}.dramisinfo.com
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

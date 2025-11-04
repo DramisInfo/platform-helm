@@ -23,6 +23,8 @@ bootstrap:
     enabled: false
   opslevelAgent:
     enabled: false
+  flowise:
+    enabled: false
   nats:
     enabled: true
     jetstream:

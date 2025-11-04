@@ -20,13 +20,13 @@ spec:
         ingress:
           enabled: true
           ingressClassName: "nginx"
+          pathType: Prefix
           annotations:
             cert-manager.io/cluster-issuer: "letsencrypt-prd"
           hosts:
             - host: flowise.{{ .Values.global.clusterName }}.dramisinfo.com
               paths:
-                - path: /
-                  pathType: Prefix
+                - /
           tls:
             - secretName: flowise-tls
               hosts:

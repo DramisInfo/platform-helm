@@ -21,7 +21,7 @@ spec:
           enabled: true
           ingressClassName: "nginx"
           annotations:
-            cert-manager.io/cluster-issuer: "vault-issuer"
+            cert-manager.io/cluster-issuer: "letsencrypt-prd"
           hosts:
             - grafana.{{ .Values.global.clusterName }}.dramisinfo.com
           tls:

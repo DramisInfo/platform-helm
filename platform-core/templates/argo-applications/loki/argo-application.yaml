@@ -19,7 +19,8 @@ spec:
       # Keep Loki chart's values inside the Argo Application (do not allow platform-core users
       # to change these values). Use single-binary deployment to avoid object-storage bucket
       # requirements for SimpleScalable/Distributed modes. Force local filesystem storage
-      # to avoid S3 bucket requirements (bucketNames.chunks).
+      # to avoid S3 bucket requirements (bucketNames.chunks). Explicitly disable scalable
+      # targets to satisfy chart validations.
       values: |
         deploymentMode: SingleBinary
         loki:
@@ -32,6 +33,19 @@ spec:
             persistence:
               enabled: true
               size: 10Gi
+          # Ensure all scalable/distributed targets are disabled for SingleBinary
+          write:
+            replicas: 0
+          read:
+            replicas: 0
+          backend:
+            replicas: 0
+          ingester:
+            replicas: 0
+          distributor:
+            replicas: 0
+          querier:
+            replicas: 0
   syncPolicy:
     automated:
       prune: true

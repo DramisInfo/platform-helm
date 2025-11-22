@@ -18,10 +18,15 @@ spec:
     helm:
       # Keep Loki chart's values inside the Argo Application (do not allow platform-core users
       # to change these values). Use single-binary deployment to avoid object-storage bucket
-      # requirements for SimpleScalable/Distributed modes.
+      # requirements for SimpleScalable/Distributed modes. Force local filesystem storage
+      # to avoid S3 bucket requirements (bucketNames.chunks).
       values: |
         deploymentMode: SingleBinary
         loki:
+          storage:
+            type: filesystem
+            filesystem:
+              chunks_directory: /var/loki/chunks
           singleBinary:
             replicas: 1
             persistence:

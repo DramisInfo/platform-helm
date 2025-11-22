@@ -30,29 +30,6 @@ spec:
               chunks_directory: /var/loki/chunks
           # Use test schema in home lab to avoid missing schema_config validation
           useTestSchema: true
-          # Disable distributed targets (they're not used in SingleBinary)
-          read:
-            replicas: 0
-          write:
-            replicas: 0
-          backend:
-            replicas: 0
-          ingester:
-            replicas: 0
-          distributor:
-            replicas: 0
-          querier:
-            replicas: 0
-          queryFrontend:
-            replicas: 0
-          queryScheduler:
-            replicas: 0
-          indexGateway:
-            replicas: 0
-          compactor:
-            replicas: 0
-          ruler:
-            replicas: 0
         # Top-level singleBinary is expected by the chart validate template
         singleBinary:
           replicas: 1

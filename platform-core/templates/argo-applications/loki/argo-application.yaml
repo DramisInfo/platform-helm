@@ -15,6 +15,18 @@ spec:
     repoURL: "https://grafana.github.io/helm-charts"
     targetRevision: "6.46.0"
     chart: loki
+    helm:
+      # Keep Loki chart's values inside the Argo Application (do not allow platform-core users
+      # to change these values). Use single-binary deployment to avoid object-storage bucket
+      # requirements for SimpleScalable/Distributed modes.
+      values: |
+        deploymentMode: SingleBinary
+        loki:
+          singleBinary:
+            replicas: 1
+            persistence:
+              enabled: true
+              size: 10Gi
   syncPolicy:
     automated:
       prune: true

@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: loki
+  name: promtail
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -13,8 +13,8 @@ spec:
   project: default
   source:
     repoURL: "https://grafana.github.io/helm-charts"
-    targetRevision: "6.46.0"
-    chart: loki
+    targetRevision: "6.17.1"
+    chart: promtail
   syncPolicy:
     automated:
       prune: true

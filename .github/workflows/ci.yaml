@@ -255,7 +255,6 @@ jobs:
           NEW_VERSION: ${{ needs.release.outputs.version }}
         run: |
           sed -i "s/targetRevision: \".*\"/targetRevision: \"v$NEW_VERSION\"/" platform-tools/overlays/cace-1-dev/patches/platform-core.yaml
-          sed -i "s/targetRevision: \".*\"/targetRevision: \"v$NEW_VERSION\"/" platform-tools/overlays/cace-2-dev/patches/platform-core.yaml
 
       - name: Commit and push changes
         env:

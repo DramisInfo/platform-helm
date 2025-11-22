@@ -28,12 +28,45 @@ spec:
             type: filesystem
             filesystem:
               chunks_directory: /var/loki/chunks
+          # Use test schema in home lab to avoid missing schema_config validation
+          useTestSchema: true
+          # Disable distributed targets (they're not used in SingleBinary)
+          read:
+            replicas: 0
+          write:
+            replicas: 0
+          backend:
+            replicas: 0
+          ingester:
+            replicas: 0
+          distributor:
+            replicas: 0
+          querier:
+            replicas: 0
+          queryFrontend:
+            replicas: 0
+          queryScheduler:
+            replicas: 0
+          indexGateway:
+            replicas: 0
+          compactor:
+            replicas: 0
+          ruler:
+            replicas: 0
         # Top-level singleBinary is expected by the chart validate template
         singleBinary:
           replicas: 1
           persistence:
             enabled: true
             size: 10Gi
+        # Reduce memcached/cache memory and replicas so Loki installs on smaller clusters
+        # (we found default memcached sizes cause "Insufficient memory" on this cluster).
+        chunksCache:
+          allocatedMemory: 128
+          replicas: 1
+        resultsCache:
+          allocatedMemory: 128
+          replicas: 1
         # Ensure all scalable/distributed targets are disabled for SingleBinary
         write:
           replicas: 0

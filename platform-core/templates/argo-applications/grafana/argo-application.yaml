@@ -63,6 +63,14 @@ spec:
               gnetId: 14584
               revision: 1
               datasource: Prometheus
+        # Enable anonymous access to Grafana (disables authentication for viewers).
+        # WARNING: This allows unauthenticated access to dashboards and should only
+        # be used for testing or internal trusted networks. To restrict access,
+        # adjust org_role to a less-privileged role (e.g., Viewer) or remove this block.
+        grafana.ini:
+          auth.anonymous:
+            enabled: true
+            org_role: Admin
   syncPolicy:
     automated:
       prune: true

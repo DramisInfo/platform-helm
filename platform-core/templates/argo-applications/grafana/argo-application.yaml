@@ -17,6 +17,9 @@ spec:
     chart: grafana
     helm:
       valuesObject:
+        # Labels for grafana-operator to manage this instance
+        labels:
+          dashboards: "grafana"
         ingress:
           enabled: true
           ingressClassName: "nginx"

@@ -1,0 +1,48 @@
+{{- if .Values.bootstrap.grafana.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://grafana.github.io/helm-charts"
+    targetRevision: "v5.15.1"
+    chart: grafana-operator
+    helm:
+      valuesObject:
+        # Watch all namespaces for GrafanaDashboard CRDs
+        watchNamespaces: ""
+        
+        # Enable dashboard watching
+        dashboards:
+          enabled: true
+        
+        # Enable folder management
+        folders:
+          enabled: true
+        
+        # Enable library panel management
+        libraryPanels:
+          enabled: true
+        
+        # Grafana instance selector
+        # The operator will manage Grafana instances with matching labels
+        grafana:
+          instanceSelector:
+            matchLabels:
+              dashboards: "grafana"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+{{- end -}}

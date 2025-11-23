@@ -53,16 +53,16 @@ spec:
                 editable: true
                 options:
                   path: /var/lib/grafana/dashboards/default
-        dashboards:
-          default:
-            kubernetes:
-              gnetId: 1860
-              revision: 37
-              datasource: Prometheus
-            ArgoCD:
-              gnetId: 14584
-              revision: 1
-              datasource: Prometheus
+        # dashboards:
+        #   default:
+        #     kubernetes:
+        #       gnetId: 1860
+        #       revision: 37
+        #       datasource: Prometheus
+        #     ArgoCD:
+        #       gnetId: 14584
+        #       revision: 1
+        #       datasource: Prometheus
         # Enable anonymous access to Grafana (disables authentication for viewers).
         # WARNING: This allows unauthenticated access to dashboards and should only
         # be used for testing or internal trusted networks. To restrict access,

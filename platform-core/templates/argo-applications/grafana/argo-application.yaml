@@ -28,6 +28,14 @@ spec:
             - secretName: grafana-tls
               hosts:
                 - grafana.{{ .Values.global.clusterName }}.dramisinfo.com
+        # Datasource provisioning: Default or overridden via top-level values
+        {{- if .Values.bootstrap.grafana.datasources }}
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+{{- toYaml .Values.bootstrap.grafana.datasources | nindent 12 }}
+        {{- else }}
         datasources:
           datasources.yaml:
             apiVersion: 1
@@ -41,6 +49,7 @@ spec:
                 type: loki
                 url: http://loki:3100
                 access: proxy
+        {{- end }}
         dashboardProviders:
           dashboardproviders.yaml:
             apiVersion: 1
@@ -71,6 +80,19 @@ spec:
           auth.anonymous:
             enabled: true
             org_role: Admin
+        # Optional plugins preinstall via top-level values
+        {{- if .Values.bootstrap.grafana.plugins }}
+        plugins:
+      {{- toYaml .Values.bootstrap.grafana.plugins | nindent 10 }}
+        {{- end }}
+        # When using certain chart versions you can enable pre-install sync via an env var
+        {{- if .Values.bootstrap.grafana.plugins }}
+        env:
+          GF_PLUGINS_INSTALL: "{{ join "," .Values.bootstrap.grafana.plugins }}"
+        {{- if .Values.bootstrap.grafana.pluginsPreinstallSync }}
+          GF_PLUGINS_PREINSTALL_SYNC: "true"
+        {{- end }}
+        {{- end }}
   syncPolicy:
     automated:
       prune: true

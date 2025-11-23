@@ -17,6 +17,24 @@ bootstrap:
     enabled: false
   grafana:
     enabled: false
+    # List of plugins to pre-install. Can be plugin IDs or full download URLs.
+    # Examples:
+    # - grafana-github-datasource
+    # - https://grafana.com/api/plugins/grafana-github-datasource/versions/v2.3.0/download;grafana-github-datasource
+    plugins: []
+    # Optional flag to enable preinstall sync (for chart versions that support preinstall sync environment vars)
+    # Note: Chart may use GF_PLUGINS_PREINSTALL_SYNC or GF_PLUGINS_INSTALL depending on the version.
+    pluginsPreinstallSync: false
+    # List of datasources to provision via provisioning file. Provide a list of data source YAML objects.
+    # Example:
+    # datasources:
+    #   - name: GitHub
+    #     type: grafana-github-datasource
+    #     access: proxy
+    #     url: https://api.github.com
+    #     jsonData:
+    #       ...
+    datasources: []
   loki:
     enabled: false
   opslevel:

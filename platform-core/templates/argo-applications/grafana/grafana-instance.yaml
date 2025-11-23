@@ -1,0 +1,18 @@
+{{- if .Values.bootstrap.grafana.enabled -}}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    dashboards: "grafana"
+spec:
+  external:
+    url: http://grafana.monitoring.svc.cluster.local
+    adminUser:
+      name: grafana-admin-credentials
+      key: GF_SECURITY_ADMIN_USER
+    adminPassword:
+      name: grafana-admin-credentials
+      key: GF_SECURITY_ADMIN_PASSWORD
+{{- end -}}

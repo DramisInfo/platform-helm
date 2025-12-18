@@ -13,6 +13,8 @@ bootstrap:
     enabled: false
   externalSecretOperator:
     enabled: false
+  cnpg:
+    enabled: false
   prometheus:
     enabled: false
   grafana:

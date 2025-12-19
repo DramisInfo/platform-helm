@@ -1,13 +1,6 @@
 {
 	"servers": {
-		"kubernetes": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"kubernetes-mcp-server@latest"
-			],
-			"type": "stdio"
-		}
+
 	},
 	"inputs": []
 }

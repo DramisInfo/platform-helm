@@ -82,3 +82,8 @@ bootstrap:
       advertise: ""
       # Gateway port (defaults to 7222)
       port: 7222
+  istio:
+    enabled: false
+    # Wildcard host pattern for the shared gateway
+    # Example: "*.cace-1-dev.dramisinfo.com" or "*.prod.example.com"
+    host: "*.{{ .Values.global.clusterName }}.dramisinfo.com"

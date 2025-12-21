@@ -1,0 +1,47 @@
+{{- if .Values.bootstrap.istio.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-ingressgateway
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: istio-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+    targetRevision: "1.28.1"
+    chart: gateway
+    helm:
+      valuesObject:
+        name: istio-ingressgateway
+        labels:
+          istio: ingressgateway
+        replicaCount: 2
+        service:
+          type: LoadBalancer
+          ports:
+            - name: http2
+              port: 80
+              targetPort: 8080
+              protocol: TCP
+            - name: https
+              port: 443
+              targetPort: 8443
+              protocol: TCP
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+{{- end -}}

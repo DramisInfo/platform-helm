@@ -59,6 +59,7 @@ The platform includes the following configurable tools:
 |------|-------------|---------------|
 | **Ingress NGINX** | Kubernetes ingress controller | ✅ Always enabled |
 | **Cert-Manager** | TLS certificate management | ⚙️ Configurable |
+| **SMB CSI Driver** | SMB/CIFS storage support via CSI | ⚙️ Configurable |
 | **Crossplane** | Cloud-native control plane | ⚙️ Configurable |
 | **Atlas Operator** | Database schema management | ⚙️ Configurable |
 | **Terraform Operator** | HashiCorp Terraform integration | ⚙️ Configurable |
@@ -310,6 +311,74 @@ The NATS Helm chart will automatically:
 - **Local Performance**: Clients connect to their local cluster for optimal latency
 - **Fault Tolerance**: If one cluster becomes unavailable, others continue operating
 - **JetStream Replication**: Stream data can be replicated across regions for disaster recovery
+
+### SMB CSI Driver Configuration
+
+The SMB CSI Driver enables Kubernetes to use SMB (Server Message Block) file shares as persistent volumes. This is useful for accessing Windows file shares, NAS devices, or any SMB-compatible storage systems.
+
+#### Basic Configuration
+
+```yaml
+bootstrap:
+  smbCsiDriver:
+    enabled: true
+    version: "v1.18.0"  # Optional: specify driver version
+```
+
+This deploys:
+- SMB CSI controller with provisioner and resizer sidecars
+- CSI node daemonset on Linux nodes
+- Required RBAC resources in kube-system namespace
+
+#### Advanced Configuration
+
+You can customize the SMB CSI driver by providing Helm values:
+
+```yaml
+bootstrap:
+  smbCsiDriver:
+    enabled: true
+    version: "v1.18.0"
+    values:
+      controller:
+        replicas: 2
+        resources:
+          smb:
+            limits:
+              memory: 300Mi
+            requests:
+              cpu: 20m
+              memory: 40Mi
+      linux:
+        kubelet: "/var/lib/kubelet"
+        resources:
+          livenessProbe:
+            limits:
+              memory: 150Mi
+            requests:
+              cpu: 20m
+              memory: 40Mi
+```
+
+#### Using SMB Volumes
+
+Once deployed, you can create a StorageClass and use SMB shares:
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: smb
+provisioner: smb.csi.k8s.io
+parameters:
+  source: "//smb-server.example.com/share"
+  csi.storage.k8s.io/node-stage-secret-name: "smbcreds"
+  csi.storage.k8s.io/node-stage-secret-namespace: "default"
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+```
+
+For more information, see the [SMB CSI Driver documentation](https://github.com/kubernetes-csi/csi-driver-smb).
 
 ### OpsLevel Configuration
 

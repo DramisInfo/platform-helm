@@ -15,6 +15,11 @@ bootstrap:
     enabled: false
   cnpg:
     enabled: false
+  smbCsiDriver:
+    enabled: false
+    version: "v1.18.0"
+    # Optional: Override default Helm values
+    # values: {}
   prometheus:
     enabled: false
   grafana:

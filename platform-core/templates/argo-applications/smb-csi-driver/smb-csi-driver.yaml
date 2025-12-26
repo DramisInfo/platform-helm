@@ -1,0 +1,36 @@
+{{- if .Values.bootstrap.smbCsiDriver.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: smb-csi-driver
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  destination:
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts"
+    targetRevision: {{ .Values.bootstrap.smbCsiDriver.version | default "v1.18.0" }}
+    chart: csi-driver-smb
+    {{- if .Values.bootstrap.smbCsiDriver.values }}
+    helm:
+      values: |
+        {{- toYaml .Values.bootstrap.smbCsiDriver.values | nindent 8 }}
+    {{- end }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end }}

@@ -29,7 +29,7 @@ bootstrap:
   ingressNginx:
     enabled: false
   prometheus:
-    enabled: true
+    enabled: false
   grafana:
     enabled: false
     # List of plugins to pre-install. Can be plugin IDs or full download URLs.

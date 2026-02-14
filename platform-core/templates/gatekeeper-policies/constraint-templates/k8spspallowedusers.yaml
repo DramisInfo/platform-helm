@@ -146,6 +146,7 @@ spec:
             params := object.get(input, "parameters", {})
             spec := get_spec(input.review.object)
             rule := object.get(object.get(params, field, {}), "rule", "")
+            rule != ""
             provided_user := get_field_value(spec, field)
             not accept_users(rule, provided_user)
             msg := sprintf("Container users violate policy: field %v, rule: %v", [field, rule])
@@ -160,6 +161,7 @@ spec:
             not is_exempt(container)
             provided_user := get_field_value(container, "runAsUser")
             rule := object.get(object.get(params, "runAsUser", {}), "rule", "")
+            rule != ""
             not accept_users(rule, provided_user)
             msg := sprintf("Container %v is attempting to run as user %v, which is not allowed by rule: %v", [container.name, provided_user, rule])
         }

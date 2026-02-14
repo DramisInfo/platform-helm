@@ -19,7 +19,7 @@ spec:
       valuesObject:
         server:
           ingress:
-            enabled: true
+            enabled: false
             annotations:
               cert-manager.io/cluster-issuer: "letsencrypt-prd"
               kubernetes.io/ingress.class: "nginx"

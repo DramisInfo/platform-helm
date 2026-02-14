@@ -1,0 +1,69 @@
+{{- if .Values.bootstrap.istio.enabled -}}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: shared-gateway
+  namespace: istio-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+      tls:
+        httpsRedirect: true
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+      tls:
+        mode: SIMPLE
+        credentialName: istio-wildcard-tls-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: istio-wildcard-tls
+  namespace: istio-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  secretName: istio-wildcard-tls-cert
+  issuerRef:
+    name: letsencrypt-prd
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  hosts:
+    - argo.{{ .Values.global.clusterName }}.dramisinfo.com
+  gateways:
+    - istio-system/shared-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: argocd-server
+            port:
+              number: 80
+{{- end -}}
+

@@ -4,6 +4,7 @@ kind: ConstraintTemplate
 metadata:
   name: k8spspallowedusers
   annotations:
+    argocd.argoproj.io/sync-wave: "0"
     metadata.gatekeeper.sh/title: "Allowed Users"
     metadata.gatekeeper.sh/version: 1.1.0
     description: >-

@@ -34,7 +34,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - Replace=true
       - SkipHooks=true
       - Timeout=600
       - Validate=false

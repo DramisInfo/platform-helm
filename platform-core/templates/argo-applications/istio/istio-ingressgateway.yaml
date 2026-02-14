@@ -34,14 +34,6 @@ spec:
               port: 443
               targetPort: 8443
               protocol: TCP
-            - name: nats-client
-              port: 4222
-              targetPort: 4222
-              protocol: TCP
-            - name: nats-gateway
-              port: 7222
-              targetPort: 7222
-              protocol: TCP
   syncPolicy:
     automated:
       prune: true

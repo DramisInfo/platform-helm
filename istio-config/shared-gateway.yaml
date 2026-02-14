@@ -24,15 +24,3 @@ spec:
       tls:
         mode: SIMPLE
         credentialName: istio-wildcard-tls-cert
-    - port:
-        number: 4222
-        name: nats-client
-        protocol: TCP
-      hosts:
-        - "nats.cace-1-dev.dramisinfo.com"
-    - port:
-        number: 7222
-        name: nats-gateway
-        protocol: TCP
-      hosts:
-        - "nats.cace-1-dev.dramisinfo.com"

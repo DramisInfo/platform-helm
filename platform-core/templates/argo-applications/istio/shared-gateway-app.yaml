@@ -15,7 +15,7 @@ spec:
   project: default
   source:
     repoURL: "https://github.com/istio/istio.git"
-    targetRevision: "1.28.1"
+    targetRevision: "1.28.3"
     path: "manifests/charts/gateways/istio-ingress"
     helm:
       valuesObject:

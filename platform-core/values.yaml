@@ -21,7 +21,7 @@ bootstrap:
     # Optional: Override default Helm values
     # values: {}
   ingressNginx:
-    enabled: true
+    enabled: false
   prometheus:
     enabled: false
   grafana:
@@ -90,7 +90,7 @@ bootstrap:
       # Gateway port (defaults to 7222)
       port: 7222
   istio:
-    enabled: false
+    enabled: true
     # Wildcard host pattern for the shared gateway
     # Example: "*.cace-1-dev.dramisinfo.com" or "*.prod.example.com"
     host: "*.{{ .Values.global.clusterName }}.dramisinfo.com"

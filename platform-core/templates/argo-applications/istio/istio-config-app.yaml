@@ -2,10 +2,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: istio-shared-gateway
+  name: istio-config
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/sync-wave: "0"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -14,17 +14,13 @@ spec:
     server: "https://kubernetes.default.svc"
   project: default
   source:
-    repoURL: "https://github.com/istio/istio.git"
-    targetRevision: "1.28.3"
-    path: "manifests/charts/gateways/istio-ingress"
-    helm:
-      valuesObject:
-        gateways:
-          istio-ingressgateway:
-            name: shared-gateway
-            labels:
-              istio: ingressgateway
+    repoURL: "https://github.com/DramisInfo/platform-helm.git"
+    targetRevision: "HEAD"
+    path: "istio-config"
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
     retry:

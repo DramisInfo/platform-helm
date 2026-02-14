@@ -13,6 +13,12 @@ spec:
     namespace: gatekeeper-system
     server: "https://kubernetes.default.svc"
   project: default
+  ignoreDifferences:
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    jqPathExpressions:
+    - .spec.preserveUnknownFields
+    - .spec.names.singular
   source:
     repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
     targetRevision: "3.17.1"

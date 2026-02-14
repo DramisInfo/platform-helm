@@ -1,0 +1,43 @@
+{{- if .Values.bootstrap.gatekeeper.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gatekeeper
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  destination:
+    namespace: gatekeeper-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
+    targetRevision: "3.17.1"
+    chart: gatekeeper
+    helm:
+      valuesObject:
+        replicas: 2
+        auditInterval: 60
+        constraintViolationsLimit: 20
+        auditFromCache: false
+        emitAdmissionEvents: false
+        emitAuditEvents: false
+        logLevel: INFO
+        image:
+          release: v3.17.1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

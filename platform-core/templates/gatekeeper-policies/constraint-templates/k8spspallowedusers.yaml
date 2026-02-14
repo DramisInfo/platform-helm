@@ -184,11 +184,13 @@ spec:
         }
 
         get_containers(spec) = containers {
-            containers := [c | c := spec.containers[_]]
-        } {
-            containers := [c | c := spec.initContainers[_]]
-        } {
-            containers := [c | c := spec.ephemeralContainers[_]]
+            containers := array.concat(
+                array.concat(
+                    object.get(spec, "containers", []),
+                    object.get(spec, "initContainers", [])
+                ),
+                object.get(spec, "ephemeralContainers", [])
+            )
         }
 
         get_field_value(obj, field) = value {

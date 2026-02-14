@@ -20,6 +20,8 @@ bootstrap:
     version: "v1.18.0"
     # Optional: Override default Helm values
     # values: {}
+  ingressNginx:
+    enabled: true
   prometheus:
     enabled: false
   grafana:

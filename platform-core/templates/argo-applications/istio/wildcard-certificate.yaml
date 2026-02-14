@@ -1,0 +1,16 @@
+{{- if .Values.bootstrap.istio.enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: istio-wildcard-tls
+  namespace: istio-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  secretName: istio-wildcard-tls-cert
+  issuerRef:
+    name: letsencrypt-prd
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+{{- end -}}

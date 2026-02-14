@@ -6,7 +6,7 @@ metadata:
   name: shared-gateway
   namespace: istio-system
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   selector:
     istio: ingressgateway
@@ -35,7 +35,7 @@ metadata:
   name: istio-wildcard-tls
   namespace: istio-system
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   secretName: istio-wildcard-tls-cert
   issuerRef:
@@ -50,7 +50,7 @@ metadata:
   name: argocd-server
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   hosts:
     - argo.{{ .Values.global.clusterName }}.dramisinfo.com

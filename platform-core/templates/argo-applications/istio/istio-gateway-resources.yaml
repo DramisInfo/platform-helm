@@ -7,6 +7,7 @@ metadata:
   namespace: istio-system
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   selector:
     istio: ingressgateway
@@ -36,6 +37,7 @@ metadata:
   namespace: istio-system
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   secretName: istio-wildcard-tls-cert
   issuerRef:
@@ -51,6 +53,7 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   hosts:
     - argo.{{ .Values.global.clusterName }}.dramisinfo.com

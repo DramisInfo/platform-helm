@@ -22,6 +22,10 @@ bootstrap:
     # values: {}
   gatekeeper:
     enabled: true
+    policies:
+      # Enable CIS Kubernetes benchmark policies
+      # Policies are versioned with the Helm chart for easier testing and promotion
+      enabled: true
   ingressNginx:
     enabled: false
   prometheus:

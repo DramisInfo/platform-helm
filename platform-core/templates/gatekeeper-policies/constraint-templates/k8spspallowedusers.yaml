@@ -1,0 +1,230 @@
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.gatekeeper.policies.enabled -}}
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8spspallowedusers
+  annotations:
+    metadata.gatekeeper.sh/title: "Allowed Users"
+    metadata.gatekeeper.sh/version: 1.1.0
+    description: >-
+      Controls the user and group IDs of the container and volumes. Corresponds
+      to the `runAsUser`, `runAsGroup`, `supplementalGroups`, and `fsGroup`
+      fields in a PodSecurityPolicy. For more information, see
+      https://kubernetes.io/docs/concepts/policy/pod-security-policy/#users-and-groups
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPAllowedUsers
+      validation:
+        openAPIV3Schema:
+          type: object
+          description: >-
+            Controls the user and group IDs of the container and volumes. Corresponds
+            to the `runAsUser`, `runAsGroup`, `supplementalGroups`, and `fsGroup`
+            fields in a PodSecurityPolicy. For more information, see
+            https://kubernetes.io/docs/concepts/policy/pod-security-policy/#users-and-groups
+          properties:
+            exemptImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+              type: array
+              items:
+                type: string
+            runAsUser:
+              type: object
+              description: >-
+                Controls which user ID values are allowed in a Pod or container-level SecurityContext.
+              properties:
+                rule:
+                  type: string
+                  description: >-
+                    A strategy for applying the runAsUser restriction.
+                  enum:
+                    - MustRunAs
+                    - MustRunAsNonRoot
+                    - RunAsAny
+                ranges:
+                  type: array
+                  description: >-
+                    A list of user ID ranges affected by the rule.
+                  items:
+                    type: object
+                    properties:
+                      min:
+                        type: integer
+                        description: The minimum user ID in the range, inclusive.
+                      max:
+                        type: integer
+                        description: The maximum user ID in the range, inclusive.
+            runAsGroup:
+              type: object
+              description: >-
+                Controls which group ID values are allowed in a Pod or container-level SecurityContext.
+              properties:
+                rule:
+                  type: string
+                  description: A strategy for applying the runAsGroup restriction.
+                  enum:
+                    - MustRunAs
+                    - MayRunAs
+                    - RunAsAny
+                ranges:
+                  type: array
+                  description: A list of group ID ranges affected by the rule.
+                  items:
+                    type: object
+                    properties:
+                      min:
+                        type: integer
+                        description: The minimum group ID in the range, inclusive.
+                      max:
+                        type: integer
+                        description: The maximum group ID in the range, inclusive.
+            supplementalGroups:
+              type: object
+              description: >-
+                Controls the supplementalGroups values that are allowed in a Pod-level SecurityContext.
+              properties:
+                rule:
+                  type: string
+                  description: A strategy for applying the supplementalGroups restriction.
+                  enum:
+                    - MustRunAs
+                    - MayRunAs
+                    - RunAsAny
+                ranges:
+                  type: array
+                  description: A list of group ID ranges affected by the rule.
+                  items:
+                    type: object
+                    properties:
+                      min:
+                        type: integer
+                        description: The minimum group ID in the range, inclusive.
+                      max:
+                        type: integer
+                        description: The maximum group ID in the range, inclusive.
+            fsGroup:
+              type: object
+              description: >-
+                Controls the fsGroup values that are allowed in a Pod-level SecurityContext.
+              properties:
+                rule:
+                  type: string
+                  description: A strategy for applying the fsGroup restriction.
+                  enum:
+                    - MustRunAs
+                    - MayRunAs
+                    - RunAsAny
+                ranges:
+                  type: array
+                  description: A list of group ID ranges affected by the rule.
+                  items:
+                    type: object
+                    properties:
+                      min:
+                        type: integer
+                        description: The minimum group ID in the range, inclusive.
+                      max:
+                        type: integer
+                        description: The maximum group ID in the range, inclusive.
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spspallowedusers
+
+        import data.lib.exclude_update.is_update
+        import data.lib.exempt_container.is_exempt
+
+        violation[{"msg": msg}] {
+            fields := ["runAsUser", "runAsGroup", "supplementalGroups", "fsGroup"]
+            field := fields[_]
+            not is_update(input.review)
+            params := object.get(input, "parameters", {})
+            spec := get_spec(input.review.object)
+            rule := object.get(object.get(params, field, {}), "rule", "")
+            provided_user := get_field_value(spec, field)
+            not accept_users(rule, provided_user)
+            msg := sprintf("Container users violate policy: field %v, rule: %v", [field, rule])
+        }
+
+        violation[{"msg": msg}] {
+            not is_update(input.review)
+            params := object.get(input, "parameters", {})
+            spec := get_spec(input.review.object)
+            containers := get_containers(spec)
+            container := containers[_]
+            not is_exempt(container)
+            provided_user := get_field_value(container, "runAsUser")
+            rule := object.get(object.get(params, "runAsUser", {}), "rule", "")
+            not accept_users(rule, provided_user)
+            msg := sprintf("Container %v is attempting to run as user %v, which is not allowed by rule: %v", [container.name, provided_user, rule])
+        }
+
+        accept_users("RunAsAny", _) := true
+
+        accept_users("MustRunAsNonRoot", provided_user) := true {
+            provided_user != 0
+        }
+
+        accept_users("MustRunAs", provided_user) := true {
+            ranges := input.parameters.runAsUser.ranges[_]
+            provided_user >= ranges.min
+            provided_user <= ranges.max
+        }
+
+        get_spec(obj) = spec {
+            obj.kind == "Pod"
+            spec := obj.spec
+        } else = spec {
+            spec := obj.spec.template.spec
+        }
+
+        get_containers(spec) = containers {
+            containers := [c | c := spec.containers[_]]
+        } {
+            containers := [c | c := spec.initContainers[_]]
+        } {
+            containers := [c | c := spec.ephemeralContainers[_]]
+        }
+
+        get_field_value(obj, field) = value {
+            has_field(obj, field)
+            value := obj.securityContext[field]
+        } else = value {
+            value := null
+        }
+
+        has_field(obj, field) {
+            obj.securityContext[field]
+        }
+      libs:
+        - |
+          package lib.exclude_update
+
+          is_update(review) {
+              review.operation == "UPDATE"
+          }
+        - |
+          package lib.exempt_container
+
+          is_exempt(container) {
+              exempt_images := object.get(object.get(input, "parameters", {}), "exemptImages", [])
+              img := container.image
+              exemption := exempt_images[_]
+              _matches_exemption(img, exemption)
+          }
+
+          _matches_exemption(img, exemption) {
+              not endswith(exemption, "*")
+              exemption == img
+          }
+
+          _matches_exemption(img, exemption) {
+              endswith(exemption, "*")
+              prefix := trim_suffix(exemption, "*")
+              startswith(img, prefix)
+          }
+{{- end -}}

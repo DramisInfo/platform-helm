@@ -1,0 +1,23 @@
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.gatekeeper.policies.enabled -}}
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPPrivilegedContainer
+metadata:
+  name: psp-privileged-container
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces:
+      - "*"
+    excludedNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - cert-manager
+      - istio-system
+      - ingress-nginx
+  parameters:
+    exemptImages:
+      - "gcr.io/k8s-minikube/*"
+{{- end -}}

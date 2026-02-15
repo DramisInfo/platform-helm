@@ -1,0 +1,18 @@
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.monitoring.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: gatekeeper
+  namespace: gatekeeper-system
+  labels:
+    app: gatekeeper
+spec:
+  selector:
+    matchLabels:
+      app: gatekeeper
+      control-plane: controller-manager
+  podMetricsEndpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+{{- end -}}

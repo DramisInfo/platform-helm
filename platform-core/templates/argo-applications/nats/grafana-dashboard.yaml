@@ -164,37 +164,78 @@ spec:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Breakdown of NATS subscriptions: System (~187/pod for $SYS.*, $JS.API.*) vs Application subscriptions",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                }
               },
               "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "System"
+                },
+                "properties": [
                   {
-                    "color": "green",
-                    "value": null
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "blue",
+                      "mode": "fixed"
+                    }
                   }
                 ]
               },
-              "unit": "short"
-            },
-            "overrides": []
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Application"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 4,
-            "w": 3,
+            "w": 8,
             "x": 8,
             "y": 0
           },
           "id": 3,
           "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
+            "displayLabels": [
+              "name",
+              "value",
+              "percent"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "value",
+                "percent"
+              ]
+            },
+            "pieType": "donut",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -202,69 +243,10 @@ spec:
               "fields": "",
               "values": false
             },
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "11.5.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "expr": "sum(nats_varz_subscriptions{namespace=~\"$namespace\"})",
-              "refId": "A"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
             }
-          ],
-          "title": "Total Subscriptions",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Internal NATS system subscriptions ($SYS.*, $JS.API.*, etc). Approximately 187 per pod.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "blue",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 2,
-            "x": 11,
-            "y": 0
-          },
-          "id": 25,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto",
-            "wideLayout": true
           },
           "pluginVersion": "11.5.1",
           "targets": [
@@ -274,80 +256,21 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "count(nats_varz_subscriptions{namespace=~\"$namespace\"}) * 187",
+              "legendFormat": "System",
               "refId": "A"
-            }
-          ],
-          "title": "System Subs",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Application subscriptions (Total - System). These are subscriptions created by your applications.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 100
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "short"
             },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 3,
-            "x": 13,
-            "y": 0
-          },
-          "id": 26,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "11.5.1",
-          "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "$datasource"
               },
               "expr": "sum(nats_varz_subscriptions{namespace=~\"$namespace\"}) - (count(nats_varz_subscriptions{namespace=~\"$namespace\"}) * 187)",
-              "refId": "A"
+              "legendFormat": "Application",
+              "refId": "B"
             }
           ],
-          "title": "App Subscriptions",
-          "type": "stat"
+          "title": "Subscriptions Breakdown",
+          "type": "piechart"
         },
         {
           "datasource": {

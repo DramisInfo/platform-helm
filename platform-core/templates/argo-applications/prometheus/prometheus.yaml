@@ -30,6 +30,67 @@ spec:
               - secretName: prometheus-tls
                 hosts:
                   - prom.{{ .Values.global.clusterName }}.dramisinfo.com
+        # Additional scrape configs to discover pods and services with prometheus.io annotations
+        extraScrapeConfigs: |
+          - job_name: 'kubernetes-pods'
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              # Only scrape pods with annotation: prometheus.io/scrape: "true"
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              # Get the port from annotation: prometheus.io/port
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port, __meta_kubernetes_pod_ip]
+                action: replace
+                regex: ([^;]+);(.+)
+                replacement: $2:$1
+                target_label: __address__
+              # Get the metrics path from annotation: prometheus.io/path
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              # Keep pod labels
+              - action: labelmap
+                regex: __meta_kubernetes_pod_label_(.+)
+              # Add namespace label
+              - source_labels: [__meta_kubernetes_namespace]
+                action: replace
+                target_label: kubernetes_namespace
+              # Add pod name label  
+              - source_labels: [__meta_kubernetes_pod_name]
+                action: replace
+                target_label: kubernetes_pod_name
+          - job_name: 'kubernetes-services'
+            kubernetes_sd_configs:
+              - role: service
+            relabel_configs:
+              # Only scrape services with annotation: prometheus.io/scrape: "true"
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              # Get the port from annotation: prometheus.io/port
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port]
+                action: replace
+                target_label: __meta_kubernetes_service_port_number
+                regex: (.+)
+              # Get the metrics path from annotation: prometheus.io/path
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              # Keep service labels
+              - action: labelmap
+                regex: __meta_kubernetes_service_label_(.+)
+              # Add namespace label
+              - source_labels: [__meta_kubernetes_namespace]
+                action: replace
+                target_label: kubernetes_namespace
+              # Add service name label
+              - source_labels: [__meta_kubernetes_service_name]
+                action: replace
+                target_label: kubernetes_service_name
 
   syncPolicy:
     automated:

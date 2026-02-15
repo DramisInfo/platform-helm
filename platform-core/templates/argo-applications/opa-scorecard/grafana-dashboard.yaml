@@ -37,10 +37,7 @@ spec:
       "liveNow": false,
       "panels": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -87,10 +84,7 @@ spec:
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
+              "datasource": "Prometheus",
               "expr": "sum(opa_scorecard_constraint_violations)",
               "refId": "A"
             }
@@ -99,10 +93,7 @@ spec:
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -149,10 +140,7 @@ spec:
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
+              "datasource": "Prometheus",
               "expr": "count(count by (kind) (opa_scorecard_constraint_violations))",
               "refId": "A"
             }
@@ -161,10 +149,7 @@ spec:
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -211,10 +196,7 @@ spec:
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
+              "datasource": "Prometheus",
               "expr": "count(count by (violating_namespace) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"}))",
               "refId": "A"
             }
@@ -223,10 +205,7 @@ spec:
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -302,10 +281,7 @@ spec:
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
+              "datasource": "Prometheus",
               "expr": "sum by (kind) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"})",
               "legendFormat": "{{`{{kind}}`}}",
               "refId": "A"
@@ -315,10 +291,7 @@ spec:
           "type": "timeseries"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -379,10 +352,7 @@ spec:
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
+              "datasource": "Prometheus",
               "expr": "sum by (kind, name) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"})",
               "format": "table",
               "instant": true,
@@ -409,10 +379,7 @@ spec:
           "type": "table"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -473,10 +440,7 @@ spec:
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
+              "datasource": "Prometheus",
               "expr": "opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"}",
               "format": "table",
               "instant": true,
@@ -537,10 +501,7 @@ spec:
                 "$__all"
               ]
             },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
+            "datasource": "Prometheus",
             "definition": "label_values(opa_scorecard_constraint_violations, violating_namespace)",
             "hide": 0,
             "includeAll": true,

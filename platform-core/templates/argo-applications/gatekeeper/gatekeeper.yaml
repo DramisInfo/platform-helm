@@ -34,6 +34,16 @@ spec:
         logLevel: INFO
         image:
           release: v3.17.1
+        controllerManager:
+          podAnnotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8888"
+            prometheus.io/path: "/metrics"
+        audit:
+          podAnnotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8888"
+            prometheus.io/path: "/metrics"
   syncPolicy:
     automated:
       prune: true

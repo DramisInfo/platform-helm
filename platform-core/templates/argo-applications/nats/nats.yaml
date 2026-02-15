@@ -84,14 +84,18 @@ spec:
               enabled: true
         {{- end }}
         # Security context to comply with Gatekeeper policies
+        # Based on community recommendations: https://github.com/nats-io/k8s/issues/904
         podTemplate:
           merge:
             spec:
               securityContext:
                 runAsNonRoot: true
                 runAsUser: 1000
-                runAsGroup: 1000
-                fsGroup: 1000
+                runAsGroup: 2000
+                fsGroup: 3000
+                seccompProfile:
+                  type: RuntimeDefault
+              automountServiceAccountToken: false
         container:
           merge:
             securityContext:
@@ -101,6 +105,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+              privileged: false
+              # Note: readOnlyRootFilesystem NOT set to allow JetStream to function
         reloader:
           merge:
             securityContext:
@@ -110,17 +116,13 @@ spec:
               capabilities:
                 drop:
                   - ALL
+              privileged: false
+              readOnlyRootFilesystem: true
         natsBox:
           enabled: true
-          podTemplate:
-            merge:
-              spec:
-                securityContext:
-                  runAsNonRoot: true
-                  runAsUser: 1000
-                  runAsGroup: 1000
-                  fsGroup: 1000
           container:
+            image:
+              tag: 0.14.3-nonroot
             merge:
               securityContext:
                 allowPrivilegeEscalation: false
@@ -129,6 +131,34 @@ spec:
                 capabilities:
                   drop:
                     - ALL
+                privileged: false
+                readOnlyRootFilesystem: true
+            patch:
+              - op: add
+                path: /volumeMounts/-
+                value:
+                  name: nsc-config
+                  mountPath: /nsc/.config
+          podTemplate:
+            merge:
+              spec:
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 1000
+                  runAsGroup: 2000
+                  fsGroup: 3000
+                  seccompProfile:
+                    type: RuntimeDefault
+                automountServiceAccountToken: false
+            patch:
+              - op: add
+                path: /spec/volumes/-
+                value:
+                  name: nsc-config
+                  emptyDir:
+                    sizeLimit: "100Mi"
+        serviceAccount:
+          enabled: true
   syncPolicy:
     automated:
       prune: true

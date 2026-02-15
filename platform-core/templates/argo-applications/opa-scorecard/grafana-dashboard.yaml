@@ -85,11 +85,11 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "sum(opa_scorecard_constraint_violations)",
+              "expr": "count(opa_scorecard_constraint_information)",
               "refId": "A"
             }
           ],
-          "title": "Total Violations",
+          "title": "Total Constraints",
           "type": "stat"
         },
         {
@@ -141,11 +141,11 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "count(count by (kind) (opa_scorecard_constraint_violations))",
+              "expr": "count by (kind) (opa_scorecard_constraint_information)",
               "refId": "A"
             }
           ],
-          "title": "Constraint Types with Violations",
+          "title": "Constraints by Type",
           "type": "stat"
         },
         {
@@ -197,11 +197,11 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "count(count by (violating_namespace) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"}))",
+              "expr": "count by (namespace) (opa_scorecard_constraint_information{namespace=~\"$namespace\"})",
               "refId": "A"
             }
           ],
-          "title": "Namespaces with Violations",
+          "title": "Constraints by Namespace",
           "type": "stat"
         },
         {
@@ -282,12 +282,12 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "sum by (kind) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"})",
+              "expr": "count by (kind) (opa_scorecard_constraint_information{namespace=~\"$namespace\"})",
               "legendFormat": "{{`{{kind}}`}}",
               "refId": "A"
             }
           ],
-          "title": "Violations by Constraint Type Over Time",
+          "title": "Constraints by Type Over Time",
           "type": "timeseries"
         },
         {
@@ -353,13 +353,13 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "sum by (kind, name) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"})",
+              "expr": "opa_scorecard_constraint_information{namespace=~\"$namespace\"}",
               "format": "table",
               "instant": true,
               "refId": "A"
             }
           ],
-          "title": "Violations by Constraint",
+          "title": "Constraint Information Table",
           "transformations": [
             {
               "id": "organize",
@@ -441,13 +441,13 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"}",
+              "expr": "opa_scorecard_constraint_information{namespace=~\"$namespace\"}",
               "format": "table",
               "instant": true,
               "refId": "A"
             }
           ],
-          "title": "Detailed Violations",
+          "title": "Constraint Details",
           "transformations": [
             {
               "id": "organize",
@@ -459,20 +459,18 @@ spec:
                   "endpoint": true,
                   "instance": true,
                   "job": true,
-                  "namespace": true,
+                  "node": true,
                   "pod": true,
-                  "service": true,
-                  "violation_enforcement": false
+                  "pod_template_hash": true,
+                  "service": true
                 },
                 "indexByName": {},
                 "renameByName": {
                   "kind": "Constraint Type",
                   "name": "Constraint Name",
-                  "violation_enforcement": "Enforcement",
-                  "violation_msg": "Violation Message",
-                  "violating_kind": "Resource Kind",
-                  "violating_name": "Resource Name",
-                  "violating_namespace": "Namespace"
+                  "enforcementAction": "Enforcement Action",
+                  "totalViolations": "Total Violations",
+                  "namespace": "Namespace"
                 }
               }
             }
@@ -502,7 +500,7 @@ spec:
               ]
             },
             "datasource": "Prometheus",
-            "definition": "label_values(opa_scorecard_constraint_violations, violating_namespace)",
+            "definition": "label_values(opa_scorecard_constraint_information, namespace)",
             "hide": 0,
             "includeAll": true,
             "label": "Namespace",
@@ -510,7 +508,7 @@ spec:
             "name": "namespace",
             "options": [],
             "query": {
-              "query": "label_values(opa_scorecard_constraint_violations, violating_namespace)",
+              "query": "label_values(opa_scorecard_constraint_information, namespace)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -527,8 +525,8 @@ spec:
       },
       "timepicker": {},
       "timezone": "browser",
-      "title": "OPA Gatekeeper Violations",
-      "uid": "opa-gatekeeper-violations",
+      "title": "OPA Gatekeeper Constraints",
+      "uid": "opa-gatekeeper-constraints",
       "version": 1,
       "weekStart": ""
     }

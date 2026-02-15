@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-  name: gatekeeper
+  name: gatekeeper-audit
   namespace: gatekeeper-system
   labels:
     app: gatekeeper
@@ -11,7 +11,7 @@ spec:
   selector:
     matchLabels:
       app: gatekeeper
-      control-plane: controller-manager
+      control-plane: audit-controller
   podMetricsEndpoints:
   - port: metrics
     path: /metrics

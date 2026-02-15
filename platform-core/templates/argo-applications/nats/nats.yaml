@@ -118,6 +118,10 @@ spec:
                   - ALL
               privileged: false
               readOnlyRootFilesystem: true
+        promExporter:
+          enabled: true
+          podMonitor:
+            enabled: true
         natsBox:
           enabled: true
           container:

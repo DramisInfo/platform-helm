@@ -15,7 +15,7 @@ spec:
             prefix: /
       route:
         - destination:
-            host: prometheus-kube-prometheus-grafana
+            host: prometheus-grafana
             port:
               number: 80
 {{- end -}}

@@ -34,6 +34,10 @@ spec:
             enabled: true
             type: pvc
             size: 10Gi
+          # CRITICAL: Disable init-chown-data container that runs as root
+          # fsGroup handles permissions automatically in Kubernetes
+          initChownData:
+            enabled: false
           # Pre-installed plugins
           plugins:
             - grafana-piechart-panel

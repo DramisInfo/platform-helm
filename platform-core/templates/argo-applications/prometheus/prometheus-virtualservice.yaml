@@ -1,0 +1,24 @@
+{{- if .Values.bootstrap.monitoring.enabled -}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "-50"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  hosts:
+    - prom.{{ .Values.global.clusterName }}.dramisinfo.com
+  gateways:
+    - istio-system/shared-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: prometheus-kube-prometheus-prometheus
+            port:
+              number: 9090
+{{- end -}}

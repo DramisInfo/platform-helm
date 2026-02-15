@@ -20,17 +20,6 @@ spec:
         # Labels for grafana-operator to manage this instance
         labels:
           dashboards: "grafana"
-        ingress:
-          enabled: true
-          ingressClassName: "nginx"
-          annotations:
-            cert-manager.io/cluster-issuer: "letsencrypt-prd"
-          hosts:
-            - grafana.{{ .Values.global.clusterName }}.dramisinfo.com
-          tls:
-            - secretName: grafana-tls
-              hosts:
-                - grafana.{{ .Values.global.clusterName }}.dramisinfo.com
         # Datasource provisioning: Default or overridden via top-level values
         {{- if .Values.bootstrap.grafana.datasources }}
         datasources:

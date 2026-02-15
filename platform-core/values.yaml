@@ -43,7 +43,7 @@ bootstrap:
   prometheus:
     enabled: true
   grafana:
-    enabled: false
+    enabled: true
     # List of plugins to pre-install. Can be plugin IDs or full download URLs.
     # Examples:
     # - grafana-github-datasource

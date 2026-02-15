@@ -32,7 +32,7 @@ spec:
                   - prom.{{ .Values.global.clusterName }}.dramisinfo.com
         # Additional scrape configs to discover pods and services with prometheus.io annotations
         extraScrapeConfigs: |
-          - job_name: 'kubernetes-pods'
+          - job_name: 'kubernetes-pods-annotations'
             kubernetes_sd_configs:
               - role: pod
             relabel_configs:
@@ -62,7 +62,7 @@ spec:
               - source_labels: [__meta_kubernetes_pod_name]
                 action: replace
                 target_label: kubernetes_pod_name
-          - job_name: 'kubernetes-services'
+          - job_name: 'kubernetes-services-annotations'
             kubernetes_sd_configs:
               - role: service
             relabel_configs:

@@ -21,11 +21,25 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: opa-scorecard-exporter
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: exporter
           image: mcelep/opa_scorecard_exporter:v0.0.4
           args:
             - "-incluster"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           ports:
             - name: metrics
               containerPort: 9141

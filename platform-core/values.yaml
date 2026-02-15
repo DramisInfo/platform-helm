@@ -38,10 +38,6 @@ bootstrap:
         - argocd
       # Image patterns to exempt from policies (e.g., ["gcr.io/k8s-minikube/*"])
       exemptImages: []
-    # Note: OPA Scorecard is automatically deployed when gatekeeper, prometheus, and grafana are all enabled.
-    # It provides a Prometheus exporter for Gatekeeper constraint violations and a pre-configured Grafana dashboard.
-    # Repository: https://github.com/mcelep/opa-scorecard
-    # The dashboard will be available in Grafana under "OPA Gatekeeper Violations"
   ingressNginx:
     enabled: false
   prometheus:

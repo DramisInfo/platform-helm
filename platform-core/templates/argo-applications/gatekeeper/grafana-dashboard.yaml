@@ -4,6 +4,8 @@ kind: GrafanaDashboard
 metadata:
   name: opa-gatekeeper
   namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "-55"
   labels:
     dashboards: "grafana"
 spec:

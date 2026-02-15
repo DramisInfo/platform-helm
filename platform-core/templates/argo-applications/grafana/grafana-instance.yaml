@@ -4,6 +4,8 @@ kind: Grafana
 metadata:
   name: grafana
   namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "-55"
   labels:
     dashboards: "grafana"
 spec:

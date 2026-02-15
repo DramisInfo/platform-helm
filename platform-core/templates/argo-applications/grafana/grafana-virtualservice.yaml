@@ -5,7 +5,7 @@ metadata:
   name: grafana
   namespace: monitoring
   annotations:
-    argocd.argoproj.io/sync-wave: "-65"
+    argocd.argoproj.io/sync-wave: "-55"
 spec:
   hosts:
     - grafana.{{ .Values.global.clusterName }}.dramisinfo.com

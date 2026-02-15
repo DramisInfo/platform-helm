@@ -4,6 +4,8 @@ kind: PodMonitor
 metadata:
   name: gatekeeper-audit
   namespace: gatekeeper-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "-55"
   labels:
     app: gatekeeper
     release: prometheus

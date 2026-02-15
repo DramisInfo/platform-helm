@@ -30,6 +30,10 @@ spec:
           persistence:
             enabled: true
             size: 10Gi
+          # Disable init-chown-data to comply with Gatekeeper policies
+          # Kubernetes fsGroup will handle permissions automatically
+          initChownData:
+            enabled: false
           # Pre-installed plugins
           plugins:
             - grafana-piechart-panel

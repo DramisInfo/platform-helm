@@ -146,7 +146,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "gatekeeper_violations",
+              "expr": "sum by (enforcement_action) (gatekeeper_violations)",
               "legendFormat": "{{`{{enforcement_action}}`}}",
               "refId": "A"
             }
@@ -314,7 +314,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "time() - gatekeeper_audit_last_run_time",
+              "expr": "time() - max(gatekeeper_audit_last_run_time)",
               "refId": "A"
             }
           ],
@@ -376,7 +376,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "rate(gatekeeper_audit_duration_seconds_sum[5m]) / rate(gatekeeper_audit_duration_seconds_count[5m])",
+              "expr": "sum(rate(gatekeeper_audit_duration_seconds_sum[5m])) / sum(rate(gatekeeper_audit_duration_seconds_count[5m]))",
               "refId": "A"
             }
           ],
@@ -518,7 +518,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "gatekeeper_violations",
+              "expr": "sum by (enforcement_action) (gatekeeper_violations)",
               "legendFormat": "{{`{{enforcement_action}}`}}",
               "refId": "A"
             }
@@ -590,7 +590,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "gatekeeper_constraints",
+              "expr": "sum by (enforcement_action) (gatekeeper_constraints)",
               "legendFormat": "{{`{{enforcement_action}}`}}",
               "refId": "A"
             }
@@ -649,7 +649,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "gatekeeper_constraint_templates",
+              "expr": "sum by (status) (gatekeeper_constraint_templates)",
               "legendFormat": "{{`{{status}}`}}",
               "refId": "A"
             }
@@ -747,7 +747,7 @@ spec:
           "targets": [
             {
               "datasource": "Prometheus",
-              "expr": "rate(gatekeeper_audit_duration_seconds_sum[5m]) / rate(gatekeeper_audit_duration_seconds_count[5m])",
+              "expr": "sum(rate(gatekeeper_audit_duration_seconds_sum[5m])) / sum(rate(gatekeeper_audit_duration_seconds_count[5m]))",
               "legendFormat": "avg duration",
               "refId": "A"
             }

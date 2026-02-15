@@ -499,7 +499,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_varz_in_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - In",
+              "legendFormat": "{{"{{pod}}"}} - In",
               "refId": "A"
             },
             {
@@ -508,7 +508,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_varz_out_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - Out",
+              "legendFormat": "{{"{{pod}}"}} - Out",
               "refId": "B"
             }
           ],
@@ -598,7 +598,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_varz_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - In",
+              "legendFormat": "{{"{{pod}}"}} - In",
               "refId": "A"
             },
             {
@@ -607,7 +607,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_varz_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - Out",
+              "legendFormat": "{{"{{pod}}"}} - Out",
               "refId": "B"
             }
           ],
@@ -720,7 +720,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_cpu{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],
@@ -810,7 +810,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_mem{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],
@@ -900,7 +900,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_connections{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],
@@ -1003,7 +1003,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_jetstream_stats_memory{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}} - Used",
+              "legendFormat": "{{"{{pod}}"}} - Used",
               "refId": "A"
             },
             {
@@ -1012,7 +1012,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_jetstream_config_max_memory{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}} - Max",
+              "legendFormat": "{{"{{pod}}"}} - Max",
               "refId": "B"
             }
           ],
@@ -1102,7 +1102,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_jetstream_stats_storage{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}} - Used",
+              "legendFormat": "{{"{{pod}}"}} - Used",
               "refId": "A"
             },
             {
@@ -1111,7 +1111,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_varz_jetstream_config_max_storage{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}} - Max",
+              "legendFormat": "{{"{{pod}}"}} - Max",
               "refId": "B"
             }
           ],
@@ -1201,7 +1201,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_varz_jetstream_stats_api_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - Total",
+              "legendFormat": "{{"{{pod}}"}} - Total",
               "refId": "A"
             },
             {
@@ -1210,7 +1210,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_varz_jetstream_stats_api_errors{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - Errors",
+              "legendFormat": "{{"{{pod}}"}} - Errors",
               "refId": "B"
             }
           ],
@@ -1300,7 +1300,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_server_total_messages{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],
@@ -1403,7 +1403,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_routez_num_routes{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],
@@ -1493,7 +1493,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_gatewayz_inbound_gateway_conn_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - {{gateway_name}} In",
+              "legendFormat": "{{"{{pod}}"}} - {{"{{gateway_name}}"}} In",
               "refId": "A"
             },
             {
@@ -1502,7 +1502,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "rate(nats_gatewayz_inbound_gateway_conn_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
-              "legendFormat": "{{pod}} - {{gateway_name}} Out",
+              "legendFormat": "{{"{{pod}}"}} - {{"{{gateway_name}}"}} Out",
               "refId": "B"
             }
           ],
@@ -1605,7 +1605,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_subsz_num_subscriptions{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],
@@ -1697,7 +1697,7 @@ spec:
                 "uid": "$datasource"
               },
               "expr": "nats_subsz_cache_hit_rate{namespace=~\"$namespace\", pod=~\"$pod\"}",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{"{{pod}}"}}",
               "refId": "A"
             }
           ],

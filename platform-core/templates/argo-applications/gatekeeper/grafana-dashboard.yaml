@@ -5,7 +5,7 @@ metadata:
   name: opa-gatekeeper
   namespace: monitoring
   annotations:
-    argocd.argoproj.io/sync-wave: "-55"
+    argocd.argoproj.io/sync-wave: "-50"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     dashboards: "grafana"

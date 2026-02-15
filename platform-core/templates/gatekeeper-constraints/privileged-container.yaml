@@ -4,7 +4,7 @@ kind: K8sPSPPrivilegedContainer
 metadata:
   name: psp-privileged-container
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "-90"
 spec:
   enforcementAction: {{ .Values.bootstrap.gatekeeper.policies.enforcementAction | default "deny" }}
   match:

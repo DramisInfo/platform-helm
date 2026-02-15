@@ -838,6 +838,81 @@ spec:
           ],
           "title": "Validation Request Rate",
           "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "description": "Heatmap showing validation request duration distribution over time",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 36
+          },
+          "id": 11,
+          "options": {
+            "calculate": false,
+            "cellGap": 2,
+            "cellValues": {
+              "decimals": 0
+            },
+            "color": {
+              "exponent": 0.5,
+              "fill": "dark-orange",
+              "mode": "scheme",
+              "reverse": false,
+              "scale": "exponential",
+              "scheme": "Spectral",
+              "steps": 128
+            },
+            "exemplars": {
+              "color": "rgba(255,0,255,0.7)"
+            },
+            "filterValues": {
+              "le": 1e-9
+            },
+            "legend": {
+              "show": true
+            },
+            "rowsFrame": {
+              "layout": "auto"
+            },
+            "tooltip": {
+              "show": true,
+              "yHistogram": false
+            },
+            "yAxis": {
+              "axisPlacement": "left",
+              "reverse": false,
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "9.4.7",
+          "targets": [
+            {
+              "datasource": "Prometheus",
+              "expr": "sum by (le) (rate(gatekeeper_validation_request_duration_seconds_bucket[5m]))",
+              "format": "heatmap",
+              "legendFormat": "{{`{{le}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Validation Request Duration Heatmap",
+          "type": "heatmap"
         }
       ],
       "refresh": "30s",

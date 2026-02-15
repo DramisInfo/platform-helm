@@ -30,8 +30,6 @@ spec:
       containers:
         - name: exporter
           image: mcelep/opa_scorecard_exporter:v0.0.4
-          args:
-            - "-incluster"
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

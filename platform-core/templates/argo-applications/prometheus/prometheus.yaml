@@ -27,27 +27,32 @@ spec:
             dashboards: "grafana"
           # Grafana configuration
           adminPassword: admin
+          # Enable persistence with proper security context
+          # fsGroup: 472 allows Kubernetes to automatically handle volume permissions
+          # without needing a root init container
           persistence:
             enabled: true
+            type: pvc
             size: 10Gi
-          # Disable init-chown-data to comply with Gatekeeper policies
-          # Kubernetes fsGroup will handle permissions automatically
-          initChownData:
-            enabled: false
           # Pre-installed plugins
           plugins:
             - grafana-piechart-panel
-          # Security context
-          securityContext:
+          # Pod security context - fsGroup is critical for volume permissions
+          # Grafana runs as user 472, and fsGroup 472 allows access to PVCs
+          podSecurityContext:
             runAsNonRoot: true
             runAsUser: 472
+            runAsGroup: 472
             fsGroup: 472
+            fsGroupChangePolicy: "OnRootMismatch"
             seccompProfile:
               type: RuntimeDefault
+          # Container security context
           containerSecurityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 472
+            runAsGroup: 472
             capabilities:
               drop:
                 - ALL

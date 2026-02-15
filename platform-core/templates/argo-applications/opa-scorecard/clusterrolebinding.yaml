@@ -1,0 +1,14 @@
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.prometheus.enabled .Values.bootstrap.grafana.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opa-scorecard-reader-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opa-scorecard-reader
+subjects:
+  - kind: ServiceAccount
+    name: opa-scorecard-exporter
+    namespace: opa-scorecard
+{{- end -}}

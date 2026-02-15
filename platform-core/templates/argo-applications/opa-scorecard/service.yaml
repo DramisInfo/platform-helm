@@ -1,0 +1,22 @@
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.prometheus.enabled .Values.bootstrap.grafana.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: opa-scorecard-exporter
+  namespace: opa-scorecard
+  labels:
+    app: opa-scorecard-exporter
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9141"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9141
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    app: opa-scorecard-exporter
+{{- end -}}

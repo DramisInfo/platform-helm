@@ -1,0 +1,8 @@
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.prometheus.enabled .Values.bootstrap.grafana.enabled -}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opa-scorecard
+  labels:
+    name: opa-scorecard
+{{- end -}}

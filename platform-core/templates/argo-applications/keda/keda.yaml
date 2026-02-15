@@ -1,0 +1,87 @@
+{{- if .Values.bootstrap.keda.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keda
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-90"
+spec:
+  destination:
+    namespace: keda
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://kedacore.github.io/charts"
+    targetRevision: "2.19.0"
+    chart: keda
+    helm:
+      valuesObject:
+        # Security context to comply with Gatekeeper policies
+        securityContext:
+          operator:
+            capabilities:
+              drop:
+              - ALL
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          metricServer:
+            capabilities:
+              drop:
+              - ALL
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          webhooks:
+            capabilities:
+              drop:
+              - ALL
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+        podSecurityContext:
+          operator:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          metricServer:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          webhooks:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+        # Prometheus monitoring integration
+        prometheus:
+          operator:
+            enabled: true
+            podMonitor:
+              enabled: true
+          metricServer:
+            enabled: true
+            podMonitor:
+              enabled: true
+          webhooks:
+            enabled: true
+            serviceMonitor:
+              enabled: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

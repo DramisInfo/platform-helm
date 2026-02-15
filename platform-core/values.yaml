@@ -63,6 +63,8 @@ bootstrap:
       datasources: []
   loki:
     enabled: false
+  keda:
+    enabled: true
   opslevel:
     enabled: false
   opslevelAgent:

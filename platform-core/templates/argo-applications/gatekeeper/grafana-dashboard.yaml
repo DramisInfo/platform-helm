@@ -1,4 +1,4 @@
-{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.prometheus.enabled .Values.bootstrap.grafana.enabled -}}
+{{- if and .Values.bootstrap.gatekeeper.enabled .Values.bootstrap.monitoring.enabled -}}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:

@@ -307,7 +307,7 @@ spec:
                 "uid": "prometheus"
               },
               "expr": "sum by (kind) (opa_scorecard_constraint_violations{violating_namespace=~\"$namespace\"})",
-              "legendFormat": "{{kind}}",
+              "legendFormat": "{{`{{kind}}`}}",
               "refId": "A"
             }
           ],

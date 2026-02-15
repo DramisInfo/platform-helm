@@ -8,7 +8,7 @@ metadata:
     dashboards: "grafana"
 spec:
   external:
-    url: http://grafana.monitoring.svc.cluster.local
+    url: http://prometheus-kube-prometheus-grafana.monitoring.svc.cluster.local
     adminUser:
       name: grafana-admin-credentials
       key: GF_SECURITY_ADMIN_USER

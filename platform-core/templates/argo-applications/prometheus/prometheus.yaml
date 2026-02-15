@@ -27,6 +27,13 @@ spec:
             dashboards: "grafana"
           # Grafana configuration
           adminPassword: admin
+          # Disable authentication for homelab
+          grafana.ini:
+            auth.anonymous:
+              enabled: true
+              org_role: Admin
+            auth:
+              disable_login_form: false
           # Enable persistence with proper security context
           # fsGroup: 472 allows Kubernetes to automatically handle volume permissions
           # without needing a root init container

@@ -118,10 +118,12 @@ spec:
                   - ALL
               privileged: false
               readOnlyRootFilesystem: true
+        {{- if .Values.bootstrap.monitoring.enabled }}
         promExporter:
           enabled: true
           podMonitor:
             enabled: true
+        {{- end }}
         natsBox:
           enabled: true
           container:

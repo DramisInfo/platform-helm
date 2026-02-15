@@ -23,9 +23,21 @@ bootstrap:
   gatekeeper:
     enabled: true
     policies:
-      # Enable CIS Kubernetes benchmark policies
-      # Policies are versioned with the Helm chart for easier testing and promotion
+      # Enable policies from the official Gatekeeper Library
+      # Uses community-maintained ConstraintTemplates from https://github.com/open-policy-agent/gatekeeper-library
       enabled: true
+      # Enforcement action: "deny" blocks violations, "dryrun" logs only
+      enforcementAction: deny
+      # Namespaces excluded from policy enforcement
+      excludedNamespaces:
+        - kube-system
+        - gatekeeper-system
+        - cert-manager
+        - istio-system
+        - ingress-nginx
+        - argocd
+      # Image patterns to exempt from policies (e.g., ["gcr.io/k8s-minikube/*"])
+      exemptImages: []
   ingressNginx:
     enabled: false
   prometheus:

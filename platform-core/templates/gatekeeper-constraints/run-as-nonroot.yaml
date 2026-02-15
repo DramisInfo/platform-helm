@@ -4,9 +4,9 @@ kind: K8sPSPAllowedUsers
 metadata:
   name: psp-pods-must-run-as-nonroot
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
-  enforcementAction: deny
+  enforcementAction: {{ .Values.bootstrap.gatekeeper.policies.enforcementAction | default "deny" }}
   match:
     kinds:
       - apiGroups: [""]
@@ -14,14 +14,21 @@ spec:
     namespaces:
       - "*"
     excludedNamespaces:
+      {{- if .Values.bootstrap.gatekeeper.policies.excludedNamespaces }}
+      {{- toYaml .Values.bootstrap.gatekeeper.policies.excludedNamespaces | nindent 6 }}
+      {{- else }}
       - kube-system
       - gatekeeper-system
       - cert-manager
       - istio-system
       - ingress-nginx
+      - argocd
+      {{- end }}
   parameters:
     runAsUser:
       rule: MustRunAsNonRoot
+    {{- if .Values.bootstrap.gatekeeper.policies.exemptImages }}
     exemptImages:
-      - "gcr.io/k8s-minikube/*"
+      {{- toYaml .Values.bootstrap.gatekeeper.policies.exemptImages | nindent 6 }}
+    {{- end }}
 {{- end -}}

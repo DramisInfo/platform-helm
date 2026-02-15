@@ -123,6 +123,8 @@ spec:
           enabled: true
           podMonitor:
             enabled: true
+            labels:
+              release: prometheus
         {{- end }}
         natsBox:
           enabled: true

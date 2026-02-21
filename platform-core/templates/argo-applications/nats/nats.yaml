@@ -215,7 +215,859 @@ spec:
                     "graphTooltip": 0,
                     "id": null,
                     "links": [],
-                    "panels": [],
+                    "panels": [
+                      {
+                                            "id": 1,
+                                            "type": "stat",
+                                            "title": "Cluster Size",
+                                            "description": "SLI: Number of healthy NATS pods",
+                                            "gridPos": {
+                                                                  "h": 4,
+                                                                  "w": 4,
+                                                                  "x": 0,
+                                                                  "y": 0
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "colorMode": "background",
+                                                                  "graphMode": "none",
+                                                                  "justifyMode": "center",
+                                                                  "orientation": "auto",
+                                                                  "reduceOptions": {
+                                                                                        "calcs": [
+                                                                                                              "lastNotNull"
+                                                                                        ],
+                                                                                        "fields": "",
+                                                                                        "values": false
+                                                                  },
+                                                                  "textMode": "auto"
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "thresholds"
+                                                                                        },
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "red",
+                                                                                                                                                          "value": null
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "yellow",
+                                                                                                                                                          "value": 2
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": 3
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        },
+                                                                                        "unit": "short",
+                                                                                        "mappings": []
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "count(nats_varz_connections{namespace=~\"$namespace\"})",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 2,
+                                            "type": "stat",
+                                            "title": "Message Rate In",
+                                            "description": "SLI: Aggregate inbound message throughput",
+                                            "gridPos": {
+                                                                  "h": 4,
+                                                                  "w": 4,
+                                                                  "x": 4,
+                                                                  "y": 0
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "colorMode": "value",
+                                                                  "graphMode": "area",
+                                                                  "justifyMode": "center",
+                                                                  "orientation": "auto",
+                                                                  "reduceOptions": {
+                                                                                        "calcs": [
+                                                                                                              "lastNotNull"
+                                                                                        ],
+                                                                                        "fields": "",
+                                                                                        "values": false
+                                                                  },
+                                                                  "textMode": "auto"
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "palette-classic"
+                                                                                        },
+                                                                                        "unit": "msg/s",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "sum(rate(nats_varz_in_msgs{namespace=~\"$namespace\"}[$__rate_interval]))",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 3,
+                                            "type": "stat",
+                                            "title": "Message Rate Out",
+                                            "description": "SLI: Aggregate outbound message throughput",
+                                            "gridPos": {
+                                                                  "h": 4,
+                                                                  "w": 4,
+                                                                  "x": 8,
+                                                                  "y": 0
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "colorMode": "value",
+                                                                  "graphMode": "area",
+                                                                  "justifyMode": "center",
+                                                                  "orientation": "auto",
+                                                                  "reduceOptions": {
+                                                                                        "calcs": [
+                                                                                                              "lastNotNull"
+                                                                                        ],
+                                                                                        "fields": "",
+                                                                                        "values": false
+                                                                  },
+                                                                  "textMode": "auto"
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "palette-classic"
+                                                                                        },
+                                                                                        "unit": "msg/s",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "sum(rate(nats_varz_out_msgs{namespace=~\"$namespace\"}[$__rate_interval]))",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 4,
+                                            "type": "stat",
+                                            "title": "Slow Consumers",
+                                            "description": "SLI (Error): Slow consumers indicate back-pressure and potential message loss. Target: 0",
+                                            "gridPos": {
+                                                                  "h": 4,
+                                                                  "w": 4,
+                                                                  "x": 12,
+                                                                  "y": 0
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "colorMode": "background",
+                                                                  "graphMode": "area",
+                                                                  "justifyMode": "center",
+                                                                  "orientation": "auto",
+                                                                  "reduceOptions": {
+                                                                                        "calcs": [
+                                                                                                              "lastNotNull"
+                                                                                        ],
+                                                                                        "fields": "",
+                                                                                        "values": false
+                                                                  },
+                                                                  "textMode": "auto"
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "thresholds"
+                                                                                        },
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "red",
+                                                                                                                                                          "value": 1
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        },
+                                                                                        "unit": "short",
+                                                                                        "mappings": []
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "sum(nats_varz_slow_consumers{namespace=~\"$namespace\"})",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 5,
+                                            "type": "stat",
+                                            "title": "JetStream Streams",
+                                            "description": "Total number of JetStream streams in the cluster",
+                                            "gridPos": {
+                                                                  "h": 4,
+                                                                  "w": 4,
+                                                                  "x": 16,
+                                                                  "y": 0
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "colorMode": "value",
+                                                                  "graphMode": "none",
+                                                                  "justifyMode": "center",
+                                                                  "orientation": "auto",
+                                                                  "reduceOptions": {
+                                                                                        "calcs": [
+                                                                                                              "lastNotNull"
+                                                                                        ],
+                                                                                        "fields": "",
+                                                                                        "values": false
+                                                                  },
+                                                                  "textMode": "auto"
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "palette-classic"
+                                                                                        },
+                                                                                        "unit": "short",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "blue",
+                                                                                                                                                          "value": null
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "sum(nats_server_total_streams{namespace=~\"$namespace\"})",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 6,
+                                            "type": "stat",
+                                            "title": "JetStream Consumers",
+                                            "description": "Total number of JetStream consumers in the cluster",
+                                            "gridPos": {
+                                                                  "h": 4,
+                                                                  "w": 4,
+                                                                  "x": 20,
+                                                                  "y": 0
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "colorMode": "value",
+                                                                  "graphMode": "none",
+                                                                  "justifyMode": "center",
+                                                                  "orientation": "auto",
+                                                                  "reduceOptions": {
+                                                                                        "calcs": [
+                                                                                                              "lastNotNull"
+                                                                                        ],
+                                                                                        "fields": "",
+                                                                                        "values": false
+                                                                  },
+                                                                  "textMode": "auto"
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "palette-classic"
+                                                                                        },
+                                                                                        "unit": "short",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "blue",
+                                                                                                                                                          "value": null
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "sum(nats_server_total_consumers{namespace=~\"$namespace\"})",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 7,
+                                            "type": "row",
+                                            "title": "Traffic (Golden Signal)",
+                                            "collapsed": false,
+                                            "gridPos": {
+                                                                  "h": 1,
+                                                                  "w": 24,
+                                                                  "x": 0,
+                                                                  "y": 4
+                                            },
+                                            "panels": []
+                      },
+                      {
+                                            "id": 8,
+                                            "type": "timeseries",
+                                            "title": "Message Rate In/Out per Pod",
+                                            "description": "Golden Signal - Traffic: per-pod inbound and outbound message throughput",
+                                            "gridPos": {
+                                                                  "h": 8,
+                                                                  "w": 12,
+                                                                  "x": 0,
+                                                                  "y": 5
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "legend": {
+                                                                                        "calcs": [
+                                                                                                              "mean",
+                                                                                                              "max"
+                                                                                        ],
+                                                                                        "displayMode": "table",
+                                                                                        "placement": "bottom",
+                                                                                        "showLegend": true
+                                                                  },
+                                                                  "tooltip": {
+                                                                                        "mode": "multi",
+                                                                                        "sort": "desc"
+                                                                  }
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "palette-classic"
+                                                                                        },
+                                                                                        "custom": {
+                                                                                                              "lineWidth": 2
+                                                                                        },
+                                                                                        "unit": "msg/s",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "rate(nats_varz_in_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
+                                                                                        "legendFormat": "{{"{{pod}}"}} in",
+                                                                                        "refId": "A"
+                                                                  },
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "rate(nats_varz_out_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
+                                                                                        "legendFormat": "{{"{{pod}}"}} out",
+                                                                                        "refId": "B"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 9,
+                                            "type": "timeseries",
+                                            "title": "Bandwidth In/Out per Pod",
+                                            "description": "Golden Signal - Traffic: per-pod inbound and outbound byte throughput",
+                                            "gridPos": {
+                                                                  "h": 8,
+                                                                  "w": 12,
+                                                                  "x": 12,
+                                                                  "y": 5
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "legend": {
+                                                                                        "calcs": [
+                                                                                                              "mean",
+                                                                                                              "max"
+                                                                                        ],
+                                                                                        "displayMode": "table",
+                                                                                        "placement": "bottom",
+                                                                                        "showLegend": true
+                                                                  },
+                                                                  "tooltip": {
+                                                                                        "mode": "multi",
+                                                                                        "sort": "desc"
+                                                                  }
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "palette-classic"
+                                                                                        },
+                                                                                        "custom": {
+                                                                                                              "lineWidth": 2
+                                                                                        },
+                                                                                        "unit": "Bps",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "rate(nats_varz_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
+                                                                                        "legendFormat": "{{"{{pod}}"}} in",
+                                                                                        "refId": "A"
+                                                                  },
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "rate(nats_varz_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
+                                                                                        "legendFormat": "{{"{{pod}}"}} out",
+                                                                                        "refId": "B"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 10,
+                                            "type": "row",
+                                            "title": "Errors (Golden Signal)",
+                                            "collapsed": false,
+                                            "gridPos": {
+                                                                  "h": 1,
+                                                                  "w": 24,
+                                                                  "x": 0,
+                                                                  "y": 13
+                                            },
+                                            "panels": []
+                      },
+                      {
+                                            "id": 11,
+                                            "type": "timeseries",
+                                            "title": "Slow Consumers over Time",
+                                            "description": "Golden Signal - Errors: slow consumers indicate a pod cannot keep up with message delivery, risking message loss. SLO: must be 0.",
+                                            "gridPos": {
+                                                                  "h": 8,
+                                                                  "w": 12,
+                                                                  "x": 0,
+                                                                  "y": 14
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "legend": {
+                                                                                        "calcs": [
+                                                                                                              "max"
+                                                                                        ],
+                                                                                        "displayMode": "table",
+                                                                                        "placement": "bottom",
+                                                                                        "showLegend": true
+                                                                  },
+                                                                  "tooltip": {
+                                                                                        "mode": "multi",
+                                                                                        "sort": "desc"
+                                                                  }
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "thresholds"
+                                                                                        },
+                                                                                        "custom": {
+                                                                                                              "lineWidth": 2,
+                                                                                                              "fillOpacity": 20
+                                                                                        },
+                                                                                        "unit": "short",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "red",
+                                                                                                                                                          "value": 1
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "nats_varz_slow_consumers{namespace=~\"$namespace\", pod=~\"$pod\"}",
+                                                                                        "legendFormat": "{{"{{pod}}"}}",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 12,
+                                            "type": "timeseries",
+                                            "title": "JetStream API Error Rate",
+                                            "description": "Golden Signal - Errors: rate of JetStream API errors per pod. SLO: error rate < 0.1%.",
+                                            "gridPos": {
+                                                                  "h": 8,
+                                                                  "w": 12,
+                                                                  "x": 12,
+                                                                  "y": 14
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "legend": {
+                                                                                        "calcs": [
+                                                                                                              "mean",
+                                                                                                              "max"
+                                                                                        ],
+                                                                                        "displayMode": "table",
+                                                                                        "placement": "bottom",
+                                                                                        "showLegend": true
+                                                                  },
+                                                                  "tooltip": {
+                                                                                        "mode": "multi",
+                                                                                        "sort": "desc"
+                                                                  }
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "thresholds"
+                                                                                        },
+                                                                                        "custom": {
+                                                                                                              "lineWidth": 2,
+                                                                                                              "fillOpacity": 20
+                                                                                        },
+                                                                                        "unit": "reqps",
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "yellow",
+                                                                                                                                                          "value": 0.01
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "red",
+                                                                                                                                                          "value": 0.1
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "rate(nats_varz_jetstream_stats_api_errors{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
+                                                                                        "legendFormat": "{{"{{pod}}"}} errors",
+                                                                                        "refId": "A"
+                                                                  },
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "rate(nats_varz_jetstream_stats_api_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$__rate_interval])",
+                                                                                        "legendFormat": "{{"{{pod}}"}} total",
+                                                                                        "refId": "B"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 13,
+                                            "type": "row",
+                                            "title": "Saturation (Golden Signal)",
+                                            "collapsed": false,
+                                            "gridPos": {
+                                                                  "h": 1,
+                                                                  "w": 24,
+                                                                  "x": 0,
+                                                                  "y": 22
+                                            },
+                                            "panels": []
+                      },
+                      {
+                                            "id": 14,
+                                            "type": "timeseries",
+                                            "title": "JetStream Memory Utilization",
+                                            "description": "Golden Signal - Saturation: JetStream memory used vs max. SLO: stay below 80%.",
+                                            "gridPos": {
+                                                                  "h": 8,
+                                                                  "w": 12,
+                                                                  "x": 0,
+                                                                  "y": 23
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "legend": {
+                                                                                        "calcs": [
+                                                                                                              "mean",
+                                                                                                              "max"
+                                                                                        ],
+                                                                                        "displayMode": "table",
+                                                                                        "placement": "bottom",
+                                                                                        "showLegend": true
+                                                                  },
+                                                                  "tooltip": {
+                                                                                        "mode": "multi",
+                                                                                        "sort": "desc"
+                                                                  }
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "thresholds"
+                                                                                        },
+                                                                                        "custom": {
+                                                                                                              "lineWidth": 2,
+                                                                                                              "fillOpacity": 15
+                                                                                        },
+                                                                                        "unit": "percentunit",
+                                                                                        "min": 0,
+                                                                                        "max": 1,
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "yellow",
+                                                                                                                                                          "value": 0.7
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "red",
+                                                                                                                                                          "value": 0.9
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "nats_varz_jetstream_stats_memory{namespace=~\"$namespace\", pod=~\"$pod\"} / nats_varz_jetstream_config_max_memory{namespace=~\"$namespace\", pod=~\"$pod\"}",
+                                                                                        "legendFormat": "{{"{{pod}}"}}",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      },
+                      {
+                                            "id": 15,
+                                            "type": "timeseries",
+                                            "title": "JetStream Storage Utilization",
+                                            "description": "Golden Signal - Saturation: JetStream file storage used vs max. SLO: stay below 80%.",
+                                            "gridPos": {
+                                                                  "h": 8,
+                                                                  "w": 12,
+                                                                  "x": 12,
+                                                                  "y": 23
+                                            },
+                                            "datasource": {
+                                                                  "type": "prometheus",
+                                                                  "uid": "$datasource"
+                                            },
+                                            "options": {
+                                                                  "legend": {
+                                                                                        "calcs": [
+                                                                                                              "mean",
+                                                                                                              "max"
+                                                                                        ],
+                                                                                        "displayMode": "table",
+                                                                                        "placement": "bottom",
+                                                                                        "showLegend": true
+                                                                  },
+                                                                  "tooltip": {
+                                                                                        "mode": "multi",
+                                                                                        "sort": "desc"
+                                                                  }
+                                            },
+                                            "fieldConfig": {
+                                                                  "defaults": {
+                                                                                        "color": {
+                                                                                                              "mode": "thresholds"
+                                                                                        },
+                                                                                        "custom": {
+                                                                                                              "lineWidth": 2,
+                                                                                                              "fillOpacity": 15
+                                                                                        },
+                                                                                        "unit": "percentunit",
+                                                                                        "min": 0,
+                                                                                        "max": 1,
+                                                                                        "mappings": [],
+                                                                                        "thresholds": {
+                                                                                                              "mode": "absolute",
+                                                                                                              "steps": [
+                                                                                                                                    {
+                                                                                                                                                          "color": "green",
+                                                                                                                                                          "value": null
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "yellow",
+                                                                                                                                                          "value": 0.7
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                                          "color": "red",
+                                                                                                                                                          "value": 0.9
+                                                                                                                                    }
+                                                                                                              ]
+                                                                                        }
+                                                                  },
+                                                                  "overrides": []
+                                            },
+                                            "targets": [
+                                                                  {
+                                                                                        "datasource": {
+                                                                                                              "type": "prometheus",
+                                                                                                              "uid": "$datasource"
+                                                                                        },
+                                                                                        "expr": "nats_varz_jetstream_stats_storage{namespace=~\"$namespace\", pod=~\"$pod\"} / nats_varz_jetstream_config_max_storage{namespace=~\"$namespace\", pod=~\"$pod\"}",
+                                                                                        "legendFormat": "{{"{{pod}}"}}",
+                                                                                        "refId": "A"
+                                                                  }
+                                            ]
+                      }
+],
                     "refresh": "10s",
                     "schemaVersion": 39,
                     "tags": [

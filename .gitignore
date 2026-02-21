@@ -3,4 +3,3 @@ node_modules/
 platform-core/charts/*.tgz
 .helm-dry-run
 portforward.log
-.todo/

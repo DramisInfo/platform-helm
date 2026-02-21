@@ -1,0 +1,100 @@
+name: Test Chart Combinations
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: all-disabled
+            set: >-
+              bootstrap.gatekeeper.enabled=false
+              bootstrap.monitoring.enabled=false
+              bootstrap.keda.enabled=false
+              bootstrap.nats.enabled=false
+
+          - name: gatekeeper-only
+            set: >-
+              bootstrap.gatekeeper.enabled=true
+              bootstrap.monitoring.enabled=false
+              bootstrap.keda.enabled=false
+              bootstrap.nats.enabled=false
+
+          - name: monitoring-only
+            set: >-
+              bootstrap.gatekeeper.enabled=false
+              bootstrap.monitoring.enabled=true
+              bootstrap.keda.enabled=false
+              bootstrap.nats.enabled=false
+
+          - name: keda-and-nats
+            set: >-
+              bootstrap.gatekeeper.enabled=false
+              bootstrap.monitoring.enabled=false
+              bootstrap.keda.enabled=true
+              bootstrap.nats.enabled=true
+
+          - name: optional-components
+            set: >-
+              bootstrap.gatekeeper.enabled=false
+              bootstrap.monitoring.enabled=false
+              bootstrap.keda.enabled=false
+              bootstrap.nats.enabled=false
+              bootstrap.crossplane.enabled=true
+              bootstrap.externalSecretOperator.enabled=true
+              bootstrap.cnpg.enabled=true
+              bootstrap.ingressNginx.enabled=true
+              bootstrap.terraformOperator.enabled=true
+
+          - name: all-enabled
+            set: >-
+              bootstrap.gatekeeper.enabled=true
+              bootstrap.monitoring.enabled=true
+              bootstrap.keda.enabled=true
+              bootstrap.nats.enabled=true
+              bootstrap.crossplane.enabled=true
+              bootstrap.externalSecretOperator.enabled=true
+              bootstrap.cnpg.enabled=true
+              bootstrap.ingressNginx.enabled=true
+              bootstrap.terraformOperator.enabled=true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
+
+      - name: Render - ${{ matrix.name }}
+        run: |
+          ARGS=""
+          for kv in ${{ matrix.set }}; do
+            ARGS="$ARGS --set $kv"
+          done
+          helm template platform-core ./platform-core $ARGS
+
+  # This job name must exactly match the required check name in the ruleset.
+  # It acts as a single aggregation point for all matrix results.
+  "Test Chart Combinations":
+    runs-on: ubuntu-latest
+    needs: render
+    if: always()
+    steps:
+      - name: Check matrix results
+        run: |
+          if [[ "${{ needs.render.result }}" != "success" ]]; then
+            echo "One or more chart combination renders failed."
+            exit 1
+          fi
+          echo "All chart combinations rendered successfully."

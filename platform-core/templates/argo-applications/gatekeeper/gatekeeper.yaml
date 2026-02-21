@@ -19,29 +19,1092 @@ spec:
     jqPathExpressions:
     - .spec.preserveUnknownFields
     - .spec.names.singular
-  source:
-    repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
-    targetRevision: "3.17.1"
-    chart: gatekeeper
-    helm:
-      valuesObject:
-        replicas: 2
-        auditInterval: 60
-        constraintViolationsLimit: 20
-        auditFromCache: false
-        emitAdmissionEvents: false
-        emitAuditEvents: false
-        logLevel: INFO
-        image:
-          release: v3.17.1
-        podAnnotations:
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "8888"
-          prometheus.io/path: "/metrics"
-        auditPodAnnotations:
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "8888"
-          prometheus.io/path: "/metrics"
+  sources:
+    - repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
+      targetRevision: "3.17.1"
+      chart: gatekeeper
+      helm:
+        valuesObject:
+          replicas: 2
+          auditInterval: 60
+          constraintViolationsLimit: 20
+          auditFromCache: false
+          emitAdmissionEvents: false
+          emitAuditEvents: false
+          logLevel: INFO
+          image:
+            release: v3.17.1
+          podAnnotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8888"
+            prometheus.io/path: "/metrics"
+          auditPodAnnotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8888"
+            prometheus.io/path: "/metrics"
+    {{- if .Values.bootstrap.gatekeeper.policies.enabled }}
+    - repoURL: "https://github.com/open-policy-agent/gatekeeper-library"
+      targetRevision: "master"
+      path: "library/pod-security-policy"
+    {{- end }}
+    {{- if or .Values.bootstrap.gatekeeper.policies.enabled .Values.bootstrap.monitoring.enabled }}
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            {{- if .Values.bootstrap.gatekeeper.policies.enabled }}
+            - apiVersion: constraints.gatekeeper.sh/v1beta1
+              kind: K8sPSPPrivilegedContainer
+              metadata:
+                name: psp-privileged-container
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                enforcementAction: {{ .Values.bootstrap.gatekeeper.policies.enforcementAction | default "deny" }}
+                match:
+                  kinds:
+                    - apiGroups: [""]
+                      kinds: ["Pod"]
+                  namespaces:
+                    - "*"
+                  excludedNamespaces:
+                    {{- if .Values.bootstrap.gatekeeper.policies.excludedNamespaces }}
+                    {{- toYaml .Values.bootstrap.gatekeeper.policies.excludedNamespaces | nindent 20 }}
+                    {{- else }}
+                    - kube-system
+                    - gatekeeper-system
+                    - cert-manager
+                    - istio-system
+                    - ingress-nginx
+                    - argocd
+                    {{- end }}
+                {{- if .Values.bootstrap.gatekeeper.policies.exemptImages }}
+                parameters:
+                  exemptImages:
+                    {{- toYaml .Values.bootstrap.gatekeeper.policies.exemptImages | nindent 20 }}
+                {{- end }}
+            - apiVersion: constraints.gatekeeper.sh/v1beta1
+              kind: K8sPSPAllowedUsers
+              metadata:
+                name: psp-pods-must-run-as-nonroot
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                enforcementAction: {{ .Values.bootstrap.gatekeeper.policies.enforcementAction | default "deny" }}
+                match:
+                  kinds:
+                    - apiGroups: [""]
+                      kinds: ["Pod"]
+                  namespaces:
+                    - "*"
+                  excludedNamespaces:
+                    {{- if .Values.bootstrap.gatekeeper.policies.excludedNamespaces }}
+                    {{- toYaml .Values.bootstrap.gatekeeper.policies.excludedNamespaces | nindent 20 }}
+                    {{- else }}
+                    - kube-system
+                    - gatekeeper-system
+                    - cert-manager
+                    - istio-system
+                    - ingress-nginx
+                    - argocd
+                    {{- end }}
+                parameters:
+                  runAsUser:
+                    rule: MustRunAsNonRoot
+                  {{- if .Values.bootstrap.gatekeeper.policies.exemptImages }}
+                  exemptImages:
+                    {{- toYaml .Values.bootstrap.gatekeeper.policies.exemptImages | nindent 20 }}
+                  {{- end }}
+            {{- end }}
+            {{- if .Values.bootstrap.monitoring.enabled }}
+            - apiVersion: monitoring.coreos.com/v1
+              kind: PodMonitor
+              metadata:
+                name: gatekeeper
+                namespace: gatekeeper-system
+                annotations:
+                  argocd.argoproj.io/sync-wave: "0"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                labels:
+                  app: gatekeeper
+                  release: prometheus
+              spec:
+                selector:
+                  matchLabels:
+                    app: gatekeeper
+                    control-plane: controller-manager
+                podMetricsEndpoints:
+                  - port: metrics
+                    path: /metrics
+                    interval: 30s
+            - apiVersion: monitoring.coreos.com/v1
+              kind: PodMonitor
+              metadata:
+                name: gatekeeper-audit
+                namespace: gatekeeper-system
+                annotations:
+                  argocd.argoproj.io/sync-wave: "0"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                labels:
+                  app: gatekeeper
+                  release: prometheus
+              spec:
+                selector:
+                  matchLabels:
+                    app: gatekeeper
+                    control-plane: audit-controller
+                podMetricsEndpoints:
+                  - port: metrics
+                    path: /metrics
+                    interval: 30s
+            - apiVersion: grafana.integreatly.org/v1beta1
+              kind: GrafanaDashboard
+              metadata:
+                name: opa-gatekeeper
+                namespace: monitoring
+                annotations:
+                  argocd.argoproj.io/sync-wave: "0"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                labels:
+                  dashboards: "grafana"
+              spec:
+                instanceSelector:
+                  matchLabels:
+                    dashboards: "grafana"
+                resyncPeriod: 30s
+                json: |
+                  {
+                    "annotations": {
+                      "list": [
+                        {
+                          "builtIn": 1,
+                          "datasource": {
+                            "type": "datasource",
+                            "uid": "grafana"
+                          },
+                          "enable": true,
+                          "hide": true,
+                          "iconColor": "rgba(0, 211, 255, 1)",
+                          "name": "Annotations & Alerts",
+                          "type": "dashboard"
+                        }
+                      ]
+                    },
+                    "description": "OPA Gatekeeper monitoring dashboard showing policy violations, constraints, and audit metrics",
+                    "editable": true,
+                    "fiscalYearStartMonth": 0,
+                    "graphTooltip": 0,
+                    "id": null,
+                    "links": [],
+                    "liveNow": false,
+                    "panels": [
+                      {
+                        "collapsed": false,
+                        "gridPos": {
+                          "h": 1,
+                          "w": 24,
+                          "x": 0,
+                          "y": 0
+                        },
+                        "id": 100,
+                        "panels": [],
+                        "title": "Overview",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Total number of policy violations detected by enforcement action",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                },
+                                {
+                                  "color": "red",
+                                  "value": 1
+                                }
+                              ]
+                            }
+                          },
+                          "overrides": [
+                            {
+                              "matcher": {
+                                "id": "byName",
+                                "options": "warn"
+                              },
+                              "properties": [
+                                {
+                                  "id": "color",
+                                  "value": {
+                                    "fixedColor": "orange",
+                                    "mode": "fixed"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "matcher": {
+                                "id": "byName",
+                                "options": "deny"
+                              },
+                              "properties": [
+                                {
+                                  "id": "color",
+                                  "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "matcher": {
+                                "id": "byName",
+                                "options": "dryrun"
+                              },
+                              "properties": [
+                                {
+                                  "id": "color",
+                                  "value": {
+                                    "fixedColor": "yellow",
+                                    "mode": "fixed"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 0,
+                          "y": 1
+                        },
+                        "id": 1,
+                        "options": {
+                          "displayMode": "gradient",
+                          "minVizHeight": 10,
+                          "minVizWidth": 0,
+                          "orientation": "horizontal",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "showUnfilled": true
+                        },
+                        "pluginVersion": "9.4.7",
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum by (enforcement_action) (gatekeeper_violations)",
+                            "legendFormat": "{{`{{enforcement_action}}`}}",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Total Violations by Enforcement Action",
+                        "type": "bargauge"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Current number of constraints and constraint templates",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "blue",
+                                  "value": null
+                                }
+                              ]
+                            }
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 4,
+                          "w": 6,
+                          "x": 12,
+                          "y": 1
+                        },
+                        "id": 2,
+                        "options": {
+                          "colorMode": "value",
+                          "graphMode": "area",
+                          "justifyMode": "auto",
+                          "orientation": "auto",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "textMode": "auto"
+                        },
+                        "pluginVersion": "9.4.7",
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum(gatekeeper_constraint_templates)",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Constraint Templates",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "blue",
+                                  "value": null
+                                }
+                              ]
+                            }
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 4,
+                          "w": 6,
+                          "x": 18,
+                          "y": 1
+                        },
+                        "id": 3,
+                        "options": {
+                          "colorMode": "value",
+                          "graphMode": "area",
+                          "justifyMode": "auto",
+                          "orientation": "auto",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "textMode": "auto"
+                        },
+                        "pluginVersion": "9.4.7",
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum(gatekeeper_constraints)",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Active Constraints",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Time since last audit run",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                },
+                                {
+                                  "color": "yellow",
+                                  "value": 120
+                                },
+                                {
+                                  "color": "red",
+                                  "value": 300
+                                }
+                              ]
+                            },
+                            "unit": "s"
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 4,
+                          "w": 6,
+                          "x": 12,
+                          "y": 5
+                        },
+                        "id": 4,
+                        "options": {
+                          "colorMode": "value",
+                          "graphMode": "area",
+                          "justifyMode": "auto",
+                          "orientation": "auto",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "textMode": "auto"
+                        },
+                        "pluginVersion": "9.4.7",
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "time() - max(gatekeeper_audit_last_run_time)",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Last Audit Run",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Average audit duration",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                },
+                                {
+                                  "color": "yellow",
+                                  "value": 5
+                                },
+                                {
+                                  "color": "red",
+                                  "value": 10
+                                }
+                              ]
+                            },
+                            "unit": "s"
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 4,
+                          "w": 6,
+                          "x": 18,
+                          "y": 5
+                        },
+                        "id": 5,
+                        "options": {
+                          "colorMode": "value",
+                          "graphMode": "area",
+                          "justifyMode": "auto",
+                          "orientation": "auto",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "textMode": "auto"
+                        },
+                        "pluginVersion": "9.4.7",
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum(rate(gatekeeper_audit_duration_seconds_sum[5m])) / sum(rate(gatekeeper_audit_duration_seconds_count[5m]))",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Avg Audit Duration",
+                        "type": "stat"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {
+                          "h": 1,
+                          "w": 24,
+                          "x": 0,
+                          "y": 9
+                        },
+                        "id": 101,
+                        "panels": [],
+                        "title": "Violations Over Time",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Policy violations trend by enforcement action",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
+                            },
+                            "custom": {
+                              "axisCenteredZero": false,
+                              "axisColorMode": "text",
+                              "axisLabel": "",
+                              "axisPlacement": "auto",
+                              "barAlignment": 0,
+                              "drawStyle": "line",
+                              "fillOpacity": 20,
+                              "gradientMode": "none",
+                              "hideFrom": {
+                                "tooltip": false,
+                                "viz": false,
+                                "legend": false
+                              },
+                              "lineInterpolation": "smooth",
+                              "lineWidth": 2,
+                              "pointSize": 5,
+                              "scaleDistribution": {
+                                "type": "linear"
+                              },
+                              "showPoints": "never",
+                              "spanNulls": false,
+                              "stacking": {
+                                "group": "A",
+                                "mode": "none"
+                              },
+                              "thresholdsStyle": {
+                                "mode": "off"
+                              }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                }
+                              ]
+                            }
+                          },
+                          "overrides": [
+                            {
+                              "matcher": {
+                                "id": "byName",
+                                "options": "deny"
+                              },
+                              "properties": [
+                                {
+                                  "id": "color",
+                                  "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "matcher": {
+                                "id": "byName",
+                                "options": "warn"
+                              },
+                              "properties": [
+                                {
+                                  "id": "color",
+                                  "value": {
+                                    "fixedColor": "orange",
+                                    "mode": "fixed"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "matcher": {
+                                "id": "byName",
+                                "options": "dryrun"
+                              },
+                              "properties": [
+                                {
+                                  "id": "color",
+                                  "value": {
+                                    "fixedColor": "yellow",
+                                    "mode": "fixed"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 24,
+                          "x": 0,
+                          "y": 10
+                        },
+                        "id": 6,
+                        "options": {
+                          "legend": {
+                            "calcs": [
+                              "last",
+                              "max"
+                            ],
+                            "displayMode": "table",
+                            "placement": "right",
+                            "showLegend": true
+                          },
+                          "tooltip": {
+                            "mode": "multi",
+                            "sort": "desc"
+                          }
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum by (enforcement_action) (gatekeeper_violations)",
+                            "legendFormat": "{{`{{enforcement_action}}`}}",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Violations Trend",
+                        "type": "timeseries"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {
+                          "h": 1,
+                          "w": 24,
+                          "x": 0,
+                          "y": 18
+                        },
+                        "id": 102,
+                        "panels": [],
+                        "title": "Constraints Details",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Constraints by enforcement action",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
+                            },
+                            "custom": {
+                              "hideFrom": {
+                                "tooltip": false,
+                                "viz": false,
+                                "legend": false
+                              }
+                            },
+                            "mappings": []
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 0,
+                          "y": 19
+                        },
+                        "id": 7,
+                        "options": {
+                          "legend": {
+                            "displayMode": "table",
+                            "placement": "right",
+                            "showLegend": true,
+                            "values": [
+                              "value"
+                            ]
+                          },
+                          "pieType": "donut",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                          }
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum by (enforcement_action) (gatekeeper_constraints)",
+                            "legendFormat": "{{`{{enforcement_action}}`}}",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Constraints by Enforcement Action",
+                        "type": "piechart"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Constraint templates by status",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
+                            },
+                            "custom": {
+                              "hideFrom": {
+                                "tooltip": false,
+                                "viz": false,
+                                "legend": false
+                              }
+                            },
+                            "mappings": []
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 12,
+                          "y": 19
+                        },
+                        "id": 8,
+                        "options": {
+                          "legend": {
+                            "displayMode": "table",
+                            "placement": "right",
+                            "showLegend": true,
+                            "values": [
+                              "value"
+                            ]
+                          },
+                          "pieType": "donut",
+                          "reduceOptions": {
+                            "calcs": [
+                              "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                          },
+                          "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                          }
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum by (status) (gatekeeper_constraint_templates)",
+                            "legendFormat": "{{`{{status}}`}}",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Constraint Templates by Status",
+                        "type": "piechart"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {
+                          "h": 1,
+                          "w": 24,
+                          "x": 0,
+                          "y": 27
+                        },
+                        "id": 103,
+                        "panels": [],
+                        "title": "Audit Performance",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Audit duration over time",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
+                            },
+                            "custom": {
+                              "axisCenteredZero": false,
+                              "axisColorMode": "text",
+                              "axisLabel": "",
+                              "axisPlacement": "auto",
+                              "barAlignment": 0,
+                              "drawStyle": "line",
+                              "fillOpacity": 10,
+                              "gradientMode": "none",
+                              "hideFrom": {
+                                "tooltip": false,
+                                "viz": false,
+                                "legend": false
+                              },
+                              "lineInterpolation": "linear",
+                              "lineWidth": 1,
+                              "pointSize": 5,
+                              "scaleDistribution": {
+                                "type": "linear"
+                              },
+                              "showPoints": "never",
+                              "spanNulls": false,
+                              "stacking": {
+                                "group": "A",
+                                "mode": "none"
+                              },
+                              "thresholdsStyle": {
+                                "mode": "off"
+                              }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                }
+                              ]
+                            },
+                            "unit": "s"
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 0,
+                          "y": 28
+                        },
+                        "id": 9,
+                        "options": {
+                          "legend": {
+                            "calcs": [
+                              "mean",
+                              "max"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                          },
+                          "tooltip": {
+                            "mode": "single",
+                            "sort": "none"
+                          }
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum(rate(gatekeeper_audit_duration_seconds_sum[5m])) / sum(rate(gatekeeper_audit_duration_seconds_count[5m]))",
+                            "legendFormat": "avg duration",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Audit Duration",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Validation request rate",
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
+                            },
+                            "custom": {
+                              "axisCenteredZero": false,
+                              "axisColorMode": "text",
+                              "axisLabel": "",
+                              "axisPlacement": "auto",
+                              "barAlignment": 0,
+                              "drawStyle": "line",
+                              "fillOpacity": 10,
+                              "gradientMode": "none",
+                              "hideFrom": {
+                                "tooltip": false,
+                                "viz": false,
+                                "legend": false
+                              },
+                              "lineInterpolation": "linear",
+                              "lineWidth": 1,
+                              "pointSize": 5,
+                              "scaleDistribution": {
+                                "type": "linear"
+                              },
+                              "showPoints": "never",
+                              "spanNulls": false,
+                              "stacking": {
+                                "group": "A",
+                                "mode": "normal"
+                              },
+                              "thresholdsStyle": {
+                                "mode": "off"
+                              }
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                }
+                              ]
+                            },
+                            "unit": "reqps"
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 12,
+                          "y": 28
+                        },
+                        "id": 10,
+                        "options": {
+                          "legend": {
+                            "calcs": [
+                              "mean"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom",
+                            "showLegend": true
+                          },
+                          "tooltip": {
+                            "mode": "multi",
+                            "sort": "none"
+                          }
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum(rate(gatekeeper_validation_request_count_total[5m])) by (admission_status)",
+                            "legendFormat": "{{`{{admission_status}}`}}",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Validation Request Rate",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": "Prometheus",
+                        "description": "Heatmap showing validation request duration distribution over time",
+                        "fieldConfig": {
+                          "defaults": {
+                            "custom": {
+                              "hideFrom": {
+                                "tooltip": false,
+                                "viz": false,
+                                "legend": false
+                              },
+                              "scaleDistribution": {
+                                "type": "linear"
+                              }
+                            }
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 24,
+                          "x": 0,
+                          "y": 36
+                        },
+                        "id": 11,
+                        "options": {
+                          "calculate": false,
+                          "cellGap": 2,
+                          "cellValues": {
+                            "decimals": 0
+                          },
+                          "color": {
+                            "exponent": 0.5,
+                            "fill": "dark-orange",
+                            "mode": "scheme",
+                            "reverse": false,
+                            "scale": "exponential",
+                            "scheme": "Spectral",
+                            "steps": 128
+                          },
+                          "exemplars": {
+                            "color": "rgba(255,0,255,0.7)"
+                          },
+                          "filterValues": {
+                            "le": 1e-9
+                          },
+                          "legend": {
+                            "show": true
+                          },
+                          "rowsFrame": {
+                            "layout": "auto"
+                          },
+                          "tooltip": {
+                            "show": true,
+                            "yHistogram": false
+                          },
+                          "yAxis": {
+                            "axisPlacement": "left",
+                            "reverse": false,
+                            "unit": "s"
+                          }
+                        },
+                        "pluginVersion": "9.4.7",
+                        "targets": [
+                          {
+                            "datasource": "Prometheus",
+                            "expr": "sum by (le) (rate(gatekeeper_validation_request_duration_seconds_bucket[5m]))",
+                            "format": "heatmap",
+                            "legendFormat": "{{`{{le}}`}}",
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Validation Request Duration Heatmap",
+                        "type": "heatmap"
+                      }
+                    ],
+                    "refresh": "30s",
+                    "schemaVersion": 38,
+                    "style": "dark",
+                    "tags": [
+                      "opa",
+                      "gatekeeper",
+                      "policy",
+                      "security"
+                    ],
+                    "templating": {
+                      "list": []
+                    },
+                    "time": {
+                      "from": "now-6h",
+                      "to": "now"
+                    },
+                    "timepicker": {},
+                    "timezone": "browser",
+                    "title": "OPA Gatekeeper",
+                    "uid": "opa-gatekeeper",
+                    "version": 1,
+                    "weekStart": ""
+                  }
+            {{- end }}
+    {{- end }}
   syncPolicy:
     automated:
       prune: true

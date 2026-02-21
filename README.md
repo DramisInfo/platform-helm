@@ -82,4 +82,4 @@ In the meantime, refer to the inline comments in [platform-core/values.yaml](pla
 
 ## License
 
-See [LICENSE](LICENSE) if present, or contact the maintainers.
+This project is licensed under the [MIT License](LICENSE).

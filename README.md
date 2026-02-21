@@ -1,37 +1,55 @@
-# platform-helm
+# Platform Helm
 
-This repository contains the **platform-core** Helm chart — a meta-chart that manages the bootstrapping of shared platform components on Kubernetes clusters via [Argo CD](https://argo-cd.readthedocs.io/).
+**platform-core** is an open-source meta Helm chart that bootstraps shared platform components on Kubernetes clusters using a GitOps-first approach powered by [Argo CD](https://argo-cd.readthedocs.io/).
 
-Each component is deployed as an Argo CD `Application`, allowing GitOps-driven lifecycle management across one or more clusters.
+Rather than deploying workloads directly, every template renders an Argo CD `Application` CRD that points to an upstream Helm chart or Git repository. Argo CD then owns the full lifecycle of each component — upgrades, rollbacks, and drift detection — across one or more clusters.
+
+---
+
+## Table of Contents
+
+- [Components](#components)
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [Repository Structure](#repository-structure)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## Components
 
-The following platform components can be enabled or disabled through `values.yaml`:
+All components are opt-in and controlled through `values.yaml`. Enable only what your cluster needs.
 
-| Component | Description |
-|---|---|
-| [cert-manager](https://cert-manager.io/) | TLS certificate management |
-| [Crossplane](https://www.crossplane.io/) | Infrastructure provisioning via Kubernetes |
-| [Terraform Operator](https://github.com/isaaguilar/terraform-operator) | Run Terraform from Kubernetes |
-| [External Secrets Operator](https://external-secrets.io/) | Sync secrets from external providers |
-| [CNPG](https://cloudnative-pg.io/) | CloudNativePG PostgreSQL operator |
-| [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) | Policy enforcement via OPA |
-| [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) | Ingress controller |
-| [Istio](https://istio.io/) | Service mesh |
-| [Prometheus](https://prometheus.io/) | Metrics collection and alerting |
-| [Grafana](https://grafana.com/) | Metrics visualization |
-| [KEDA](https://keda.sh/) | Event-driven autoscaling |
-| [NATS](https://nats.io/) | Messaging system with JetStream |
+| Component | Description | Default |
+|---|---|:---:|
+| [cert-manager](https://cert-manager.io/) | Automated TLS certificate management | disabled |
+| [Crossplane](https://www.crossplane.io/) | Infrastructure provisioning via Kubernetes CRDs | disabled |
+| [Terraform Operator](https://github.com/isaaguilar/terraform-operator) | Run Terraform workspaces from Kubernetes | disabled |
+| [External Secrets Operator](https://external-secrets.io/) | Sync secrets from Vault, AWS SM, GCP SM, and more | disabled |
+| [CNPG](https://cloudnative-pg.io/) | CloudNativePG — production-grade PostgreSQL on Kubernetes | disabled |
+| [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) | Policy enforcement via OPA with community library support | **enabled** |
+| [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) | NGINX-based Kubernetes ingress controller | disabled |
+| [Istio](https://istio.io/) | Service mesh with mTLS, traffic management, and observability | disabled |
+| [Prometheus](https://prometheus.io/) | Metrics collection, alerting, and long-term storage | **enabled** |
+| [Grafana](https://grafana.com/) | Metrics dashboards with plugin and datasource provisioning | **enabled** |
+| [KEDA](https://keda.sh/) | Event-driven autoscaling for Kubernetes workloads | **enabled** |
+| [NATS](https://nats.io/) | Cloud-native messaging with JetStream persistence | **enabled** |
+
+---
 
 ## Prerequisites
 
-- Kubernetes cluster
-- Argo CD installed and configured
-- Helm v3
+- Kubernetes cluster (v1.24+)
+- [Argo CD](https://argo-cd.readthedocs.io/en/stable/getting_started/) installed in the `argocd` namespace
+- [Helm v3](https://helm.sh/docs/intro/install/)
 
-## Usage
+---
 
-### Install via Helm
+## Getting Started
+
+### 1. Install the chart
 
 ```bash
 helm install platform-core ./platform-core \
@@ -39,11 +57,19 @@ helm install platform-core ./platform-core \
   --values your-values.yaml
 ```
 
-### Minimal `values.yaml`
+### 2. Upgrade an existing installation
+
+```bash
+helm upgrade platform-core ./platform-core \
+  --namespace argocd \
+  --values your-values.yaml
+```
+
+### 3. Minimal `values.yaml`
 
 ```yaml
 global:
-  clusterName: "my-cluster"
+  clusterName: "my-cluster"   # used for resource naming and host templates
 
 bootstrap:
   ingressNginx:
@@ -54,31 +80,71 @@ bootstrap:
     enabled: true
   istio:
     enabled: true
-    host: "*.my-cluster.example.com"
 ```
 
-Most components are disabled by default and must be explicitly enabled. See [platform-core/values.yaml](platform-core/values.yaml) for all available options.
+Most components are disabled by default. See [platform-core/values.yaml](platform-core/values.yaml) for the full list of available options and inline documentation.
+
+### 4. Validate before deploying
+
+```bash
+# Lint the chart
+helm lint platform-core
+
+# Render all templates to stdout
+helm template platform-core ./platform-core
+
+# Render with a custom values override
+helm template platform-core ./platform-core -f my-values.yaml
+```
+
+---
 
 ## Repository Structure
 
 ```
 platform-helm/
-└── platform-core/          # Main Helm chart
+└── platform-core/                    # Main Helm chart
     ├── Chart.yaml
-    ├── values.yaml
+    ├── values.yaml                   # All component toggles and configuration
+    ├── GATEKEEPER-POLICIES.md        # Enforced OPA policies and exclusions
     └── templates/
-        └── argo-applications/   # One Argo CD Application per component
+        └── argo-applications/        # One Argo CD Application per component
+            ├── cert-manager/
+            ├── cnpg/
+            ├── crossplane/
+            ├── external-secret-operator/
+            ├── gatekeeper/
+            ├── grafana/
+            ├── ingress-nginx/
+            ├── istio/
+            ├── keda/
+            ├── nats/
+            ├── prometheus/
+            └── terraform-operator/
 ```
+
+---
 
 ## Documentation
 
-> A detailed documentation section covering configuration, multi-cluster setup, policy management, and component-specific guides is coming soon.
+Refer to the inline comments in [platform-core/values.yaml](platform-core/values.yaml) and the following component-specific guides:
 
-In the meantime, refer to the inline comments in [platform-core/values.yaml](platform-core/values.yaml) and the component-specific notes:
+- [Gatekeeper Policies](platform-core/GATEKEEPER-POLICIES.md) — enforced constraints, exclusions, and enforcement modes
+- [Grafana Configuration](platform-core/README.md) — plugin and datasource provisioning
 
-- [Gatekeeper Policies](platform-core/GATEKEEPER-POLICIES.md)
-- [Grafana Configuration](platform-core/README.md)
+---
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. For security issues, see [SECURITY.md](SECURITY.md).
+
+When adding a new component:
+1. Create `platform-core/templates/argo-applications/<component>/<component>.yaml`
+2. Wrap the template with `{{- if .Values.bootstrap.<component>.enabled -}}`
+3. Add the corresponding `enabled: false` default in `values.yaml` with inline comments
+4. Choose an appropriate `argocd.argoproj.io/sync-wave` value based on dependency order
+
+---
 
 ## License
 

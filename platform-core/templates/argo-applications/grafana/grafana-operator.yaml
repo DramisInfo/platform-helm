@@ -52,7 +52,7 @@ spec:
                 name: grafana
                 namespace: monitoring
                 annotations:
-                  argocd.argoproj.io/sync-wave: "-50"
+                  argocd.argoproj.io/sync-wave: "5"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
                 labels:
                   dashboards: "grafana"
@@ -71,7 +71,7 @@ spec:
                 name: grafana-admin-credentials
                 namespace: monitoring
                 annotations:
-                  argocd.argoproj.io/sync-wave: "-50"
+                  argocd.argoproj.io/sync-wave: "5"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               type: Opaque
               stringData:
@@ -83,7 +83,7 @@ spec:
                 name: grafana
                 namespace: monitoring
                 annotations:
-                  argocd.argoproj.io/sync-wave: "-50"
+                  argocd.argoproj.io/sync-wave: "5"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               spec:
                 hosts:

@@ -7,19 +7,12 @@ bootstrap:
       enabled: false
   crossplane:
     enabled: false
-  atlas:
-    enabled: false
   terraformOperator:
     enabled: false
   externalSecretOperator:
     enabled: false
   cnpg:
     enabled: false
-  smbCsiDriver:
-    enabled: false
-    version: "v1.18.0"
-    # Optional: Override default Helm values
-    # values: {}
   gatekeeper:
     enabled: true
     policies:
@@ -61,16 +54,8 @@ bootstrap:
       #     jsonData:
       #       ...
       datasources: []
-  loki:
-    enabled: false
   keda:
     enabled: true
-  opslevel:
-    enabled: false
-  opslevelAgent:
-    enabled: false
-  flowise:
-    enabled: false
   nats:
     enabled: true
     jetstream:

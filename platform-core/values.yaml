@@ -41,7 +41,7 @@ bootstrap:
   ingressNginx:
     enabled: false
   monitoring:
-    enabled: true
+    enabled: false
     grafana:
       # List of plugins to pre-install. Can be plugin IDs or full download URLs.
       # Examples:

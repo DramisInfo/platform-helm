@@ -530,6 +530,303 @@ spec:
                         "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_subscriptions{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Active Subscriptions per Pod",
                         "type": "timeseries"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 57},
+                        "id": 50,
+                        "title": "JetStream Deep-Dive",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 58},
+                        "id": 51,
+                        "options": {"colorMode": "background", "graphMode": "area", "reduceOptions": {"calcs": ["lastNotNull"]}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(nats_server_total_messages{namespace=~\"$namespace\", pod=~\"$pod\"})", "legendFormat": "Messages", "refId": "A"}],
+                        "title": "JetStream Total Messages Stored",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "bytes"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 58},
+                        "id": 52,
+                        "options": {"colorMode": "background", "graphMode": "area", "reduceOptions": {"calcs": ["lastNotNull"]}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(nats_server_total_message_bytes{namespace=~\"$namespace\", pod=~\"$pod\"})", "legendFormat": "Bytes", "refId": "A"}],
+                        "title": "JetStream Total Bytes Stored",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 58},
+                        "id": 53,
+                        "options": {"colorMode": "background", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"]}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(nats_varz_jetstream_stats_ha_assets{namespace=~\"$namespace\", pod=~\"$pod\"})", "legendFormat": "HA Assets", "refId": "A"}],
+                        "title": "JetStream HA Assets",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "reqps"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 58},
+                        "id": 54,
+                        "options": {"colorMode": "background", "graphMode": "area", "reduceOptions": {"calcs": ["lastNotNull"]}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(rate(nats_varz_jetstream_stats_api_total{namespace=~\"$namespace\", pod=~\"$pod\"}[5m]))", "legendFormat": "API req/s", "refId": "A"}],
+                        "title": "JetStream API Request Rate",
+                        "type": "stat"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {"mode": "thresholds"},
+                            "max": 100, "min": 0,
+                            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]},
+                            "unit": "percent"
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 62},
+                        "id": 55,
+                        "options": {"orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"]}, "showThresholdLabels": false, "showThresholdMarkers": true},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "100 * sum(nats_varz_jetstream_stats_memory{namespace=~\"$namespace\", pod=~\"$pod\"}) / sum(nats_varz_jetstream_config_max_memory{namespace=~\"$namespace\", pod=~\"$pod\"})", "legendFormat": "Memory Utilization", "refId": "A"}],
+                        "title": "JetStream Memory Utilization %",
+                        "type": "gauge"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "bytes"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 62},
+                        "id": 56,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_jetstream_stats_memory{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} used", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_jetstream_config_max_memory{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} max", "refId": "B"}
+                        ],
+                        "title": "JetStream Memory Used vs Max",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "reqps"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 62},
+                        "id": 57,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_jetstream_stats_api_total{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} total", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_jetstream_stats_api_errors{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} errors", "refId": "B"}
+                        ],
+                        "title": "JetStream API Rate (total vs errors)",
+                        "type": "timeseries"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 70},
+                        "id": 60,
+                        "title": "Cluster Health",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "percent"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 71},
+                        "id": 61,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_cpu{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
+                        "title": "CPU Usage per Pod",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 71},
+                        "id": 62,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_routez_num_routes{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
+                        "title": "Cluster Routes per Pod",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 79},
+                        "id": 63,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_connections{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
+                        "title": "Connections per Pod (trend)",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 79},
+                        "id": 64,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_total_connections{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
+                        "title": "Total Connections Accepted (cumulative)",
+                        "type": "timeseries"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 87},
+                        "id": 70,
+                        "title": "Subscription Engine",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {"mode": "thresholds"},
+                            "max": 1, "min": 0,
+                            "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.7}, {"color": "green", "value": 0.9}]},
+                            "unit": "percentunit"
+                          },
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 88},
+                        "id": 71,
+                        "options": {"orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"]}, "showThresholdLabels": false, "showThresholdMarkers": true},
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "avg(nats_subsz_cache_hit_rate{namespace=~\"$namespace\", pod=~\"$pod\"})", "legendFormat": "Cache Hit Rate", "refId": "A"}],
+                        "title": "Subscription Cache Hit Rate",
+                        "type": "gauge"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 9, "x": 6, "y": 88},
+                        "id": 72,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_subsz_max_fanout{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} max fanout", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_subsz_avg_fanout{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} avg fanout", "refId": "B"}
+                        ],
+                        "title": "Subscription Fanout (max vs avg)",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "ops"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 9, "x": 15, "y": 88},
+                        "id": 73,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(rate(nats_subsz_num_inserts{namespace=~\"$namespace\", pod=~\"$pod\"}[5m]))", "legendFormat": "Inserts/s", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(rate(nats_subsz_num_removes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m]))", "legendFormat": "Removes/s", "refId": "B"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "sum(rate(nats_subsz_num_matches{namespace=~\"$namespace\", pod=~\"$pod\"}[5m]))", "legendFormat": "Matches/s", "refId": "C"}
+                        ],
+                        "title": "Subscription Operations Rate",
+                        "type": "timeseries"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 96},
+                        "id": 80,
+                        "title": "Gateway Connectivity",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "Bps"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 97},
+                        "id": 81,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_gatewayz_outbound_gateway_conn_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} → {{`{{remote_name}}`}} out", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_gatewayz_outbound_gateway_conn_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} → {{`{{remote_name}}`}} in", "refId": "B"}
+                        ],
+                        "title": "Outbound Gateway Bytes Rate",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "Bps"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 97},
+                        "id": 82,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_gatewayz_inbound_gateway_conn_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} ← {{`{{remote_name}}`}} out", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_gatewayz_inbound_gateway_conn_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} ← {{`{{remote_name}}`}} in", "refId": "B"}
+                        ],
+                        "title": "Inbound Gateway Bytes Rate",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "short"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 105},
+                        "id": 83,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_gatewayz_outbound_gateway_conn_out_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} → {{`{{remote_name}}`}} out", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_gatewayz_outbound_gateway_conn_in_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}} → {{`{{remote_name}}`}} in", "refId": "B"}
+                        ],
+                        "title": "Outbound Gateway Message Rate",
+                        "type": "timeseries"
+                      },
+                      {
+                        "datasource": {"type": "prometheus", "uid": "$datasource"},
+                        "fieldConfig": {
+                          "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}, "unit": "s"},
+                          "overrides": []
+                        },
+                        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 105},
+                        "id": 84,
+                        "options": {"tooltip": {"mode": "multi"}},
+                        "targets": [
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_gatewayz_outbound_gateway_conn_idle_seconds{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} → {{`{{remote_name}}`}} outbound idle", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_gatewayz_inbound_gateway_conn_idle_seconds{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} ← {{`{{remote_name}}`}} inbound idle", "refId": "B"}
+                        ],
+                        "title": "Gateway Connection Idle Time",
+                        "type": "timeseries"
                       }
                     ],
                     "refresh": "10s",

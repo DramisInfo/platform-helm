@@ -336,7 +336,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
                         "id": 11,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_in_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{pod}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_in_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Messages In Rate (msg/s)",
                         "type": "timeseries"
                       },
@@ -349,7 +349,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
                         "id": 12,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_out_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{pod}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_out_msgs{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Messages Out Rate (msg/s)",
                         "type": "timeseries"
                       },
@@ -362,7 +362,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
                         "id": 13,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{pod}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_in_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Bytes In Rate",
                         "type": "timeseries"
                       },
@@ -375,7 +375,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
                         "id": 14,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{pod}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "rate(nats_varz_out_bytes{namespace=~\"$namespace\", pod=~\"$pod\"}[5m])", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Bytes Out Rate",
                         "type": "timeseries"
                       },
@@ -433,7 +433,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
                         "id": 31,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_gatewayz_outbound_gateway_conn_rtt{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{pod}} → {{remote_name}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_gatewayz_outbound_gateway_conn_rtt{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} → {{`{{remote_name}}`}}", "refId": "A"}],
                         "title": "Outbound Gateway RTT",
                         "type": "timeseries"
                       },
@@ -446,7 +446,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32},
                         "id": 32,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_gatewayz_inbound_gateway_conn_rtt{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{pod}} ← {{remote_name}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_gatewayz_inbound_gateway_conn_rtt{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}} ← {{`{{remote_name}}`}}", "refId": "A"}],
                         "title": "Inbound Gateway RTT",
                         "type": "timeseries"
                       },
@@ -485,7 +485,7 @@ spec:
                         "gridPos": {"h": 8, "w": 8, "x": 8, "y": 41},
                         "id": 42,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_mem{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{pod}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_mem{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Memory Usage per Pod",
                         "type": "timeseries"
                       },
@@ -499,8 +499,8 @@ spec:
                         "id": 43,
                         "options": {"tooltip": {"mode": "multi"}},
                         "targets": [
-                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_jetstream_stats_storage{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "Used {{pod}}", "refId": "A"},
-                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_jetstream_config_max_storage{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "Max {{pod}}", "refId": "B"}
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_jetstream_stats_storage{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "Used {{`{{pod}}`}}", "refId": "A"},
+                          {"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_jetstream_config_max_storage{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "Max {{`{{pod}}`}}", "refId": "B"}
                         ],
                         "title": "JetStream Storage Used vs Max",
                         "type": "timeseries"
@@ -527,7 +527,7 @@ spec:
                         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 49},
                         "id": 45,
                         "options": {"tooltip": {"mode": "multi"}},
-                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_subscriptions{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{pod}}", "refId": "A"}],
+                        "targets": [{"datasource": {"type": "prometheus", "uid": "$datasource"}, "expr": "nats_varz_subscriptions{namespace=~\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{`{{pod}}`}}", "refId": "A"}],
                         "title": "Active Subscriptions per Pod",
                         "type": "timeseries"
                       }

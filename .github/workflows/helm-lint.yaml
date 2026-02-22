@@ -9,7 +9,8 @@ on:
       - main
 
 jobs:
-  "Helm Lint":
+  helm-lint:
+    name: Helm Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

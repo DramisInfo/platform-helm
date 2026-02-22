@@ -86,7 +86,8 @@ jobs:
 
   # This job name must exactly match the required check name in the ruleset.
   # It acts as a single aggregation point for all matrix results.
-  "Test Chart Combinations":
+  test-chart-combinations:
+    name: Test Chart Combinations
     runs-on: ubuntu-latest
     needs: render
     if: always()

@@ -1,96 +1,58 @@
-# Copilot Instructions — platform-helm
+# Copilot Instructions for platform-helm
 
-## Architecture Overview
+## Architecture
 
-`platform-core` is a **meta Helm chart**: it installs nothing directly. Instead, every template renders an Argo CD `Application` CRD that points to an upstream Helm chart or Git repo. Argo CD then manages the actual component lifecycle. All component templates live under `platform-core/templates/argo-applications/<component>/`.
+`platform-core` is a **meta Helm chart**: every template renders an Argo CD `Application` CRD — it never deploys workloads directly. Argo CD owns the full lifecycle (sync, upgrade, rollback, drift detection).
 
-The chart is deployed once into the `argocd` namespace and controlled entirely through `values.yaml`. Most components are opt-in (`enabled: false` by default).
+- All component templates live under `platform-core/templates/argo-applications/<component>/`
+- Each component has its own subdirectory with one or more `Application` manifests
+- Components and their upstream chart versions are declared inline inside each template (no sub-charts)
+- All components are opt-in via `values.yaml` under `bootstrap.<component>.enabled`
 
-## Key Structural Patterns
+## Adding a New Component
 
-### Enabling/disabling components
-Every template is wrapped with `{{- if .Values.bootstrap.<component>.enabled -}}`. To add a new component, follow this exact guard pattern and add a corresponding `enabled: false` default in `values.yaml` with inline comments.
+1. Create `platform-core/templates/argo-applications/<component>/<component>.yaml`
+2. Wrap the entire file in `{{- if .Values.bootstrap.<component>.enabled -}} ... {{- end -}}`
+3. Use `argocd.argoproj.io/sync-wave` annotations to control ordering (lower = earlier; Gatekeeper is `-100`, Prometheus `-92`, KEDA `-90`, NATS `-40`)
+4. Set `namespace: argocd` on the `Application` metadata; set deployment namespace in `spec.destination.namespace`
+5. Add the corresponding `enabled: false` toggle to `values.yaml` under `bootstrap`, with inline comments for all options
+6. Bump `version` in `platform-core/Chart.yaml` (SemVer: patch for tweaks, minor for new features)
 
-### Multi-source ArgoCD Applications
-Components frequently combine multiple sources in a single `Application`. The `dysnix/charts` `raw` chart is used to deploy arbitrary Kubernetes resources (CRDs, Gateways, Constraints) inline without a separate chart:
-```yaml
-sources:
-  - repoURL: "https://upstream-helm-repo.example.com/charts"
-    chart: my-chart
-    targetRevision: "1.2.3"
-    helm:
-      valuesObject: { ... }
-  - repoURL: "https://dysnix.github.io/charts"
-    targetRevision: "0.3.2"
-    chart: raw
-    helm:
-      valuesObject:
-        resources:
-          - apiVersion: some.crd.io/v1
-            kind: SomeResource
-            metadata:
-              annotations:
-                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-```
-Use `SkipDryRunOnMissingResource=true` whenever a resource depends on a CRD that may not yet exist at sync time.
+## Template Patterns
 
-### Sync wave ordering
-Deployment order is controlled via `argocd.argoproj.io/sync-wave` on each Application. Current ordering (most negative = first):
-- `-100` Gatekeeper (policies enforced before anything else)
-- `-92` Prometheus
-- `-80` Istio
-- `-55` Grafana Operator
-- `-40` NATS
+- Use `valuesObject:` (not `values:`) when passing Helm values inline inside an `Application` source — see [nats.yaml](../platform-core/templates/argo-applications/nats/nats.yaml) and [prometheus.yaml](../platform-core/templates/argo-applications/prometheus/prometheus.yaml)
+- Use `{{- if .Values.bootstrap.<component>.<option> }}` guards before optional blocks
+- Use `{{ .Values.global.clusterName | quote }}` for cluster-scoped names
+- Multi-source apps (e.g., Gatekeeper + library) use `sources:` (list); single-source apps use `source:` (map) — see [gatekeeper.yaml](../platform-core/templates/argo-applications/gatekeeper/gatekeeper.yaml)
+- All pod/container security contexts must comply with Gatekeeper policies: `runAsNonRoot: true`, `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `seccompProfile.type: RuntimeDefault` — see [keda.yaml](../platform-core/templates/argo-applications/keda/keda.yaml)
+- Pin `targetRevision` to an exact chart version; do not use `latest` or floating tags
 
-When adding a new component, pick a sync wave value that reflects its dependency order.
-
-### `global.clusterName` is pervasive
-Used for resource naming, NATS cluster identity, and Istio host templating:
-```yaml
-host: "*.{{ .Values.global.clusterName }}.dramisinfo.com"
-```
-Always reference `{{ .Values.global.clusterName }}` rather than hardcoding cluster names.
-
-### Gatekeeper policy compliance
-All pod workloads (including those configured inside ArgoCD Applications) must satisfy Gatekeeper's pod security policies. Templates that configure upstream charts include explicit security contexts:
-```yaml
-securityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  seccompProfile:
-    type: RuntimeDefault
-```
-See `platform-core/GATEKEEPER-POLICIES.md` for the full list of enforced constraints and excluded namespaces.
-
-## Developer Workflows
+## Build and Validate
 
 ```bash
 # Lint the chart
 helm lint platform-core
 
-# Render all templates to stdout (primary debugging tool)
+# Render all templates (dry-run)
 helm template platform-core ./platform-core
 
-# Render with a specific values override
+# Render with a custom values file
 helm template platform-core ./platform-core -f my-values.yaml
-
-# Install/upgrade against a live cluster
-helm upgrade --install platform-core ./platform-core \
-  --namespace argocd --values your-values.yaml
 ```
 
-CI runs `helm lint` and `helm template` for several value combinations (minimal, full-stack, nats-gateway, etc.) on every PR — see `.github/workflows/ci.yaml`.
+CI runs `helm lint` and `helm template` on every PR automatically.
 
-## Versioning & CI
+## Key Files
 
-- **Do not manually bump `platform-core/Chart.yaml` version** — CI auto-bumps it on merge to `main` using conventional commits.
-- Commit prefix rules: `feat:` → minor bump, `feat!:` / `BREAKING CHANGE:` → major bump, everything else → patch.
-- Add `[skip ci]` to a commit message to bypass the CI pipeline (used by the bot's version-bump commits).
+| File | Purpose |
+|---|---|
+| [platform-core/values.yaml](../platform-core/values.yaml) | All tuneable options with inline docs |
+| [platform-core/Chart.yaml](../platform-core/Chart.yaml) | Chart version — bump on every change |
+| [platform-core/GATEKEEPER-POLICIES.md](../platform-core/GATEKEEPER-POLICIES.md) | Policy details for OPA/Gatekeeper |
+| [platform-core/README.md](../platform-core/README.md) | Grafana plugin/datasource provisioning guide |
 
-## Adding a New Component
+## PR Conventions
 
-1. Create `platform-core/templates/argo-applications/<component>/<component>.yaml`
-2. Wrap the entire file in `{{- if .Values.bootstrap.<newComponent>.enabled -}} ... {{- end }}`
-3. Add `<newComponent>: enabled: false` under `bootstrap:` in `values.yaml` with comments
-4. Pick an appropriate `argocd.argoproj.io/sync-wave` value
-5. Use `helm template` to validate before pushing
+- One feature or fix per PR; branch from `main` as `feat/<name>` or `fix/<name>`
+- Update `values.yaml` comments when adding or changing options
+- Always bump `version` in `Chart.yaml`

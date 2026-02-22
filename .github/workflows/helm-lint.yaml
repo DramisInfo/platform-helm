@@ -1,5 +1,8 @@
 name: Helm Lint
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches:

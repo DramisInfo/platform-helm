@@ -33,7 +33,7 @@ spec:
               enabled: true
               org_role: Admin
             auth:
-              disable_login_form: false
+              disable_login_form: true
           # Enable persistence with proper security context
           # fsGroup: 472 allows Kubernetes to automatically handle volume permissions
           # without needing a root init container

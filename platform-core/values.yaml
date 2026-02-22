@@ -2,9 +2,13 @@ global:
   clusterName: "dev"
 
 bootstrap:
-  clusterIssuer:
-    letsencrypt:
-      enabled: false
+  certManager:
+    # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.16.2)
+    enabled: true
+    # Deploy a Let's Encrypt ClusterIssuer (letsencrypt-prd) alongside cert-manager
+    # Uses AzureDNS for DNS01 challenge with a managed identity
+    clusterIssuer:
+      enabled: true
   crossplane:
     enabled: false
   terraformOperator:

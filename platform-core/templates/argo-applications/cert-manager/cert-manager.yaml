@@ -25,6 +25,17 @@ spec:
           global:
             leaderElection:
               namespace: cert-manager
+{{- if .Values.bootstrap.certManager.workloadIdentity.enabled }}
+          # Azure Workload Identity for DNS01 challenge
+          serviceAccount:
+            annotations:
+              azure.workload.identity/client-id: {{ .Values.bootstrap.certManager.workloadIdentity.clientId }}
+              azure.workload.identity/tenant-id: {{ .Values.bootstrap.certManager.workloadIdentity.tenantId }}
+            labels:
+              azure.workload.identity/use: "true"
+          podLabels:
+            azure.workload.identity/use: "true"
+{{- end }}
 {{- if .Values.bootstrap.certManager.clusterIssuer.enabled }}
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"

@@ -5,6 +5,14 @@ bootstrap:
   certManager:
     # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.16.2)
     enabled: true
+    # Configure Azure Workload Identity on the cert-manager service account
+    # Required for DNS01 challenges via AzureDNS managed identity
+    workloadIdentity:
+      enabled: true
+      # Client ID of the User-Managed Identity (UMI) with DNS Zone Contributor role
+      clientId: "bc1b708f-94a6-428d-ba6e-983a5ade07ba"
+      # Azure tenant ID
+      tenantId: "b66f9c3b-d384-4932-92fd-444edca3620f"
     # Deploy a Let's Encrypt ClusterIssuer (letsencrypt-prd) alongside cert-manager
     # Uses AzureDNS for DNS01 challenge with a managed identity
     clusterIssuer:

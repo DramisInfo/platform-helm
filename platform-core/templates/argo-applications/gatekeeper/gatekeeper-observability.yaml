@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gatekeeper-dashboards
+  name: gatekeeper-observability
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io

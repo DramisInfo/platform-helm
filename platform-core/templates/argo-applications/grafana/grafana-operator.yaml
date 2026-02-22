@@ -57,12 +57,6 @@ spec:
                 labels:
                   dashboards: "grafana"
               spec:
-                config:
-                  auth.anonymous:
-                    enabled: "true"
-                    org_role: Admin
-                  auth:
-                    disable_login_form: "true"
                 external:
                   url: http://prometheus-grafana.monitoring.svc.cluster.local
                   adminUser:

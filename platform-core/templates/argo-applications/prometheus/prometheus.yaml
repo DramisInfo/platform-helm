@@ -19,161 +19,161 @@ spec:
       chart: kube-prometheus-stack
       helm:
         valuesObject:
-        # Enable Grafana with label for Grafana Operator to manage
-        grafana:
-          enabled: true
-          # Add label so Grafana Operator can discover and manage this instance
-          labels:
-            dashboards: "grafana"
-          # Grafana configuration
-          adminPassword: admin
-          # Disable authentication for homelab
-          grafana.ini:
-            auth.anonymous:
-              enabled: true
-              org_role: Admin
-            auth:
-              disable_login_form: true
-          # Enable persistence with proper security context
-          # fsGroup: 472 allows Kubernetes to automatically handle volume permissions
-          # without needing a root init container
-          persistence:
+          # Enable Grafana with label for Grafana Operator to manage
+          grafana:
             enabled: true
-            type: pvc
-            size: 10Gi
-          # CRITICAL: Disable init-chown-data container that runs as root
-          # fsGroup handles permissions automatically in Kubernetes
-          initChownData:
-            enabled: false
-          # Pre-installed plugins
-          plugins:
-            - grafana-piechart-panel
-          # Pod security context - fsGroup is critical for volume permissions
-          # Grafana runs as user 472, and fsGroup 472 allows access to PVCs
-          podSecurityContext:
-            runAsNonRoot: true
-            runAsUser: 472
-            runAsGroup: 472
-            fsGroup: 472
-            fsGroupChangePolicy: "OnRootMismatch"
-            seccompProfile:
-              type: RuntimeDefault
-          # Container security context
-          containerSecurityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 472
-            runAsGroup: 472
-            capabilities:
-              drop:
-                - ALL
-            privileged: false
-            readOnlyRootFilesystem: false
-        
-        # Prometheus Operator configuration
-        prometheusOperator:
-          admissionWebhooks:
-            patch:
+            # Add label so Grafana Operator can discover and manage this instance
+            labels:
+              dashboards: "grafana"
+            # Grafana configuration
+            adminPassword: admin
+            # Disable authentication for homelab
+            grafana.ini:
+              auth.anonymous:
+                enabled: true
+                org_role: Admin
+              auth:
+                disable_login_form: true
+            # Enable persistence with proper security context
+            # fsGroup: 472 allows Kubernetes to automatically handle volume permissions
+            # without needing a root init container
+            persistence:
+              enabled: true
+              type: pvc
+              size: 10Gi
+            # CRITICAL: Disable init-chown-data container that runs as root
+            # fsGroup handles permissions automatically in Kubernetes
+            initChownData:
+              enabled: false
+            # Pre-installed plugins
+            plugins:
+              - grafana-piechart-panel
+            # Pod security context - fsGroup is critical for volume permissions
+            # Grafana runs as user 472, and fsGroup 472 allows access to PVCs
+            podSecurityContext:
+              runAsNonRoot: true
+              runAsUser: 472
+              runAsGroup: 472
+              fsGroup: 472
+              fsGroupChangePolicy: "OnRootMismatch"
+              seccompProfile:
+                type: RuntimeDefault
+            # Container security context
+            containerSecurityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 472
+              runAsGroup: 472
+              capabilities:
+                drop:
+                  - ALL
+              privileged: false
+              readOnlyRootFilesystem: false
+
+          # Prometheus Operator configuration
+          prometheusOperator:
+            admissionWebhooks:
+              patch:
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 2000
+                  fsGroup: 2000
+                  seccompProfile:
+                    type: RuntimeDefault
+
+          # Prometheus instance configuration
+          prometheus:
+            prometheusSpec:
+              # Enable ServiceMonitor and PodMonitor discovery
+              serviceMonitorSelector: {}
+              serviceMonitorNamespaceSelector: {}
+              podMonitorSelector: {}
+              podMonitorNamespaceSelector: {}
+
+              # Storage configuration
+              storageSpec:
+                volumeClaimTemplate:
+                  spec:
+                    accessModes: ["ReadWriteOnce"]
+                    resources:
+                      requests:
+                        storage: 10Gi
+
+              # Security context
               securityContext:
                 runAsNonRoot: true
-                runAsUser: 2000
+                runAsUser: 1000
+                runAsGroup: 2000
                 fsGroup: 2000
                 seccompProfile:
                   type: RuntimeDefault
-          
-        # Prometheus instance configuration
-        prometheus:
-          prometheusSpec:
-            # Enable ServiceMonitor and PodMonitor discovery
-            serviceMonitorSelector: {}
-            serviceMonitorNamespaceSelector: {}
-            podMonitorSelector: {}
-            podMonitorNamespaceSelector: {}
-            
-            # Storage configuration
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 10Gi
-            
-            # Security context
+
+              # Container security context
+              containers:
+                - name: prometheus
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    runAsNonRoot: true
+                    runAsUser: 1000
+                    capabilities:
+                      drop:
+                        - ALL
+                    privileged: false
+                    readOnlyRootFilesystem: true
+
+          # Alertmanager configuration
+          alertmanager:
+            alertmanagerSpec:
+              storage:
+                volumeClaimTemplate:
+                  spec:
+                    accessModes: ["ReadWriteOnce"]
+                    resources:
+                      requests:
+                        storage: 2Gi
+
+              # Security context
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 2000
+                fsGroup: 2000
+                seccompProfile:
+                  type: RuntimeDefault
+
+              containers:
+                - name: alertmanager
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    runAsNonRoot: true
+                    runAsUser: 1000
+                    capabilities:
+                      drop:
+                        - ALL
+                    privileged: false
+                    readOnlyRootFilesystem: true
+
+          # Node exporter (DaemonSet)
+          nodeExporter:
+            enabled: true
+
+          # Kube-state-metrics
+          kube-state-metrics:
             securityContext:
               runAsNonRoot: true
-              runAsUser: 1000
-              runAsGroup: 2000
-              fsGroup: 2000
+              runAsUser: 65534
+              fsGroup: 65534
               seccompProfile:
                 type: RuntimeDefault
-            
-            # Container security context
-            containers:
-              - name: prometheus
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  runAsNonRoot: true
-                  runAsUser: 1000
-                  capabilities:
-                    drop:
-                      - ALL
-                  privileged: false
-                  readOnlyRootFilesystem: true
-        
-        # Alertmanager configuration
-        alertmanager:
-          alertmanagerSpec:
-            storage:
-              volumeClaimTemplate:
-                spec:
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 2Gi
-            
-            # Security context
+
+          # Prometheus Node Exporter
+          prometheus-node-exporter:
             securityContext:
               runAsNonRoot: true
-              runAsUser: 1000
-              runAsGroup: 2000
-              fsGroup: 2000
+              runAsUser: 65534
+              fsGroup: 65534
               seccompProfile:
                 type: RuntimeDefault
-            
-            containers:
-              - name: alertmanager
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  runAsNonRoot: true
-                  runAsUser: 1000
-                  capabilities:
-                    drop:
-                      - ALL
-                  privileged: false
-                  readOnlyRootFilesystem: true
-        
-        # Node exporter (DaemonSet)
-        nodeExporter:
-          enabled: true
-        
-        # Kube-state-metrics
-        kube-state-metrics:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534
-            fsGroup: 65534
-            seccompProfile:
-              type: RuntimeDefault
-        
-        # Prometheus Node Exporter
-        prometheus-node-exporter:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534
-            fsGroup: 65534
-            seccompProfile:
-              type: RuntimeDefault
 
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"

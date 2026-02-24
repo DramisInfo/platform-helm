@@ -119,9 +119,14 @@ bootstrap:
       enabled: true
       # Restrict the controller to a single namespace (leave empty to watch all namespaces)
       watchNamespace: ""
-    # Admin API — exposes Kong's configuration REST API. Disable in production unless secured.
+    # Admin API — exposes Kong's configuration REST API.
+    # Automatically enabled as ClusterIP when manager.enabled is true (required for Kong Manager).
+    # Set enabled: true independently to also expose it externally via its own VirtualService.
     admin:
       enabled: false
+      # Hostname for the Admin API VirtualService.
+      # Leave empty to use the default: kong-admin.<global.clusterName>.dramisinfo.com
+      host: ""
     # Kong Manager web UI — exposes the Kong Manager dashboard.
     # In Kong OSS the UI is read-only; in Kong Enterprise it is fully featured.
     manager:

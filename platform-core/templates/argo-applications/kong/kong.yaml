@@ -22,6 +22,10 @@ spec:
           # Run Kong in DB-less mode (declarative config via Ingress / CRDs)
           env:
             database: "off"
+            {{- if .Values.bootstrap.kong.manager.enabled }}
+            # Tell Kong Manager's browser frontend where to reach the Admin API
+            admin_gui_api_url: {{ if .Values.bootstrap.kong.admin.host }}{{ printf "https://%s" .Values.bootstrap.kong.admin.host | quote }}{{ else }}{{ printf "https://kong-admin.%s.dramisinfo.com" .Values.global.clusterName | quote }}{{ end }}
+            {{- end }}
           # Security contexts to comply with Gatekeeper policies
           containerSecurityContext:
             runAsNonRoot: true
@@ -55,15 +59,14 @@ spec:
             {{- if .Values.bootstrap.kong.ingressController.watchNamespace }}
             watchNamespace: {{ .Values.bootstrap.kong.ingressController.watchNamespace | quote }}
             {{- end }}
-          # Admin API — disabled by default; enable only in controlled environments
+          # Admin API — always ClusterIP; auto-enabled when manager is enabled
           admin:
-            enabled: {{ .Values.bootstrap.kong.admin.enabled }}
-            {{- if .Values.bootstrap.kong.admin.enabled }}
+            enabled: {{ or .Values.bootstrap.kong.admin.enabled .Values.bootstrap.kong.manager.enabled }}
+            type: ClusterIP
             http:
               enabled: true
             tls:
               enabled: false
-            {{- end }}
           {{- if .Values.bootstrap.kong.serviceMonitor.enabled }}
           # Prometheus ServiceMonitor integration
           serviceMonitor:
@@ -108,6 +111,30 @@ spec:
                           host: kong-kong-proxy
                           port:
                             number: 80
+            {{- if .Values.bootstrap.kong.manager.enabled }}
+            - apiVersion: networking.istio.io/v1beta1
+              kind: VirtualService
+              metadata:
+                name: kong-admin
+                namespace: kong
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                hosts:
+                  - {{ if .Values.bootstrap.kong.admin.host }}{{ .Values.bootstrap.kong.admin.host | quote }}{{ else }}{{ printf "kong-admin.%s.dramisinfo.com" .Values.global.clusterName | quote }}{{ end }}
+                gateways:
+                  - istio-system/shared-gateway
+                http:
+                  - match:
+                      - uri:
+                          prefix: /
+                    route:
+                      - destination:
+                          host: kong-kong-admin
+                          port:
+                            number: 8001
+            {{- end }}
             {{- if .Values.bootstrap.kong.manager.enabled }}
             - apiVersion: networking.istio.io/v1beta1
               kind: VirtualService

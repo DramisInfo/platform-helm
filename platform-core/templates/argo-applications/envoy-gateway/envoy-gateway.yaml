@@ -1,0 +1,103 @@
+{{- if .Values.bootstrap.envoyGateway.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-gateway
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-65"
+spec:
+  destination:
+    namespace: envoy-gateway-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  sources:
+    - repoURL: "https://charts.gateway.envoyproxy.io"
+      targetRevision: "v1.7.0"
+      chart: gateway-helm
+      helm:
+        valuesObject:
+          # Skip Gateway API CRD installation if already managed by another component
+          crds:
+            install: {{ .Values.bootstrap.envoyGateway.installCRDs }}
+          deployment:
+            # Security contexts to comply with Gatekeeper policies
+            pod:
+              securityContext:
+                runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
+            container:
+              securityContext:
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+                seccompProfile:
+                  type: RuntimeDefault
+    {{- if .Values.bootstrap.envoyGateway.gateway.enabled }}
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            # GatewayClass — cluster-scoped, registers the Envoy Gateway controller
+            - apiVersion: gateway.networking.k8s.io/v1
+              kind: GatewayClass
+              metadata:
+                name: envoy-gateway
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                controllerName: gateway.envoyproxy.io/gatewayclass-controller
+            # Gateway — provisions the Envoy proxy pods and its LoadBalancer service
+            - apiVersion: gateway.networking.k8s.io/v1
+              kind: Gateway
+              metadata:
+                name: envoy-gateway
+                namespace: envoy-gateway-system
+                annotations:
+                  argocd.argoproj.io/sync-wave: "10"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                gatewayClassName: envoy-gateway
+                listeners:
+                  - name: http
+                    protocol: HTTP
+                    port: 80
+                    allowedRoutes:
+                      namespaces:
+                        from: All
+                  - name: https
+                    protocol: HTTPS
+                    port: 443
+                    tls:
+                      mode: Terminate
+                      certificateRefs:
+                        - kind: Secret
+                          name: {{ if .Values.bootstrap.envoyGateway.gateway.tlsSecret }}{{ .Values.bootstrap.envoyGateway.gateway.tlsSecret | quote }}{{ else }}{{ printf "envoy-gateway-tls-%s" .Values.global.clusterName | quote }}{{ end }}
+                          namespace: envoy-gateway-system
+                    allowedRoutes:
+                      namespaces:
+                        from: All
+    {{- end }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+{{- end -}}

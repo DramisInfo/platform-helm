@@ -105,6 +105,22 @@ bootstrap:
       advertise: ""
       # Gateway port (defaults to 7222)
       port: 7222
+  envoyGateway:
+    # Deploy Envoy Gateway via Argo CD (gateway-helm v1.7.0)
+    # Provides a Kubernetes Gateway API-native ingress gateway backed by Envoy.
+    # Operates independently from Istio: Envoy Gateway handles north-south traffic;
+    # Istio manages east-west service mesh traffic. Both can coexist.
+    enabled: false
+    # Install the Kubernetes Gateway API CRDs (GatewayClass, Gateway, HTTPRoute, etc.).
+    # Disable if another component (e.g., a future Istio upgrade) already manages them.
+    installCRDs: true
+    # Provision a default GatewayClass and Gateway (Envoy proxy) on startup
+    gateway:
+      enabled: true
+      # Name of the TLS secret in the envoy-gateway-system namespace for HTTPS termination.
+      # Leave empty to use the default: envoy-gateway-tls-<global.clusterName>
+      # Create this secret externally (e.g., via cert-manager Certificate resource).
+      tlsSecret: ""
   kong:
     # Deploy Kong API Gateway via Argo CD (kong/kong 3.0.2, Kong 3.9)
     enabled: false

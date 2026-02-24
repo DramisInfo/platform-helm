@@ -122,6 +122,13 @@ bootstrap:
     # Admin API — exposes Kong's configuration REST API. Disable in production unless secured.
     admin:
       enabled: false
+    # Kong Manager web UI — exposes the Kong Manager dashboard.
+    # In Kong OSS the UI is read-only; in Kong Enterprise it is fully featured.
+    manager:
+      enabled: true
+      # Hostname for the Kong Manager VirtualService.
+      # Leave empty to use the default: kong-manager.<global.clusterName>.dramisinfo.com
+      host: ""
     # Expose a Prometheus ServiceMonitor for scraping Kong metrics
     serviceMonitor:
       enabled: false

@@ -69,6 +69,16 @@ spec:
           serviceMonitor:
             enabled: true
           {{- end }}
+          # Kong Manager (web UI) — ClusterIP so it is fronted by Istio
+          manager:
+            enabled: {{ .Values.bootstrap.kong.manager.enabled }}
+            {{- if .Values.bootstrap.kong.manager.enabled }}
+            type: ClusterIP
+            http:
+              enabled: true
+            tls:
+              enabled: false
+            {{- end }}
     {{- if .Values.bootstrap.kong.virtualService.enabled }}
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"
@@ -98,6 +108,30 @@ spec:
                           host: kong-kong-proxy
                           port:
                             number: 80
+            {{- if .Values.bootstrap.kong.manager.enabled }}
+            - apiVersion: networking.istio.io/v1beta1
+              kind: VirtualService
+              metadata:
+                name: kong-manager
+                namespace: kong
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                hosts:
+                  - {{ if .Values.bootstrap.kong.manager.host }}{{ .Values.bootstrap.kong.manager.host | quote }}{{ else }}{{ printf "kong-manager.%s.dramisinfo.com" .Values.global.clusterName | quote }}{{ end }}
+                gateways:
+                  - istio-system/shared-gateway
+                http:
+                  - match:
+                      - uri:
+                          prefix: /
+                    route:
+                      - destination:
+                          host: kong-kong-manager
+                          port:
+                            number: 8002
+            {{- end }}
     {{- end }}
   syncPolicy:
     automated:

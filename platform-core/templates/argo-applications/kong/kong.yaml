@@ -1,0 +1,78 @@
+{{- if .Values.bootstrap.kong.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kong
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-70"
+spec:
+  destination:
+    namespace: kong
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://charts.konghq.com"
+    targetRevision: "3.0.2"
+    chart: kong
+    helm:
+      valuesObject:
+        # Run Kong in DB-less mode (declarative config via Ingress / CRDs)
+        env:
+          database: "off"
+        # Security contexts to comply with Gatekeeper policies
+        containerSecurityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        podSecurityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        # Proxy service configuration
+        proxy:
+          enabled: true
+          type: {{ .Values.bootstrap.kong.proxy.type | quote }}
+        # Kong Ingress Controller
+        ingressController:
+          enabled: {{ .Values.bootstrap.kong.ingressController.enabled }}
+          containerSecurityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          {{- if .Values.bootstrap.kong.ingressController.watchNamespace }}
+          watchNamespace: {{ .Values.bootstrap.kong.ingressController.watchNamespace | quote }}
+          {{- end }}
+        # Admin API — disabled by default; enable only in controlled environments
+        admin:
+          enabled: {{ .Values.bootstrap.kong.admin.enabled }}
+          {{- if .Values.bootstrap.kong.admin.enabled }}
+          http:
+            enabled: true
+          tls:
+            enabled: false
+          {{- end }}
+        {{- if .Values.bootstrap.kong.serviceMonitor.enabled }}
+        # Prometheus ServiceMonitor integration
+        serviceMonitor:
+          enabled: true
+        {{- end }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end -}}

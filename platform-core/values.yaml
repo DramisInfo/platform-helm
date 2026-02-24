@@ -105,6 +105,23 @@ bootstrap:
       advertise: ""
       # Gateway port (defaults to 7222)
       port: 7222
+  kong:
+    # Deploy Kong API Gateway via Argo CD (kong/kong 3.0.2, Kong 3.9)
+    enabled: false
+    # Service type for the Kong proxy service (LoadBalancer, ClusterIP, NodePort)
+    proxy:
+      type: LoadBalancer
+    # Kong Ingress Controller — watches for Ingress and Kong-specific CRDs
+    ingressController:
+      enabled: true
+      # Restrict the controller to a single namespace (leave empty to watch all namespaces)
+      watchNamespace: ""
+    # Admin API — exposes Kong's configuration REST API. Disable in production unless secured.
+    admin:
+      enabled: false
+    # Expose a Prometheus ServiceMonitor for scraping Kong metrics
+    serviceMonitor:
+      enabled: false
   istio:
     enabled: true
     # Wildcard host pattern for the shared gateway

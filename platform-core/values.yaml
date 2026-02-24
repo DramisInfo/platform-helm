@@ -108,9 +108,10 @@ bootstrap:
   kong:
     # Deploy Kong API Gateway via Argo CD (kong/kong 3.0.2, Kong 3.9)
     enabled: false
-    # Service type for the Kong proxy service (LoadBalancer, ClusterIP, NodePort)
+    # Service type for the Kong proxy service.
+    # Use ClusterIP when fronted by Istio gateway (recommended); LoadBalancer for direct external exposure.
     proxy:
-      type: LoadBalancer
+      type: ClusterIP
     # Kong Ingress Controller — watches for Ingress and Kong-specific CRDs
     ingressController:
       enabled: true
@@ -122,6 +123,11 @@ bootstrap:
     # Expose a Prometheus ServiceMonitor for scraping Kong metrics
     serviceMonitor:
       enabled: false
+    # Istio VirtualService to expose Kong proxy through the shared Istio ingress gateway
+    virtualService:
+      enabled: true
+      # Hostname that routes to the Kong proxy (must match the shared-gateway wildcard)
+      host: "api.{{ .Values.global.clusterName }}.dramisinfo.com"
   istio:
     enabled: true
     # Wildcard host pattern for the shared gateway

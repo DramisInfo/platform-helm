@@ -13,36 +13,16 @@ spec:
     namespace: kong
     server: "https://kubernetes.default.svc"
   project: default
-  source:
-    repoURL: "https://charts.konghq.com"
-    targetRevision: "3.0.2"
-    chart: kong
-    helm:
-      valuesObject:
-        # Run Kong in DB-less mode (declarative config via Ingress / CRDs)
-        env:
-          database: "off"
-        # Security contexts to comply with Gatekeeper policies
-        containerSecurityContext:
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
-          seccompProfile:
-            type: RuntimeDefault
-        podSecurityContext:
-          runAsNonRoot: true
-          seccompProfile:
-            type: RuntimeDefault
-        # Proxy service configuration
-        proxy:
-          enabled: true
-          type: {{ .Values.bootstrap.kong.proxy.type | quote }}
-        # Kong Ingress Controller
-        ingressController:
-          enabled: {{ .Values.bootstrap.kong.ingressController.enabled }}
+  sources:
+    - repoURL: "https://charts.konghq.com"
+      targetRevision: "3.0.2"
+      chart: kong
+      helm:
+        valuesObject:
+          # Run Kong in DB-less mode (declarative config via Ingress / CRDs)
+          env:
+            database: "off"
+          # Security contexts to comply with Gatekeeper policies
           containerSecurityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
@@ -52,27 +32,78 @@ spec:
                 - ALL
             seccompProfile:
               type: RuntimeDefault
-          {{- if .Values.bootstrap.kong.ingressController.watchNamespace }}
-          watchNamespace: {{ .Values.bootstrap.kong.ingressController.watchNamespace | quote }}
-          {{- end }}
-        # Admin API — disabled by default; enable only in controlled environments
-        admin:
-          enabled: {{ .Values.bootstrap.kong.admin.enabled }}
-          {{- if .Values.bootstrap.kong.admin.enabled }}
-          http:
+          podSecurityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          # Proxy service — ClusterIP when fronted by Istio gateway
+          proxy:
             enabled: true
-          tls:
-            enabled: false
+            type: {{ .Values.bootstrap.kong.proxy.type | quote }}
+          # Kong Ingress Controller
+          ingressController:
+            enabled: {{ .Values.bootstrap.kong.ingressController.enabled }}
+            containerSecurityContext:
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+              seccompProfile:
+                type: RuntimeDefault
+            {{- if .Values.bootstrap.kong.ingressController.watchNamespace }}
+            watchNamespace: {{ .Values.bootstrap.kong.ingressController.watchNamespace | quote }}
+            {{- end }}
+          # Admin API — disabled by default; enable only in controlled environments
+          admin:
+            enabled: {{ .Values.bootstrap.kong.admin.enabled }}
+            {{- if .Values.bootstrap.kong.admin.enabled }}
+            http:
+              enabled: true
+            tls:
+              enabled: false
+            {{- end }}
+          {{- if .Values.bootstrap.kong.serviceMonitor.enabled }}
+          # Prometheus ServiceMonitor integration
+          serviceMonitor:
+            enabled: true
           {{- end }}
-        {{- if .Values.bootstrap.kong.serviceMonitor.enabled }}
-        # Prometheus ServiceMonitor integration
-        serviceMonitor:
-          enabled: true
-        {{- end }}
+    {{- if .Values.bootstrap.kong.virtualService.enabled }}
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: networking.istio.io/v1beta1
+              kind: VirtualService
+              metadata:
+                name: kong-proxy
+                namespace: kong
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                hosts:
+                  - {{ .Values.bootstrap.kong.virtualService.host | quote }}
+                gateways:
+                  - istio-system/shared-gateway
+                http:
+                  - match:
+                      - uri:
+                          prefix: /
+                    route:
+                      - destination:
+                          host: kong-kong-proxy
+                          port:
+                            number: 80
+    {{- end }}
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
 {{- end -}}

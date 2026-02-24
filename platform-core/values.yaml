@@ -112,7 +112,9 @@ bootstrap:
     # Use ClusterIP when fronted by Istio gateway (recommended); LoadBalancer for direct external exposure.
     proxy:
       type: ClusterIP
-    # Kong Ingress Controller — watches for Ingress and Kong-specific CRDs
+    # Kong Ingress Controller (KIC) — translates Kubernetes Ingress/HTTPRoute/KongPlugin
+    # CRDs into Kong route configuration. Enable if managing Kong via Kubernetes resources.
+    # Disable if configuring Kong purely via its Admin API or declarative files.
     ingressController:
       enabled: true
       # Restrict the controller to a single namespace (leave empty to watch all namespaces)
@@ -126,8 +128,9 @@ bootstrap:
     # Istio VirtualService to expose Kong proxy through the shared Istio ingress gateway
     virtualService:
       enabled: true
-      # Hostname that routes to the Kong proxy (must match the shared-gateway wildcard)
-      host: "api.{{ .Values.global.clusterName }}.dramisinfo.com"
+      # Hostname that routes to the Kong proxy (must match the shared-gateway wildcard).
+      # Leave empty to use the default: api.<global.clusterName>.dramisinfo.com
+      host: ""
   istio:
     enabled: true
     # Wildcard host pattern for the shared gateway

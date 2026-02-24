@@ -86,7 +86,7 @@ spec:
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               spec:
                 hosts:
-                  - {{ .Values.bootstrap.kong.virtualService.host | quote }}
+                  - {{ if .Values.bootstrap.kong.virtualService.host }}{{ .Values.bootstrap.kong.virtualService.host | quote }}{{ else }}{{ printf "api.%s.dramisinfo.com" .Values.global.clusterName | quote }}{{ end }}
                 gateways:
                   - istio-system/shared-gateway
                 http:

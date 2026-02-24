@@ -14,7 +14,7 @@ spec:
     server: "https://kubernetes.default.svc"
   project: default
   sources:
-    - repoURL: "https://charts.gateway.envoyproxy.io"
+    - repoURL: "oci://docker.io/envoyproxy"
       targetRevision: "v1.7.0"
       chart: gateway-helm
       helm:

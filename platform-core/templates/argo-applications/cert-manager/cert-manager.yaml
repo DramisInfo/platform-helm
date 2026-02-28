@@ -22,10 +22,8 @@ spec:
           crds:
             enabled: true
             keep: true
-          # Enable Gateway API support so cert-manager auto-provisions TLS secrets
-          # for Gateway listeners annotated with cert-manager.io/cluster-issuer.
-          # ExperimentalGatewayAPISupport was renamed to GatewayAPI in cert-manager v1.15.
-          featureGates: "GatewayAPI=true"
+          # Gateway API support graduated to GA in cert-manager v1.15 and requires
+          # no feature gate — it is enabled automatically when Gateway API CRDs are present.
           global:
             leaderElection:
               namespace: cert-manager

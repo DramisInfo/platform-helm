@@ -178,9 +178,11 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       # Kubernetes normalizes tls: null on HTTP listeners and defaults group/kind
-      # on certificateRefs. jsonPointer targets the http listener (index 0) only.
+      # on certificateRefs.
+      # index 0 = HTTP listener (no tls field), index 1 = HTTPS listener.
       jsonPointers:
         - /spec/listeners/0/tls
+        - /spec/listeners/1/tls
       jqPathExpressions:
         - .spec.listeners[].tls.certificateRefs[].group
         - .spec.listeners[].tls.certificateRefs[].kind

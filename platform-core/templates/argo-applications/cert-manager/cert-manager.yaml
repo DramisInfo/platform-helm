@@ -24,7 +24,8 @@ spec:
             keep: true
           # Enable Gateway API support so cert-manager auto-provisions TLS secrets
           # for Gateway listeners annotated with cert-manager.io/cluster-issuer.
-          featureGates: "ExperimentalGatewayAPISupport=true"
+          # ExperimentalGatewayAPISupport was renamed to GatewayAPI in cert-manager v1.15.
+          featureGates: "GatewayAPI=true"
           global:
             leaderElection:
               namespace: cert-manager

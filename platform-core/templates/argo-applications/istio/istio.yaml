@@ -164,4 +164,20 @@ spec:
       name: istio-cni-node
       jsonPointers:
         - /metadata/annotations/deprecated.daemonset.template.generation
+    # Kubernetes Gateway API webhook defaults group/kind/weight/matches fields
+    # after apply — ignore these to prevent perpetual OutOfSync.
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .spec.rules[].backendRefs[].group
+        - .spec.rules[].backendRefs[].kind
+        - .spec.rules[].backendRefs[].weight
+        - .spec.rules[].matches
+        - .spec.parentRefs[].group
+        - .spec.parentRefs[].kind
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      jqPathExpressions:
+        - .spec.listeners[].tls.certificateRefs[].group
+        - .spec.listeners[].tls.certificateRefs[].kind
 {{- end -}}

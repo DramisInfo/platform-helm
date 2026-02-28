@@ -22,7 +22,7 @@ bootstrap:
   terraformOperator:
     enabled: false
   externalSecretOperator:
-    enabled: false
+    enabled: true
   cnpg:
     enabled: false
   gatekeeper:

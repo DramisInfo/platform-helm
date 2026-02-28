@@ -67,6 +67,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
       - SkipHooks=true
       - Timeout=600
       - Validate=false

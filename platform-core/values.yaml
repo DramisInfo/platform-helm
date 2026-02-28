@@ -171,6 +171,11 @@ bootstrap:
     # Wildcard host pattern for the shared gateway
     # Example: "*.cace-1-dev.dramisinfo.com" or "*.prod.example.com"
     host: "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+    # Platform override for the Istio CNI chart.
+    # Required for non-standard CNI binary/config paths.
+    # Supported values: k3s, k3d, gke, microk8s, minikube, openshift
+    # Defaults to k3s if not set.
+    platform: k3s
   kubevela:
     # Deploy KubeVela via Argo CD (kubevela/vela-core 1.10.7)
     # KubeVela is an application-centric platform that abstracts workload delivery

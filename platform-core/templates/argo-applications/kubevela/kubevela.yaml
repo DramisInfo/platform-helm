@@ -59,6 +59,7 @@ spec:
       name: v1alpha1.cluster.core.oam.dev
       jsonPointers:
         - /spec/caBundle
+        - /spec/insecureSkipTLSVerify
 
   syncPolicy:
     automated:

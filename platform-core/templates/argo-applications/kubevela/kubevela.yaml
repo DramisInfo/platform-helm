@@ -24,6 +24,7 @@ spec:
         # Security contexts to comply with Gatekeeper policies
         podSecurityContext:
           runAsNonRoot: true
+          runAsUser: 65532
           seccompProfile:
             type: RuntimeDefault
 

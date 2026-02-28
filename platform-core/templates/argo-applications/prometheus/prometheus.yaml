@@ -212,4 +212,14 @@ spec:
       - Timeout=600
       - Wait=true
       - PruneEmpty=true
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .spec.rules[].backendRefs[].group
+        - .spec.rules[].backendRefs[].kind
+        - .spec.rules[].backendRefs[].weight
+        - .spec.rules[].matches
+        - .spec.parentRefs[].group
+        - .spec.parentRefs[].kind
 {{- end -}}

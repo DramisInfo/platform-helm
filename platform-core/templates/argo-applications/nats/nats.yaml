@@ -91,6 +91,14 @@ spec:
               gateway:
                 enabled: true
           {{- end }}
+          # Delete PVCs when the StatefulSet is removed (e.g., ArgoCD prune on disable)
+          # Retain PVCs when scaling down replicas to preserve data
+          statefulSet:
+            merge:
+              spec:
+                persistentVolumeClaimRetentionPolicy:
+                  whenDeleted: Delete
+                  whenScaled: Retain
           # Security context to comply with Gatekeeper policies
           # Based on community recommendations: https://github.com/nats-io/k8s/issues/904
           podTemplate:

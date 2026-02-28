@@ -123,6 +123,38 @@ spec:
                     - ALL
                 privileged: false
                 # Note: readOnlyRootFilesystem NOT set to allow JetStream to function
+            {{- if .Values.bootstrap.nats.gateway.enabled }}
+            # Override readiness/startup probes to use TCP on core NATS port (4222)
+            # instead of the default /healthz which includes JetStream health.
+            # In a super-cluster (gateway) topology, JetStream RAFT extends across
+            # gateways. If a remote cluster is unreachable, JetStream cannot elect
+            # a meta leader, causing /healthz to fail. This creates a deadlock:
+            # pods not-Ready → Service has no endpoints → gateway unreachable even
+            # when the remote cluster comes up. TCP probe on 4222 ensures pods
+            # become Ready for core NATS traffic, allowing gateways to connect and
+            # JetStream to bootstrap once all peers are available.
+            patch:
+              - op: replace
+                path: /readinessProbe
+                value:
+                  tcpSocket:
+                    port: 4222
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+                  successThreshold: 1
+              - op: replace
+                path: /startupProbe
+                value:
+                  tcpSocket:
+                    port: 4222
+                  initialDelaySeconds: 5
+                  periodSeconds: 2
+                  timeoutSeconds: 5
+                  failureThreshold: 90
+                  successThreshold: 1
+            {{- end }}
           reloader:
             merge:
               securityContext:

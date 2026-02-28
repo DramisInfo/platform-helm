@@ -72,10 +72,12 @@ bootstrap:
     enabled: true
     jetstream:
       enabled: true
-      # JetStream domain for this cluster. Isolates the RAFT meta group per cluster
-      # so each cluster can elect its own meta leader independently.
-      # Required for super-cluster (gateway) setups to avoid cross-cluster RAFT dependency.
+      # JetStream domain for this cluster. Sets the API routing prefix ($JS.<domain>.API)
+      # so clients can target a specific cluster's JetStream in a multi-cluster setup.
       # Defaults to global.clusterName when gateways are enabled and this is empty.
+      # Note: domain does NOT isolate the RAFT meta group — that spans all gateway peers.
+      # When gateways are enabled, readiness probes are switched to TCP on port 4222
+      # so pods become Ready for core NATS even if JetStream is waiting for remote peers.
       domain: ""
       # File storage configuration for JetStream
       fileStore:

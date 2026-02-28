@@ -161,4 +161,14 @@ spec:
       jsonPointers:
         - /webhooks/0/failurePolicy
         - /webhooks/0/clientConfig/caBundle
+    - group: apps
+      kind: DaemonSet
+      name: ztunnel
+      jsonPointers:
+        - /metadata/annotations/deprecated.daemonset.template.generation
+    - group: apps
+      kind: DaemonSet
+      name: istio-cni-node
+      jsonPointers:
+        - /metadata/annotations/deprecated.daemonset.template.generation
 {{- end -}}

@@ -164,3 +164,25 @@ bootstrap:
     # Wildcard host pattern for the shared gateway
     # Example: "*.cace-1-dev.dramisinfo.com" or "*.prod.example.com"
     host: "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+  kubevela:
+    # Deploy KubeVela via Argo CD (kubevela/vela-core 1.10.7)
+    # KubeVela is an application-centric platform that abstracts workload delivery
+    # over Kubernetes using the Open Application Model (OAM).
+    enabled: false
+    # Number of controller replicas
+    replicaCount: 1
+    # Enable multi-cluster mode (requires additional cluster registration)
+    multicluster:
+      enabled: false
+    # Maximum number of retained ApplicationRevision objects per application
+    applicationRevisionLimit: 2
+    # Maximum number of retained DefinitionRevision objects per definition
+    definitionRevisionLimit: 2
+    # Resource requests and limits for the vela-core controller
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 20Mi

@@ -1,0 +1,67 @@
+{{- if .Values.bootstrap.kubevela.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubevela
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  destination:
+    namespace: vela-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://kubevela.github.io/charts"
+    targetRevision: "1.10.7"
+    chart: vela-core
+    helm:
+      valuesObject:
+        replicaCount: {{ .Values.bootstrap.kubevela.replicaCount }}
+
+        # Security contexts to comply with Gatekeeper policies
+        podSecurityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          seccompProfile:
+            type: RuntimeDefault
+
+        resources:
+          limits:
+            cpu: {{ .Values.bootstrap.kubevela.resources.limits.cpu | quote }}
+            memory: {{ .Values.bootstrap.kubevela.resources.limits.memory | quote }}
+          requests:
+            cpu: {{ .Values.bootstrap.kubevela.resources.requests.cpu | quote }}
+            memory: {{ .Values.bootstrap.kubevela.resources.requests.memory | quote }}
+
+        applicationRevisionLimit: {{ .Values.bootstrap.kubevela.applicationRevisionLimit }}
+        definitionRevisionLimit: {{ .Values.bootstrap.kubevela.definitionRevisionLimit }}
+
+        {{- if .Values.bootstrap.kubevela.multicluster.enabled }}
+        multicluster:
+          enabled: true
+        {{- end }}
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end -}}

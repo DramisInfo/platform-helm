@@ -3,6 +3,29 @@ entries:
   platform-core:
   - apiVersion: v2
     appVersion: 1.6.0
+    created: "2026-02-28T01:05:47.7434606Z"
+    description: Meta Helm chart that deploys platform components as Argo CD Applications,
+      enabling GitOps-driven lifecycle management on Kubernetes.
+    digest: 5f28afa226478b4d1e3aad2a7270be9dfa0ea88982e6886f75da9c1223787afd
+    home: https://github.com/DramisInfo/platform-helm
+    keywords:
+    - helm
+    - argocd
+    - platform
+    - gitops
+    - kubernetes
+    maintainers:
+    - name: platform-helm maintainers
+      url: https://github.com/DramisInfo/platform-helm
+    name: platform-core
+    sources:
+    - https://github.com/DramisInfo/platform-helm
+    type: application
+    urls:
+    - https://github.com/DramisInfo/platform-helm/releases/download/platform-core-0.60.3/platform-core-0.60.3.tgz
+    version: 0.60.3
+  - apiVersion: v2
+    appVersion: 1.6.0
     created: "2026-02-28T01:01:18.321680643Z"
     description: Meta Helm chart that deploys platform components as Argo CD Applications,
       enabling GitOps-driven lifecycle management on Kubernetes.
@@ -507,4 +530,4 @@ entries:
     urls:
     - https://github.com/DramisInfo/platform-helm/releases/download/platform-core-0.56.8/platform-core-0.56.8.tgz
     version: 0.56.8
-generated: "2026-02-28T01:01:18.321858805Z"
+generated: "2026-02-28T01:05:47.743662217Z"

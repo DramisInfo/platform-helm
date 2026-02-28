@@ -166,6 +166,8 @@ spec:
       name: ztunnel
       jsonPointers:
         - /metadata/annotations/deprecated.daemonset.template.generation
+      jqPathExpressions:
+        - .spec.template.spec.containers[].env[].valueFrom.resourceFieldRef.divisor
     - group: apps
       kind: DaemonSet
       name: istio-cni-node

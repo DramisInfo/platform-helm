@@ -31,10 +31,13 @@ spec:
             {{- if .Values.bootstrap.nats.jetstream.enabled }}
             jetstream:
               enabled: true
-              {{- if .Values.bootstrap.nats.jetstream.domain }}
-              domain: {{ .Values.bootstrap.nats.jetstream.domain | quote }}
-              {{- else if .Values.bootstrap.nats.gateway.enabled }}
-              domain: {{ .Values.global.clusterName | quote }}
+              {{- if or .Values.bootstrap.nats.jetstream.domain .Values.bootstrap.nats.gateway.enabled }}
+              merge:
+                {{- if .Values.bootstrap.nats.jetstream.domain }}
+                domain: {{ .Values.bootstrap.nats.jetstream.domain | quote }}
+                {{- else }}
+                domain: {{ .Values.global.clusterName | quote }}
+                {{- end }}
               {{- end }}
               {{- if .Values.bootstrap.nats.jetstream.fileStore.enabled }}
               fileStore:

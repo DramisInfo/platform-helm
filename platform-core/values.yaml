@@ -32,7 +32,7 @@ bootstrap:
   externalSecretOperator:
     enabled: true
   cnpg:
-    enabled: false
+    enabled: true
   gatekeeper:
     enabled: true
     policies:

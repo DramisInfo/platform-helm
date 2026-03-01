@@ -26,9 +26,9 @@ bootstrap:
     clusterIssuer:
       enabled: true
   crossplane:
-    enabled: false
+    enabled: true
   terraformOperator:
-    enabled: false
+    enabled: true
   externalSecretOperator:
     enabled: true
   cnpg:

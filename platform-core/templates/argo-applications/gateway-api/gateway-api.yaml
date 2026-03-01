@@ -19,7 +19,7 @@ spec:
     # in the cert-manager ControllerConfiguration, otherwise the controller crashes on startup.
     - repoURL: "https://github.com/kubernetes-sigs/gateway-api"
       targetRevision: {{ .Values.bootstrap.gatewayAPI.targetRevision | quote }}
-      path: "config/crd/bases"
+      path: "config/crd/standard"
   syncPolicy:
     automated:
       prune: true

@@ -23,7 +23,7 @@ spec:
     # No code changes or SDK injection required.
     # Generates OTLP traces → Tempo and RED metrics → Prometheus.
     - repoURL: "https://grafana.github.io/helm-charts"
-      targetRevision: "2.0.0"
+      targetRevision: "1.12.0"
       chart: beyla
       helm:
         valuesObject:
@@ -62,25 +62,16 @@ spec:
               routes:
                 unmatched: heuristic
 
+          # ── Privileged mode (required for eBPF) ──────────────────────────
+          # Setting privileged: true is the chart's single toggle that enables
+          # hostPID, privileged container, and all required eBPF capabilities.
+          # Beyla is deployed to the `beyla` namespace which is automatically
+          # excluded from Gatekeeper policies when monitoring is enabled.
+          privileged: true
+
           # ── DaemonSet: schedule on all nodes ─────────────────────────────
           tolerations:
             - operator: Exists
-
-          # ── Pod-level ────────────────────────────────────────────────────
-          # hostPID is required for Beyla to discover and instrument all processes
-          hostPID: true
-
-          podSecurityContext:
-            runAsUser: 0
-            runAsGroup: 0
-
-          # ── Container-level ──────────────────────────────────────────────
-          # privileged is required for eBPF program loading and kernel probes.
-          # This is handled by deploying to the `beyla` namespace which is
-          # automatically excluded from Gatekeeper policies when monitoring is enabled.
-          securityContext:
-            privileged: true
-            readOnlyRootFilesystem: true
 
           podAnnotations:
             prometheus.io/scrape: "true"

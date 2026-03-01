@@ -988,14 +988,14 @@ spec:
                       },
                       {
                         "datasource": "Loki",
-                        "description": "Resources currently violating OPA Gatekeeper policies, aggregated from Gatekeeper controller denial logs over the selected time range. Requires logDenies: true (auto-enabled with monitoring).",
+                        "description": "Resources currently violating OPA Gatekeeper policies, sourced from AuditViolation events emitted by the audit controller. Requires emitAuditEvents: true (auto-enabled with monitoring).",
                         "fieldConfig": {
                           "defaults": { "custom": { "align": "left" } },
                           "overrides": [
                             {
-                              "matcher": { "id": "byName", "options": "Count" },
+                              "matcher": { "id": "byName", "options": "Violations" },
                               "properties": [
-                                { "id": "custom.width", "value": 80 },
+                                { "id": "custom.width", "value": 90 },
                                 { "id": "custom.align", "value": "center" }
                               ]
                             }
@@ -1006,12 +1006,12 @@ spec:
                         "options": {
                           "footer": { "show": false },
                           "showHeader": true,
-                          "sortBy": [{ "desc": true, "displayName": "Count" }]
+                          "sortBy": [{ "desc": true, "displayName": "Violations" }]
                         },
                         "targets": [
                           {
                             "datasource": "Loki",
-                            "expr": "sum by (resource_namespace, resource_name, resource_kind, constraint_name, constraint_kind) (count_over_time({namespace=\"gatekeeper-system\", container=\"manager\"} |= \"denied admission\" | json | event_type=\"violation\" [$__range]))",
+                            "expr": "sum by (resource_namespace, name, kind, constraint) (count_over_time({job=\"integrations/kubernetes/eventhandler\", namespace=\"gatekeeper-system\"} | logfmt | reason=\"AuditViolation\" | regexp \"Resource Namespace: (?P<resource_namespace>[^,]+), Constraint: (?P<constraint>[^,]+)\" [$__range]))",
                             "instant": true,
                             "legendFormat": "",
                             "queryType": "instant",
@@ -1025,11 +1025,10 @@ spec:
                             "options": {
                               "renameByName": {
                                 "resource_namespace": "Namespace",
-                                "resource_name": "Resource",
-                                "resource_kind": "Kind",
-                                "constraint_name": "Constraint",
-                                "constraint_kind": "Constraint Kind",
-                                "Value": "Count"
+                                "name": "Resource",
+                                "kind": "Kind",
+                                "constraint": "Constraint",
+                                "Value": "Violations"
                               }
                             }
                           }

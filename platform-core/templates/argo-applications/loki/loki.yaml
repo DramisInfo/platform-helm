@@ -113,6 +113,17 @@ spec:
                 drop:
                   - ALL
 
+            # config-reloader sidecar security context
+            # (must satisfy Gatekeeper psp-pods-must-run-as-nonroot)
+          configReloader:
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 473
+              capabilities:
+                drop:
+                  - ALL
+
             # River configuration: discover all K8s pods and stream logs to Loki
             # loki.source.kubernetes uses the Kubernetes API (no /var/log mounts needed)
             configMap:

@@ -118,19 +118,10 @@ spec:
                 drop:
                   - ALL
 
-            # config-reloader sidecar security context
-            # (must satisfy Gatekeeper psp-pods-must-run-as-nonroot)
-          configReloader:
-            securityContext:
-              allowPrivilegeEscalation: false
-              runAsNonRoot: true
-              runAsUser: 473
-              capabilities:
-                drop:
-                  - ALL
-
-            # River configuration: discover all K8s pods and stream logs to Loki
-            # loki.source.kubernetes uses the Kubernetes API (no /var/log mounts needed)
+            # River configuration: pod logs + K8s Events → Loki
+            # loki.source.kubernetes       : streams pod logs via the K8s API (no /var/log mounts)
+            # loki.source.kubernetes_events: ships K8s Events, including Gatekeeper
+            #   audit violation events (produced when emitAuditEvents: true)
             configMap:
               content: |
                 // ── Pod discovery ──────────────────────────────────────────────────
@@ -138,7 +129,7 @@ spec:
                   role = "pod"
                 }
 
-                // ── Relabeling: promote pod metadata to log labels ──────────────────
+                // ── Relabeling: promote pod metadata to Loki labels ─────────────────
                 discovery.relabel "pods" {
                   targets = discovery.kubernetes.pods.targets
 
@@ -181,12 +172,32 @@ spec:
                   forward_to = [loki.write.default.receiver]
                 }
 
+                // ── Kubernetes Events → Loki ────────────────────────────────────────
+                // Captures all K8s events, including Gatekeeper audit violation events.
+                // Query in Grafana: {job="integrations/kubernetes/eventhandler"} |= "FailedAdmission"
+                loki.source.kubernetes_events "events" {
+                  job_name   = "integrations/kubernetes/eventhandler"
+                  log_format = "logfmt"
+                  forward_to = [loki.write.default.receiver]
+                }
+
                 // ── Forward to Loki ────────────────────────────────────────────────
                 loki.write "default" {
                   endpoint {
                     url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
                   }
                 }
+
+          # config-reloader sidecar security context
+          # (must satisfy Gatekeeper psp-pods-must-run-as-nonroot)
+          configReloader:
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 473
+              capabilities:
+                drop:
+                  - ALL
 
     # ── Raw resources: GrafanaDatasource + HTTPRoutes ────────────────────────
     - repoURL: "https://dysnix.github.io/charts"

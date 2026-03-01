@@ -977,6 +977,68 @@ spec:
                         ],
                         "title": "Validation Request Duration Heatmap",
                         "type": "heatmap"
+                      },
+                      {
+                        "collapsed": false,
+                        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 44 },
+                        "id": 200,
+                        "panels": [],
+                        "title": "Violation Details",
+                        "type": "row"
+                      },
+                      {
+                        "datasource": "Loki",
+                        "description": "Kubernetes Events emitted by Gatekeeper for each audit violation. Requires emitAuditEvents: true (auto-enabled with monitoring).",
+                        "gridPos": { "h": 12, "w": 24, "x": 0, "y": 45 },
+                        "id": 201,
+                        "options": {
+                          "dedupStrategy": "none",
+                          "enableLogDetails": true,
+                          "prettifyLogMessage": false,
+                          "showCommonLabels": false,
+                          "showLabels": true,
+                          "showTime": true,
+                          "sortOrder": "Descending",
+                          "wrapLogMessage": true
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Loki",
+                            "expr": "{job=\"integrations/kubernetes/eventhandler\"} |= \"FailedAdmission\" | logfmt",
+                            "legendFormat": "",
+                            "maxLines": 500,
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Audit Violation Events (per resource)",
+                        "type": "logs"
+                      },
+                      {
+                        "datasource": "Loki",
+                        "description": "Admission denials logged by the Gatekeeper controller. Requires logDenies: true (auto-enabled with monitoring). Each line is a JSON object with constraint, namespace, name, and kind.",
+                        "gridPos": { "h": 12, "w": 24, "x": 0, "y": 57 },
+                        "id": 202,
+                        "options": {
+                          "dedupStrategy": "none",
+                          "enableLogDetails": true,
+                          "prettifyLogMessage": true,
+                          "showCommonLabels": false,
+                          "showLabels": false,
+                          "showTime": true,
+                          "sortOrder": "Descending",
+                          "wrapLogMessage": true
+                        },
+                        "targets": [
+                          {
+                            "datasource": "Loki",
+                            "expr": "{namespace=\"gatekeeper-system\", container=\"manager\"} |= \"denied admission\" | json",
+                            "legendFormat": "",
+                            "maxLines": 500,
+                            "refId": "A"
+                          }
+                        ],
+                        "title": "Denied Admissions (Controller Logs)",
+                        "type": "logs"
                       }
                     ],
                     "refresh": "30s",

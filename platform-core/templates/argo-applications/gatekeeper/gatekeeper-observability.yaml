@@ -1011,7 +1011,7 @@ spec:
                         "targets": [
                           {
                             "datasource": "Loki",
-                            "expr": "sum by (resource_namespace, resource_name, resource_kind, constraint_name, constraint_kind) (count_over_time({namespace=\"gatekeeper-system\", container=\"manager\", event_type=\"violation\"} [$__range]))",
+                            "expr": "sum by (resource_namespace, resource_name, resource_kind, constraint_name, constraint_kind) (count_over_time({namespace=\"gatekeeper-system\", container=\"manager\"} |= \"denied admission\" | json | event_type=\"violation\" [$__range]))",
                             "instant": true,
                             "legendFormat": "",
                             "queryType": "instant",

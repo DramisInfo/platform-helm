@@ -86,6 +86,7 @@ spec:
                 annotations:
                   argocd.argoproj.io/sync-wave: "5"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                  link.argocd.argoproj.io/external-link: "https://grafana.{{ .Values.global.clusterName }}.dramisinfo.com"
               spec:
                 parentRefs:
                   - name: shared-gateway

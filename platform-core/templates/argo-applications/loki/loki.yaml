@@ -77,6 +77,11 @@ spec:
             replicas: 0
           gateway:
             enabled: false
+          # Disable memcached caches — not needed for SingleBinary/filesystem storage
+          chunksCache:
+            enabled: false
+          resultsCache:
+            enabled: false
           lokiCanary:
             enabled: false
           test:

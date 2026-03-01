@@ -94,10 +94,5 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
 {{- end -}}

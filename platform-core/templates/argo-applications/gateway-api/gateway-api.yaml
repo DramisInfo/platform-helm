@@ -26,10 +26,5 @@ spec:
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
-    retry:
-      limit: 10
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 30s
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
 {{- end }}

@@ -105,6 +105,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
   ignoreDifferences:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute

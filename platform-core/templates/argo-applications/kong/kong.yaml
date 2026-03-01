@@ -167,4 +167,5 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
 {{- end -}}

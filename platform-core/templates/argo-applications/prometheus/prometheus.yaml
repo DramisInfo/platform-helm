@@ -212,6 +212,7 @@ spec:
       - Timeout=600
       - Wait=true
       - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
   ignoreDifferences:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute

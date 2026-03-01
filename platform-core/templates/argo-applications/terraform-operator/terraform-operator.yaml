@@ -29,4 +29,5 @@ spec:
       - Wait=true
       - PruneEmpty=true
       - ServerSideApply=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
 {{- end }}

@@ -104,4 +104,5 @@ spec:
       - Validate=false
       - Wait=true
       - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
 {{- end -}}

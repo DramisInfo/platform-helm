@@ -1,0 +1,236 @@
+{{- if .Values.bootstrap.monitoring.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-45"
+spec:
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  project: default
+  sources:
+    # ── Loki (SingleBinary, filesystem storage) ─────────────────────────────
+    - repoURL: "https://grafana.github.io/helm-charts"
+      targetRevision: "6.53.0"
+      chart: loki
+      helm:
+        valuesObject:
+          deploymentMode: SingleBinary
+
+          loki:
+            auth_enabled: false
+            commonConfig:
+              replication_factor: 1
+            storage:
+              type: filesystem
+            limits_config:
+              # Retain logs for 7 days
+              retention_period: 168h
+
+            # Pod security context - UID 10001 is the default loki user
+            podSecurityContext:
+              runAsNonRoot: true
+              runAsUser: 10001
+              runAsGroup: 10001
+              fsGroup: 10001
+              fsGroupChangePolicy: OnRootMismatch
+              seccompProfile:
+                type: RuntimeDefault
+
+            # Container security context
+            containerSecurityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
+          singleBinary:
+            replicas: 1
+            persistence:
+              enabled: true
+              size: {{ .Values.bootstrap.monitoring.loki.persistence.size | default "10Gi" }}
+              storageClass: {{ .Values.bootstrap.monitoring.loki.persistence.storageClass | default "" | quote }}
+
+          # Disable distributed components (not used in SingleBinary mode)
+          write:
+            replicas: 0
+          read:
+            replicas: 0
+          backend:
+            replicas: 0
+          gateway:
+            enabled: false
+          lokiCanary:
+            enabled: false
+          test:
+            enabled: false
+
+    # ── Alloy (Kubernetes log scraper → Loki) ────────────────────────────────
+    # Uses loki.source.kubernetes (API-based, no host path mounts required)
+    # allowing fully non-root operation, compliant with Gatekeeper policies.
+    - repoURL: "https://grafana.github.io/helm-charts"
+      targetRevision: "1.6.0"
+      chart: alloy
+      helm:
+        valuesObject:
+          controller:
+            type: deployment
+            replicas: 1
+
+          # Pod security context - UID 473 is the alloy user
+          podSecurityContext:
+            runAsNonRoot: true
+            runAsUser: 473
+            runAsGroup: 473
+            fsGroup: 473
+            seccompProfile:
+              type: RuntimeDefault
+
+          alloy:
+            # Container security context
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 473
+              capabilities:
+                drop:
+                  - ALL
+
+            # River configuration: discover all K8s pods and stream logs to Loki
+            # loki.source.kubernetes uses the Kubernetes API (no /var/log mounts needed)
+            configMap:
+              content: |
+                // ── Pod discovery ──────────────────────────────────────────────────
+                discovery.kubernetes "pods" {
+                  role = "pod"
+                }
+
+                // ── Relabeling: promote pod metadata to log labels ──────────────────
+                discovery.relabel "pods" {
+                  targets = discovery.kubernetes.pods.targets
+
+                  rule {
+                    source_labels = ["__meta_kubernetes_namespace"]
+                    target_label  = "namespace"
+                  }
+
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_name"]
+                    target_label  = "pod"
+                  }
+
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_container_name"]
+                    target_label  = "container"
+                  }
+
+                  // Prefer app.kubernetes.io/name, fall back to app label
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+                    target_label  = "app"
+                  }
+
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_label_app"]
+                    regex         = "(.+)"
+                    target_label  = "app"
+                  }
+
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_node_name"]
+                    target_label  = "node"
+                  }
+                }
+
+                // ── Stream pod logs via Kubernetes API ─────────────────────────────
+                loki.source.kubernetes "pods" {
+                  targets    = discovery.relabel.pods.output
+                  forward_to = [loki.write.default.receiver]
+                }
+
+                // ── Forward to Loki ────────────────────────────────────────────────
+                loki.write "default" {
+                  endpoint {
+                    url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+                  }
+                }
+
+    # ── Raw resources: GrafanaDatasource + HTTPRoutes ────────────────────────
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            # Provision Loki as a Grafana datasource via the Grafana Operator
+            - apiVersion: grafana.integreatly.org/v1beta1
+              kind: GrafanaDatasource
+              metadata:
+                name: loki
+                namespace: monitoring
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                instanceSelector:
+                  matchLabels:
+                    dashboards: "grafana"
+                datasource:
+                  name: Loki
+                  type: loki
+                  access: proxy
+                  url: http://loki.monitoring.svc.cluster.local:3100
+                  isDefault: false
+
+            {{- if .Values.bootstrap.istio.enabled }}
+            # HTTPRoute to expose the Loki query endpoint (useful for debugging / ad-hoc LogQL)
+            - apiVersion: gateway.networking.k8s.io/v1
+              kind: HTTPRoute
+              metadata:
+                name: loki
+                namespace: monitoring
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                  link.argocd.argoproj.io/external-link: "https://loki.{{ .Values.global.clusterName }}.dramisinfo.com"
+              spec:
+                parentRefs:
+                  - name: shared-gateway
+                    namespace: istio-system
+                    sectionName: https
+                hostnames:
+                  - "loki.{{ .Values.global.clusterName }}.dramisinfo.com"
+                rules:
+                  - backendRefs:
+                      - name: loki
+                        port: 3100
+            {{- end }}
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Timeout=600
+      - Wait=true
+      - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .spec.rules[].backendRefs[].group
+        - .spec.rules[].backendRefs[].kind
+        - .spec.rules[].backendRefs[].weight
+        - .spec.rules[].matches
+        - .spec.parentRefs[].group
+        - .spec.parentRefs[].kind
+{{- end -}}

@@ -29,9 +29,15 @@ spec:
           auditInterval: 60
           constraintViolationsLimit: 20
           auditFromCache: false
-          emitAdmissionEvents: false
-          emitAuditEvents: false
+          # Emit Kubernetes Events for every admission denial and audit violation.
+          # When monitoring is enabled, Alloy picks these up and ships them to Loki,
+          # enabling per-resource violation queries in Grafana dashboards.
+          emitAdmissionEvents: {{ .Values.bootstrap.monitoring.enabled }}
+          emitAuditEvents: {{ .Values.bootstrap.monitoring.enabled }}
           logLevel: INFO
+          # Log each admission denial as structured JSON to the controller pod logs.
+          # Alloy ships these to Loki when monitoring is enabled.
+          logDenies: {{ .Values.bootstrap.monitoring.enabled }}
           image:
             release: v3.17.1
           podAnnotations:

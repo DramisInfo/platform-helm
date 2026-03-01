@@ -74,6 +74,16 @@ bootstrap:
       #     jsonData:
       #       ...
       datasources: []
+    loki:
+      # Loki (log aggregation) + Alloy (log collector) are deployed automatically
+      # when bootstrap.monitoring.enabled is true. Loki runs in SingleBinary mode
+      # with local filesystem storage. Alloy uses loki.source.kubernetes (Kubernetes
+      # API streaming) — no host path mounts, fully Gatekeeper-compliant.
+      persistence:
+        # Size of the PersistentVolumeClaim for Loki log storage
+        size: 10Gi
+        # Storage class to use (leave empty for cluster default)
+        storageClass: ""
   keda:
     enabled: true
   nats:

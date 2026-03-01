@@ -77,16 +77,11 @@ spec:
                   namespaces:
                     - "*"
                   excludedNamespaces:
-                    {{- if .Values.bootstrap.gatekeeper.policies.excludedNamespaces }}
-                    {{- toYaml .Values.bootstrap.gatekeeper.policies.excludedNamespaces | nindent 20 }}
-                    {{- else }}
-                    - kube-system
-                    - gatekeeper-system
-                    - cert-manager
-                    - istio-system
-                    - ingress-nginx
-                    - argocd
+                    {{- $gwExcludedNs := .Values.bootstrap.gatekeeper.policies.excludedNamespaces | default (list "kube-system" "gatekeeper-system" "cert-manager" "istio-system" "ingress-nginx" "argocd") }}
+                    {{- if .Values.bootstrap.monitoring.enabled }}
+                    {{- $gwExcludedNs = append $gwExcludedNs "beyla" }}
                     {{- end }}
+                    {{- toYaml $gwExcludedNs | nindent 20 }}
                 {{- if .Values.bootstrap.gatekeeper.policies.exemptImages }}
                 parameters:
                   exemptImages:
@@ -108,16 +103,11 @@ spec:
                   namespaces:
                     - "*"
                   excludedNamespaces:
-                    {{- if .Values.bootstrap.gatekeeper.policies.excludedNamespaces }}
-                    {{- toYaml .Values.bootstrap.gatekeeper.policies.excludedNamespaces | nindent 20 }}
-                    {{- else }}
-                    - kube-system
-                    - gatekeeper-system
-                    - cert-manager
-                    - istio-system
-                    - ingress-nginx
-                    - argocd
+                    {{- $gwExcludedNs2 := .Values.bootstrap.gatekeeper.policies.excludedNamespaces | default (list "kube-system" "gatekeeper-system" "cert-manager" "istio-system" "ingress-nginx" "argocd") }}
+                    {{- if .Values.bootstrap.monitoring.enabled }}
+                    {{- $gwExcludedNs2 = append $gwExcludedNs2 "beyla" }}
                     {{- end }}
+                    {{- toYaml $gwExcludedNs2 | nindent 20 }}
                 parameters:
                   runAsUser:
                     rule: MustRunAsNonRoot

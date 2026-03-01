@@ -84,6 +84,12 @@ bootstrap:
         size: 10Gi
         # Storage class to use (leave empty for cluster default)
         storageClass: ""
+    tempo:
+      persistence:
+        # Size of the PersistentVolumeClaim for Tempo trace storage
+        size: 10Gi
+        # Storage class to use (leave empty for cluster default)
+        storageClass: ""
   keda:
     enabled: true
   nats:

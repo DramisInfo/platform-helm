@@ -1,0 +1,131 @@
+{{- if .Values.bootstrap.monitoring.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: beyla
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Deploy after Tempo (-90) so the OTLP endpoint is available
+    argocd.argoproj.io/sync-wave: "-85"
+spec:
+  destination:
+    # Dedicated namespace excluded from Gatekeeper policies.
+    # Beyla requires privileged + hostPID for eBPF kernel instrumentation,
+    # which conflicts with psp-privileged-container and psp-pods-must-run-as-nonroot.
+    namespace: beyla
+    server: "https://kubernetes.default.svc"
+  project: default
+  sources:
+    # ── Grafana Beyla (eBPF auto-instrumentation) ────────────────────────────
+    # Instruments ALL processes on every node at the kernel level via eBPF.
+    # No code changes or SDK injection required.
+    # Generates OTLP traces → Tempo and RED metrics → Prometheus.
+    - repoURL: "https://grafana.github.io/helm-charts"
+      targetRevision: "2.0.0"
+      chart: beyla
+      helm:
+        valuesObject:
+          # ── Beyla configuration ──────────────────────────────────────────
+          config:
+            data:
+              log_level: INFO
+
+              # Instrument all services on all nodes (Beyla discovers them via eBPF).
+              # open_port covers the most common app ports; add yours if needed.
+              open_port: "80,443,3000,4000,4318,5000,8000,8080,8081,8443,9000,9090"
+
+              # ── Trace export → Tempo ────────────────────────────────────
+              otel_traces_export:
+                endpoint: "http://tempo.monitoring.svc.cluster.local:4317"
+                # Batch traces before sending to reduce overhead
+                batch_timeout: 5s
+                export_timeout: 30s
+                max_export_batch_size: 512
+
+              # ── Metrics export → Prometheus (pull) ──────────────────────
+              # RED metrics (Rate, Errors, Duration) per service/route.
+              # Prometheus scrapes via ServiceMonitor defined below.
+              prometheus_export:
+                port: 9400
+                path: /metrics
+
+              # ── Attribute enrichment ─────────────────────────────────────
+              # Enrich spans with Kubernetes metadata (pod, namespace, node).
+              attributes:
+                kubernetes:
+                  enable: true
+
+              # ── Route grouping ───────────────────────────────────────────
+              # Group high-cardinality URL patterns to keep trace cardinality low.
+              routes:
+                unmatched: heuristic
+
+          # ── DaemonSet: schedule on all nodes ─────────────────────────────
+          tolerations:
+            - operator: Exists
+
+          # ── Pod-level ────────────────────────────────────────────────────
+          # hostPID is required for Beyla to discover and instrument all processes
+          hostPID: true
+
+          podSecurityContext:
+            runAsUser: 0
+            runAsGroup: 0
+
+          # ── Container-level ──────────────────────────────────────────────
+          # privileged is required for eBPF program loading and kernel probes.
+          # This is handled by deploying to the `beyla` namespace which is
+          # automatically excluded from Gatekeeper policies when monitoring is enabled.
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: true
+
+          podAnnotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "9400"
+            prometheus.io/path: "/metrics"
+
+    # ── Raw resources: ServiceMonitor ────────────────────────────────────────
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            # ServiceMonitor so Prometheus scrapes Beyla RED metrics
+            - apiVersion: monitoring.coreos.com/v1
+              kind: ServiceMonitor
+              metadata:
+                name: beyla
+                namespace: beyla
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                labels:
+                  release: prometheus
+              spec:
+                namespaceSelector:
+                  matchNames:
+                    - beyla
+                selector:
+                  matchLabels:
+                    app.kubernetes.io/name: beyla
+                endpoints:
+                  - port: prometheus
+                    path: /metrics
+                    interval: 30s
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Timeout=600
+      - Wait=true
+      - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+{{- end -}}

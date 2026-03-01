@@ -1,0 +1,203 @@
+{{- if .Values.bootstrap.monitoring.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-90"
+spec:
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  project: default
+  sources:
+    # ── Grafana Tempo (single binary, filesystem storage) ────────────────────
+    - repoURL: "https://grafana.github.io/helm-charts"
+      targetRevision: "1.16.0"
+      chart: tempo
+      helm:
+        valuesObject:
+          tempo:
+            # ── Receivers ──────────────────────────────────────────────────
+            receivers:
+              otlp:
+                protocols:
+                  grpc:
+                    endpoint: "0.0.0.0:4317"
+                  http:
+                    endpoint: "0.0.0.0:4318"
+              # Zipkin receiver for Istio/Envoy distributed tracing
+              zipkin:
+                endpoint: "0.0.0.0:9411"
+
+            # ── Storage ────────────────────────────────────────────────────
+            storage:
+              trace:
+                backend: local
+                local:
+                  path: /var/tempo/traces
+                wal:
+                  path: /var/tempo/wal
+
+            # ── Metrics Generator ──────────────────────────────────────────
+            # Generates service graph and span metrics from trace data.
+            # Service graph metrics feed the Grafana service topology map
+            # (similar to Azure App Insights application map).
+            # Span metrics generate RED (Rate, Errors, Duration) per service.
+            metrics_generator:
+              enabled: true
+              storage:
+                path: /var/tempo/generator/wal
+                remote_write:
+                  - url: "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+              processor:
+                service_graphs:
+                  enabled: true
+                  # Retain peer attributes for richer topology nodes
+                  enable_client_server_prefix: true
+                  dimensions:
+                    - http.method
+                    - http.status_code
+                span_metrics:
+                  enabled: true
+                  dimensions:
+                    - http.method
+                    - http.status_code
+                    - http.route
+                    - service.version
+              # Enable generation on all traces (no sampling)
+              registry:
+                external_labels:
+                  cluster: "{{ .Values.global.clusterName }}"
+
+            # ── Compaction ────────────────────────────────────────────────
+            compactor:
+              compaction:
+                block_retention: 168h  # 7 days, matching Loki retention
+
+          # ── Persistence ──────────────────────────────────────────────────
+          persistence:
+            enabled: true
+            size: {{ .Values.bootstrap.monitoring.tempo.persistence.size | default "10Gi" }}
+            storageClassName: {{ .Values.bootstrap.monitoring.tempo.persistence.storageClass | default "" | quote }}
+
+          # ── Pod security context ─────────────────────────────────────────
+          # UID 10001 is a non-root user compatible with Gatekeeper policies
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+
+          # ── Container security context ───────────────────────────────────
+          containerSecurityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false  # Tempo writes traces/wal to disk
+            capabilities:
+              drop:
+                - ALL
+
+          # ── ServiceMonitor for Prometheus scraping ───────────────────────
+          serviceMonitor:
+            enabled: true
+
+    # ── Raw resources: GrafanaDatasource + HTTPRoute ─────────────────────────
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            # Provision Tempo as a Grafana datasource via the Grafana Operator.
+            # Correlates traces → logs (Loki) and service graph → metrics (Prometheus).
+            - apiVersion: grafana.integreatly.org/v1beta1
+              kind: GrafanaDatasource
+              metadata:
+                name: tempo
+                namespace: monitoring
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                instanceSelector:
+                  matchLabels:
+                    dashboards: "grafana"
+                datasource:
+                  name: Tempo
+                  type: tempo
+                  uid: tempo
+                  access: proxy
+                  url: http://tempo.monitoring.svc.cluster.local:3200
+                  isDefault: false
+                  jsonData:
+                    httpMethod: GET
+                    # Link service graph nodes to Prometheus RED metrics
+                    serviceMap:
+                      datasourceUid: prometheus
+                    # Link trace spans to Loki logs for the same pod/service
+                    tracesToLogs:
+                      datasourceUid: loki
+                      mapTagNamesEnabled: true
+                      mappedTags:
+                        - key: "service.name"
+                          value: "app"
+                        - key: "k8s.pod.name"
+                          value: "pod"
+                      filterByTraceID: true
+                      filterBySpanID: false
+                    # Enable Loki search from trace viewer sidebar
+                    lokiSearch:
+                      datasourceUid: loki
+
+            {{- if .Values.bootstrap.istio.enabled }}
+            # HTTPRoute to expose Tempo query API (useful for debugging / ad-hoc TraceQL)
+            - apiVersion: gateway.networking.k8s.io/v1
+              kind: HTTPRoute
+              metadata:
+                name: tempo
+                namespace: monitoring
+                annotations:
+                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+                  link.argocd.argoproj.io/external-link: "https://tempo.{{ .Values.global.clusterName }}.dramisinfo.com"
+              spec:
+                parentRefs:
+                  - name: shared-gateway
+                    namespace: istio-system
+                    sectionName: https
+                hostnames:
+                  - "tempo.{{ .Values.global.clusterName }}.dramisinfo.com"
+                rules:
+                  - backendRefs:
+                      - name: tempo
+                        port: 3200
+            {{- end }}
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Timeout=600
+      - Wait=true
+      - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .spec.rules[].backendRefs[].group
+        - .spec.rules[].backendRefs[].kind
+        - .spec.rules[].backendRefs[].weight
+        - .spec.rules[].matches
+        - .spec.parentRefs[].group
+        - .spec.parentRefs[].kind
+{{- end -}}

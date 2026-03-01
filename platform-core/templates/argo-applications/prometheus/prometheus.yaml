@@ -48,10 +48,6 @@ spec:
             # Pre-installed plugins
             plugins:
               - grafana-piechart-panel
-              # Application Observability plugin — provides the service map UI,
-              # RED metrics overview, and OpenTelemetry-aware service drill-down
-              # (https://grafana.com/docs/grafana/latest/datasources/tempo/app-observability/)
-              - grafana-application-observability-app
             # Pod security context - fsGroup is critical for volume permissions
             # Grafana runs as user 472, and fsGroup 472 allows access to PVCs
             podSecurityContext:

@@ -2,6 +2,14 @@ global:
   clusterName: "dev"
 
 bootstrap:
+  gatewayAPI:
+    # Install the Kubernetes Gateway API CRDs from the official kubernetes-sigs release.
+    # Must be enabled whenever cert-manager is configured with enableGatewayAPI: true.
+    # Runs at sync-wave -120 (before cert-manager at -110) to ensure CRDs exist before
+    # the cert-manager controller starts and performs its startup Gateway API check.
+    enabled: true
+    # Gateway API release tag to install (https://github.com/kubernetes-sigs/gateway-api/releases)
+    targetRevision: "v1.2.1"
   certManager:
     # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.16.2)
     enabled: true

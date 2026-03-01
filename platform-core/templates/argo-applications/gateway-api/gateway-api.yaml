@@ -1,0 +1,35 @@
+{{- if .Values.bootstrap.gatewayAPI.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway-api
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-120"
+spec:
+  destination:
+    namespace: default
+    server: "https://kubernetes.default.svc"
+  project: default
+  sources:
+    # Install the standard Gateway API CRDs from the official kubernetes-sigs release.
+    # This must run before cert-manager (wave -110) when enableGatewayAPI is set to true
+    # in the cert-manager ControllerConfiguration, otherwise the controller crashes on startup.
+    - repoURL: "https://github.com/kubernetes-sigs/gateway-api"
+      targetRevision: {{ .Values.bootstrap.gatewayAPI.targetRevision | quote }}
+      path: "config/crd/bases"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+{{- end }}

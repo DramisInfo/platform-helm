@@ -988,57 +988,53 @@ spec:
                       },
                       {
                         "datasource": "Loki",
-                        "description": "Kubernetes Events emitted by Gatekeeper for each audit violation. Requires emitAuditEvents: true (auto-enabled with monitoring).",
-                        "gridPos": { "h": 12, "w": 24, "x": 0, "y": 45 },
+                        "description": "Resources currently violating OPA Gatekeeper policies, aggregated from Gatekeeper controller denial logs over the selected time range. Requires logDenies: true (auto-enabled with monitoring).",
+                        "fieldConfig": {
+                          "defaults": { "custom": { "align": "left" } },
+                          "overrides": [
+                            {
+                              "matcher": { "id": "byName", "options": "Count" },
+                              "properties": [
+                                { "id": "custom.width", "value": 80 },
+                                { "id": "custom.align", "value": "center" }
+                              ]
+                            }
+                          ]
+                        },
+                        "gridPos": { "h": 14, "w": 24, "x": 0, "y": 45 },
                         "id": 201,
                         "options": {
-                          "dedupStrategy": "none",
-                          "enableLogDetails": true,
-                          "prettifyLogMessage": false,
-                          "showCommonLabels": false,
-                          "showLabels": true,
-                          "showTime": true,
-                          "sortOrder": "Descending",
-                          "wrapLogMessage": true
+                          "footer": { "show": false },
+                          "showHeader": true,
+                          "sortBy": [{ "desc": true, "displayName": "Count" }]
                         },
                         "targets": [
                           {
                             "datasource": "Loki",
-                            "expr": "{job=\"integrations/kubernetes/eventhandler\"} |= \"FailedAdmission\" | logfmt",
+                            "expr": "sum by (resource_namespace, resource_name, resource_kind, constraint_name, constraint_kind) (count_over_time({namespace=\"gatekeeper-system\", container=\"manager\", event_type=\"violation\"} [$__range]))",
+                            "instant": true,
                             "legendFormat": "",
-                            "maxLines": 500,
+                            "queryType": "instant",
                             "refId": "A"
                           }
                         ],
-                        "title": "Audit Violation Events (per resource)",
-                        "type": "logs"
-                      },
-                      {
-                        "datasource": "Loki",
-                        "description": "Admission denials logged by the Gatekeeper controller. Requires logDenies: true (auto-enabled with monitoring). Each line is a JSON object with constraint, namespace, name, and kind.",
-                        "gridPos": { "h": 12, "w": 24, "x": 0, "y": 57 },
-                        "id": 202,
-                        "options": {
-                          "dedupStrategy": "none",
-                          "enableLogDetails": true,
-                          "prettifyLogMessage": true,
-                          "showCommonLabels": false,
-                          "showLabels": false,
-                          "showTime": true,
-                          "sortOrder": "Descending",
-                          "wrapLogMessage": true
-                        },
-                        "targets": [
+                        "title": "Resources in Violation",
+                        "transformations": [
                           {
-                            "datasource": "Loki",
-                            "expr": "{namespace=\"gatekeeper-system\", container=\"manager\"} |= \"denied admission\" | json",
-                            "legendFormat": "",
-                            "maxLines": 500,
-                            "refId": "A"
+                            "id": "organize",
+                            "options": {
+                              "renameByName": {
+                                "resource_namespace": "Namespace",
+                                "resource_name": "Resource",
+                                "resource_kind": "Kind",
+                                "constraint_name": "Constraint",
+                                "constraint_kind": "Constraint Kind",
+                                "Value": "Count"
+                              }
+                            }
                           }
                         ],
-                        "title": "Denied Admissions (Controller Logs)",
-                        "type": "logs"
+                        "type": "table"
                       }
                     ],
                     "refresh": "30s",

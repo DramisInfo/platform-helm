@@ -47,7 +47,6 @@ bootstrap:
         - gatekeeper-system
         - cert-manager
         - istio-system
-        - ingress-nginx
         - argocd
         - azure-arc
       # Image patterns to exempt from policies (e.g., ["gcr.io/k8s-minikube/*"])

@@ -28,6 +28,17 @@ spec:
               replication_factor: 1
             storage:
               type: filesystem
+            # schemaConfig is mandatory in Loki chart v6.x.
+            # v13/tsdb is the current recommended schema for new installations.
+            schemaConfig:
+              configs:
+                - from: "2024-01-01"
+                  store: tsdb
+                  object_store: filesystem
+                  schema: v13
+                  index:
+                    prefix: loki_index_
+                    period: 24h
             limits_config:
               # Retain logs for 7 days
               retention_period: 168h

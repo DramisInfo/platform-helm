@@ -191,6 +191,13 @@ spec:
       - PruneEmpty=true
     {{- include "platform-core.defaultRetry" . | nindent 4 }}
   ignoreDifferences:
+    # Kubernetes injects apiVersion/kind into volumeClaimTemplates after StatefulSet
+    # creation. Helm does not render these fields, causing a permanent spurious diff.
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions:
+        - .spec.volumeClaimTemplates[].apiVersion
+        - .spec.volumeClaimTemplates[].kind
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       jqPathExpressions:

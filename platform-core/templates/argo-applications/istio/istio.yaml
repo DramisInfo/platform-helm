@@ -7,17 +7,13 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "-90"
+    argocd.argoproj.io/sync-wave: "-100"
 spec:
   destination:
     namespace: istio-system
     server: "https://kubernetes.default.svc"
   project: default
   sources:
-    # Kubernetes Gateway API CRDs (not bundled with K3s — required before gateway resources)
-    - repoURL: "https://github.com/kubernetes-sigs/gateway-api"
-      targetRevision: "v1.2.1"
-      path: config/crd
     - repoURL: "https://istio-release.storage.googleapis.com/charts"
       targetRevision: "1.28.4"
       chart: base
@@ -93,7 +89,7 @@ spec:
                 name: http-to-https-redirect
                 namespace: istio-system
                 annotations:
-                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-wave: "10"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               spec:
                 parentRefs:
@@ -113,7 +109,7 @@ spec:
                 name: argocd-server
                 namespace: argocd
                 annotations:
-                  argocd.argoproj.io/sync-wave: "5"
+                  argocd.argoproj.io/sync-wave: "10"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
                   link.argocd.argoproj.io/external-link: "https://argo.{{ .Values.global.clusterName }}.dramisinfo.com"
               spec:

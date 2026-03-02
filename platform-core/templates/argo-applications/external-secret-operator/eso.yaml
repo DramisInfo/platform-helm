@@ -17,6 +17,11 @@ spec:
     repoURL: "https://charts.external-secrets.io"
     targetRevision: "2.0.1"
     chart: external-secrets
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /status
   syncPolicy:
     automated:
       prune: true
@@ -24,6 +29,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
       - SkipHooks=true
       - Timeout=600
       - Validate=false

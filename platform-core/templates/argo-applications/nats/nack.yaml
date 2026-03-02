@@ -92,6 +92,11 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /status
   syncPolicy:
     automated:
       prune: true
@@ -99,6 +104,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
       - SkipHooks=true
       - Timeout=600
       - Validate=false

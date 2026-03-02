@@ -69,7 +69,7 @@ spec:
                           hostedZoneName: {{ .Values.global.clusterName }}.dramisinfo.com
                           environment: AzurePublicCloud
                           managedIdentity:
-                            clientID: bc1b708f-94a6-428d-ba6e-983a5ade07ba
+                            clientID: {{ .Values.bootstrap.certManager.workloadIdentity.clientId }}
 {{- end }}
   syncPolicy:
     automated:

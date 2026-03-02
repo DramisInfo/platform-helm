@@ -7,8 +7,8 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    # Deploy after Tempo (-90) so the OTLP endpoint is available
-    argocd.argoproj.io/sync-wave: "-85"
+    # Deploy after Tempo (-60) so the OTLP endpoint is available
+    argocd.argoproj.io/sync-wave: "-55"
 spec:
   destination:
     # Dedicated namespace excluded from Gatekeeper policies.

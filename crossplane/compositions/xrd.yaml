@@ -1,0 +1,80 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xcertmanageridentities.platform.dramisinfo.com
+spec:
+  # Cluster-scoped: no claimNames, XCertManagerIdentity instances live directly
+  # as cluster-scoped objects in platform-tools (one per cluster).
+  scope: Cluster
+  group: platform.dramisinfo.com
+  names:
+    kind: XCertManagerIdentity
+    plural: xcertmanageridentities
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - resourceGroup
+                - location
+                - dnsRoleScope
+                - oidcIssuer
+                - identityName
+                - clusterName
+              properties:
+                clusterName:
+                  type: string
+                  description: Cluster name used for tagging (e.g. cace-1-dev)
+                resourceGroup:
+                  type: string
+                  description: Azure RG where the cert-manager UMI is created (rg-<clusterName>)
+                location:
+                  type: string
+                  description: Azure region for the UMI (e.g. canadacentral)
+                dnsRoleScope:
+                  type: string
+                  description: Full ARM scope for DNS Zone Contributor (/subscriptions/.../resourceGroups/rg-dns)
+                oidcIssuer:
+                  type: string
+                  description: Arc OIDC issuer URL (az connectedk8s show --query oidcIssuerProfile.issuerUrl)
+                identityName:
+                  type: string
+                  description: Azure UMI name (e.g. umi-cace-1-dev-certmanager)
+                tenantId:
+                  type: string
+                  description: Azure tenant ID for WI annotation
+                  default: "b66f9c3b-d384-4932-92fd-444edca3620f"
+                certManagerEmail:
+                  type: string
+                  description: Email for Let's Encrypt ACME account
+                  default: "frederic.simard@dramisinfo.com"
+                acmeServer:
+                  type: string
+                  description: ACME server URL
+                  default: "https://acme-staging-v02.api.letsencrypt.org/directory"
+                subscriptionId:
+                  type: string
+                  description: Azure subscription ID for AzureDNS solver
+                  default: "c1d22d5c-418b-4bd9-ba23-5e806c376b56"
+                dnsResourceGroup:
+                  type: string
+                  description: Azure RG containing the DNS zones
+                  default: "rg-dns"
+            status:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  description: Client ID of the created cert-manager UMI
+                principalId:
+                  type: string
+                  description: Principal (Object) ID of the created cert-manager UMI
+                umiId:
+                  type: string
+                  description: Full ARM resource ID of the created UMI (for FederatedIdentityCredential parentId)

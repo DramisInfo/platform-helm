@@ -1,0 +1,36 @@
+{{- if and .Values.bootstrap.crossplane.enabled .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-compositions
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Wave -109: runs after crossplane-config (-111) is Healthy so all provider
+    # CRDs and function-patch-and-transform are available.
+    # cert-manager (-110) deploys in parallel; its WI setup and ClusterIssuer are
+    # managed via the XCertManagerIdentity Composition in this app.
+    argocd.argoproj.io/sync-wave: "-109"
+spec:
+  destination:
+    namespace: crossplane-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://github.com/DramisInfo/platform-helm.git"
+    targetRevision: HEAD
+    path: crossplane/compositions
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
+      - Validate=false
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+{{- end }}

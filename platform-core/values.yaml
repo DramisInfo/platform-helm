@@ -47,6 +47,12 @@ bootstrap:
       subscriptionId: "c1d22d5c-418b-4bd9-ba23-5e806c376b56"
       # Upbound provider-family-azure version tag (applied to all sub-providers)
       providerVersion: "v1.10.0"
+      # DNS resource group containing Azure DNS zones (used for cert-manager role assignment)
+      dnsResourceGroup: "rg-dns"
+    # crossplane-contrib function-patch-and-transform version (Pipeline mode Compositions)
+    functionPatchAndTransformVersion: "v0.8.0"
+    # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
+    providerKubernetesVersion: "v0.15.0"
   terraformOperator:
     enabled: true
   externalSecretOperator:

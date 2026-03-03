@@ -1,0 +1,33 @@
+# RBAC for provider-kubernetes running under the Crossplane service account.
+# Grants permissions to Observe/Update cert-manager SA and Deployment,
+# and to fully manage cert-manager ClusterIssuers (created by the Composition).
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: crossplane-certmanager-wi-manager
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["cert-manager.io"]
+    resources: ["clusterissuers"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crossplane-certmanager-wi-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: crossplane-certmanager-wi-manager
+subjects:
+  # provider-kubernetes uses the crossplane service account when ProviderConfig
+  # source is InjectedIdentity.
+  - kind: ServiceAccount
+    name: crossplane
+    namespace: crossplane-system

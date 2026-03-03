@@ -52,7 +52,7 @@ spec:
             metadata:
               name: provider-family-azure
             spec:
-              package: xpkg.crossplane.io/upbound/provider-family-azure:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              package: xpkg.upbound.io/upbound/provider-family-azure:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
 
@@ -65,7 +65,7 @@ spec:
             metadata:
               name: provider-azure-authorization
             spec:
-              package: xpkg.crossplane.io/upbound/provider-azure-authorization:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              package: xpkg.upbound.io/upbound/provider-azure-authorization:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
 
@@ -74,7 +74,7 @@ spec:
             metadata:
               name: provider-azure-managedidentity
             spec:
-              package: xpkg.crossplane.io/upbound/provider-azure-managedidentity:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              package: xpkg.upbound.io/upbound/provider-azure-managedidentity:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
 
@@ -83,7 +83,7 @@ spec:
             metadata:
               name: provider-azure-keyvault
             spec:
-              package: xpkg.crossplane.io/upbound/provider-azure-keyvault:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              package: xpkg.upbound.io/upbound/provider-azure-keyvault:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
 

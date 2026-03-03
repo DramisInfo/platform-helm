@@ -39,6 +39,11 @@ spec:
                   template:
                     spec:
                       serviceAccountName: crossplane
+                      # Crossplane 2.x ValidatingWebhook requires at least one container entry.
+                      # `package-runtime` is the standard container name for upbound providers.
+                      # Only the serviceAccountName override is meaningful here.
+                      containers:
+                        - name: package-runtime
 
           # provider-family-azure: base family provider (must come first; owns the
           # ProviderConfig CRD and shared controllers).

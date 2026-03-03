@@ -29,7 +29,7 @@ spec:
           global:
             leaderElection:
               namespace: cert-manager
-{{- if .Values.bootstrap.certManager.workloadIdentity.enabled }}
+{{- if and .Values.bootstrap.certManager.workloadIdentity.enabled (ne .Values.bootstrap.certManager.workloadIdentity.clientId "") }}
           # Azure Workload Identity for DNS01 challenge
           serviceAccount:
             annotations:

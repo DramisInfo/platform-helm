@@ -5,8 +5,8 @@ bootstrap:
   gatewayAPI:
     # Install the Kubernetes Gateway API CRDs from the official kubernetes-sigs release.
     # Must be enabled whenever cert-manager is configured with enableGatewayAPI: true.
-    # Runs at sync-wave -120 (before cert-manager at -110) to ensure CRDs exist before
-    # the cert-manager controller starts and performs its startup Gateway API check.
+    # Runs at sync-wave -115 (before cert-manager at -110 and Crossplane at -112) to ensure
+    # CRDs exist before the cert-manager controller starts its Gateway API check.
     enabled: true
     # Gateway API release tag to install (https://github.com/kubernetes-sigs/gateway-api/releases)
     targetRevision: "v1.2.1"
@@ -14,12 +14,17 @@ bootstrap:
     # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.16.2)
     enabled: true
     # Configure Azure Workload Identity on the cert-manager service account
-    # Required for DNS01 challenges via AzureDNS managed identity
+    # Required for DNS01 challenges via AzureDNS managed identity.
+    # NOTE: clientId is intentionally empty here. The cert-manager UMI is created
+    # by Crossplane (not Terraform) after cluster bootstrap. Crossplane also patches
+    # the cert-manager SA annotation directly, so the Helm chart WI block is only
+    # needed as a fallback when a clientId is explicitly provided (e.g., during migration).
     workloadIdentity:
       enabled: true
-      # Client ID of the User-Managed Identity (UMI) with DNS Zone Contributor role
-      clientId: "bc1b708f-94a6-428d-ba6e-983a5ade07ba"
-      # Azure tenant ID
+      # Client ID injected by Crossplane once the cert-manager UMI is created.
+      # Leave empty; Crossplane will manage the SA annotation directly.
+      clientId: ""
+      # Azure tenant ID (global, same for all clusters)
       tenantId: "b66f9c3b-d384-4932-92fd-444edca3620f"
     # Deploy a Let's Encrypt ClusterIssuer (letsencrypt-prd) alongside cert-manager
     # Uses AzureDNS for DNS01 challenge with a managed identity
@@ -27,6 +32,16 @@ bootstrap:
       enabled: true
   crossplane:
     enabled: true
+    # Azure Workload Identity for the Crossplane controller ServiceAccount.
+    # clientId is the Crossplane UMI created by Terraform and written into
+    # overlays/<cluster>/patches/crossplane-identity.yaml on every terraform apply.
+    # The GitHub Actions post-Arc job binds the federated credential to this UMI.
+    workloadIdentity:
+      enabled: true
+      # Client ID of the Crossplane UMI (populated by Terraform via the overlay patch).
+      clientId: ""
+      # Azure tenant ID (global, same for all clusters)
+      tenantId: "b66f9c3b-d384-4932-92fd-444edca3620f"
   terraformOperator:
     enabled: true
   externalSecretOperator:

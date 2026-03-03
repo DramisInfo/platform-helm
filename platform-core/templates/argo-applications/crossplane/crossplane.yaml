@@ -7,7 +7,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-      argocd.argoproj.io/sync-wave: "-90"
+      argocd.argoproj.io/sync-wave: "-112"
 spec:
   destination:
     namespace: crossplane-system
@@ -17,6 +17,26 @@ spec:
     repoURL: "https://charts.crossplane.io/stable"
     targetRevision: "2.2.0"
     chart: crossplane
+    helm:
+      valuesObject:
+{{- if and .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") }}
+        # Azure Workload Identity for the Crossplane controller
+        # Allows Crossplane to call Azure APIs using the Crossplane UMI
+        # without any client secrets.
+        serviceAccount:
+          annotations:
+            azure.workload.identity/client-id: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
+            azure.workload.identity/tenant-id: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
+        podLabels:
+          azure.workload.identity/use: "true"
+{{- else }}
+        # Workload Identity not yet configured for this cluster.
+        # Run terraform apply to populate bootstrap.crossplane.workloadIdentity.clientId
+        # via the overlays/<cluster>/patches/crossplane-identity.yaml patch.
+        serviceAccount:
+          annotations: {}
+        podLabels: {}
+{{- end }}
   syncPolicy:
     automated:
       prune: true

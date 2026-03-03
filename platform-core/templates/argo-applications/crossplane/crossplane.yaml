@@ -13,126 +13,29 @@ spec:
     namespace: crossplane-system
     server: "https://kubernetes.default.svc"
   project: default
-  sources:
-    - repoURL: "https://charts.crossplane.io/stable"
-      targetRevision: "2.2.0"
-      chart: crossplane
-      helm:
-        valuesObject:
+  source:
+    repoURL: "https://charts.crossplane.io/stable"
+    targetRevision: "2.2.0"
+    chart: crossplane
+    helm:
+      valuesObject:
 {{- if and .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") }}
-          # Azure Workload Identity for the Crossplane controller SA.
-          # Provider pods reuse this SA via DeploymentRuntimeConfig (second source below).
-          customLabels:
-            azure.workload.identity/use: "true"
-          serviceAccount:
-            customAnnotations:
-              azure.workload.identity/client-id: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
-              azure.workload.identity/tenant-id: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
+        # Azure Workload Identity for the Crossplane controller SA.
+        # Provider pods reuse this SA via DeploymentRuntimeConfig in the
+        # crossplane-config app (wave -111, deployed after this app is Healthy).
+        customLabels:
+          azure.workload.identity/use: "true"
+        serviceAccount:
+          customAnnotations:
+            azure.workload.identity/client-id: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
+            azure.workload.identity/tenant-id: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
 {{- else }}
-          # Workload Identity not yet configured for this cluster.
-          # Run terraform apply to populate bootstrap.crossplane.workloadIdentity.clientId
-          # via the overlays/<cluster>/patches/crossplane-identity.yaml patch.
-          serviceAccount:
-            customAnnotations: {}
-          customLabels: {}
-{{- end }}
-{{- if and .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") }}
-    - repoURL: "https://dysnix.github.io/charts"
-      targetRevision: "0.3.2"
-      chart: raw
-      helm:
-        valuesObject:
-          resources:
-            # DeploymentRuntimeConfig: instructs all Azure provider pods to reuse the
-            # already-annotated `crossplane` SA so the Azure WI webhook injects the
-            # OIDC token. Federated credential subject stays
-            # system:serviceaccount:crossplane-system:crossplane.
-            # Wave 1: applied after Crossplane Helm chart installs its CRDs (wave 0).
-            - apiVersion: pkg.crossplane.io/v1beta1
-              kind: DeploymentRuntimeConfig
-              metadata:
-                name: azure-workload-identity
-                annotations:
-                  argocd.argoproj.io/sync-wave: "1"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              spec:
-                deploymentTemplate:
-                  spec:
-                    selector: {}
-                    template:
-                      spec:
-                        serviceAccountName: crossplane
-
-            # provider-family-azure: base family provider (must come first; owns the
-            # ProviderConfig CRD and shared controllers).
-            - apiVersion: pkg.crossplane.io/v1
-              kind: Provider
-              metadata:
-                name: provider-family-azure
-                annotations:
-                  argocd.argoproj.io/sync-wave: "1"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              spec:
-                package: xpkg.crossplane.io/upbound/provider-family-azure:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-                runtimeConfigRef:
-                  name: azure-workload-identity
-
-            # Sub-providers — only the three we need for bootstrapping:
-            #   authorization   → role assignments
-            #   managedidentity → UMIs + federated credentials
-            #   keyvault        → Key Vault
-            - apiVersion: pkg.crossplane.io/v1
-              kind: Provider
-              metadata:
-                name: provider-azure-authorization
-                annotations:
-                  argocd.argoproj.io/sync-wave: "2"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              spec:
-                package: xpkg.crossplane.io/upbound/provider-azure-authorization:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-                runtimeConfigRef:
-                  name: azure-workload-identity
-
-            - apiVersion: pkg.crossplane.io/v1
-              kind: Provider
-              metadata:
-                name: provider-azure-managedidentity
-                annotations:
-                  argocd.argoproj.io/sync-wave: "2"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              spec:
-                package: xpkg.crossplane.io/upbound/provider-azure-managedidentity:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-                runtimeConfigRef:
-                  name: azure-workload-identity
-
-            - apiVersion: pkg.crossplane.io/v1
-              kind: Provider
-              metadata:
-                name: provider-azure-keyvault
-                annotations:
-                  argocd.argoproj.io/sync-wave: "2"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              spec:
-                package: xpkg.crossplane.io/upbound/provider-azure-keyvault:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-                runtimeConfigRef:
-                  name: azure-workload-identity
-
-            # ProviderConfig: tells the Azure provider to authenticate via the OIDC
-            # token file projected by the Azure Workload Identity webhook.
-            # Applied at wave 3 so the family provider CRD exists first.
-            - apiVersion: azure.upbound.io/v1beta1
-              kind: ProviderConfig
-              metadata:
-                name: default
-                annotations:
-                  argocd.argoproj.io/sync-wave: "3"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-              spec:
-                subscriptionID: {{ .Values.bootstrap.crossplane.azure.subscriptionId }}
-                tenantID: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
-                clientID: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
-                credentials:
-                  source: OIDCTokenFile
+        # Workload Identity not yet configured for this cluster.
+        # Run terraform apply to populate bootstrap.crossplane.workloadIdentity.clientId
+        # via the overlays/<cluster>/patches/crossplane-identity.yaml patch.
+        serviceAccount:
+          customAnnotations: {}
+        customLabels: {}
 {{- end }}
   syncPolicy:
     automated:
@@ -141,8 +44,6 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - SkipHooks=true
-      - Timeout=600
       - Validate=false
       - Wait=true
       - PruneEmpty=true

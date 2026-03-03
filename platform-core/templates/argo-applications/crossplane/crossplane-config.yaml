@@ -1,0 +1,113 @@
+{{- if and .Values.bootstrap.crossplane.enabled .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-config
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Wave -111: runs after `crossplane` (wave -112) is Healthy.
+    # At this point all Crossplane CRDs (DeploymentRuntimeConfig, Provider) are available.
+    # ProviderConfig CRD (azure.upbound.io) is installed by provider-family-azure once it
+    # starts up — SkipDryRunOnMissingResource=true handles the initial sync until it appears.
+    argocd.argoproj.io/sync-wave: "-111"
+spec:
+  destination:
+    namespace: crossplane-system
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: "https://dysnix.github.io/charts"
+    targetRevision: "0.3.2"
+    chart: raw
+    helm:
+      valuesObject:
+        resources:
+          # DeploymentRuntimeConfig: instructs all Azure provider pods to reuse the
+          # already-annotated `crossplane` SA so the Azure WI webhook injects the
+          # OIDC token. Federated credential subject stays
+          # system:serviceaccount:crossplane-system:crossplane.
+          - apiVersion: pkg.crossplane.io/v1beta1
+            kind: DeploymentRuntimeConfig
+            metadata:
+              name: azure-workload-identity
+            spec:
+              deploymentTemplate:
+                spec:
+                  selector: {}
+                  template:
+                    spec:
+                      serviceAccountName: crossplane
+
+          # provider-family-azure: base family provider (must come first; owns the
+          # ProviderConfig CRD and shared controllers).
+          - apiVersion: pkg.crossplane.io/v1
+            kind: Provider
+            metadata:
+              name: provider-family-azure
+            spec:
+              package: xpkg.crossplane.io/upbound/provider-family-azure:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              runtimeConfigRef:
+                name: azure-workload-identity
+
+          # Sub-providers for bootstrapping:
+          #   authorization   → role assignments
+          #   managedidentity → UMIs + federated credentials
+          #   keyvault        → Key Vault
+          - apiVersion: pkg.crossplane.io/v1
+            kind: Provider
+            metadata:
+              name: provider-azure-authorization
+            spec:
+              package: xpkg.crossplane.io/upbound/provider-azure-authorization:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              runtimeConfigRef:
+                name: azure-workload-identity
+
+          - apiVersion: pkg.crossplane.io/v1
+            kind: Provider
+            metadata:
+              name: provider-azure-managedidentity
+            spec:
+              package: xpkg.crossplane.io/upbound/provider-azure-managedidentity:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              runtimeConfigRef:
+                name: azure-workload-identity
+
+          - apiVersion: pkg.crossplane.io/v1
+            kind: Provider
+            metadata:
+              name: provider-azure-keyvault
+            spec:
+              package: xpkg.crossplane.io/upbound/provider-azure-keyvault:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
+              runtimeConfigRef:
+                name: azure-workload-identity
+
+          # ProviderConfig: WI-based auth via the OIDC token file projected
+          # by the Azure Workload Identity webhook.
+          # CRD is installed by provider-family-azure; SkipDryRunOnMissingResource
+          # lets the initial sync pass and self-heal handles the retry.
+          - apiVersion: azure.upbound.io/v1beta1
+            kind: ProviderConfig
+            metadata:
+              name: default
+              annotations:
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              subscriptionID: {{ .Values.bootstrap.crossplane.azure.subscriptionId }}
+              tenantID: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
+              clientID: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
+              credentials:
+                source: OIDCTokenFile
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+{{- end }}

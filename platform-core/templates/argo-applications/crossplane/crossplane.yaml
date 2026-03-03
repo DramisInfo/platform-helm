@@ -23,12 +23,12 @@ spec:
         # Azure Workload Identity for the Crossplane controller
         # Allows Crossplane to call Azure APIs using the Crossplane UMI
         # without any client secrets.
+        customLabels:
+          azure.workload.identity/use: "true"
         serviceAccount:
-          annotations:
+          customAnnotations:
             azure.workload.identity/client-id: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
             azure.workload.identity/tenant-id: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
-        podLabels:
-          azure.workload.identity/use: "true"
 {{- else }}
         # Workload Identity not yet configured for this cluster.
         # Run terraform apply to populate bootstrap.crossplane.workloadIdentity.clientId

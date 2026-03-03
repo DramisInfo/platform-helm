@@ -42,6 +42,11 @@ bootstrap:
       clientId: ""
       # Azure tenant ID (global, same for all clusters)
       tenantId: "b66f9c3b-d384-4932-92fd-444edca3620f"
+    azure:
+      # Azure subscription ID where Crossplane will create resources
+      subscriptionId: "c1d22d5c-418b-4bd9-ba23-5e806c376b56"
+      # Upbound provider-family-azure version tag (applied to all sub-providers)
+      providerVersion: "v1.10.0"
   terraformOperator:
     enabled: true
   externalSecretOperator:

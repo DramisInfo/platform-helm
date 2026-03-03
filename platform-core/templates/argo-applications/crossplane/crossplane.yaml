@@ -47,10 +47,14 @@ spec:
             # already-annotated `crossplane` SA so the Azure WI webhook injects the
             # OIDC token. Federated credential subject stays
             # system:serviceaccount:crossplane-system:crossplane.
+            # Wave 1: applied after Crossplane Helm chart installs its CRDs (wave 0).
             - apiVersion: pkg.crossplane.io/v1beta1
               kind: DeploymentRuntimeConfig
               metadata:
                 name: azure-workload-identity
+                annotations:
+                  argocd.argoproj.io/sync-wave: "1"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               spec:
                 deploymentTemplate:
                   spec:

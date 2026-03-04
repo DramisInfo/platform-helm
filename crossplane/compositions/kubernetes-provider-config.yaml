@@ -1,0 +1,14 @@
+# ProviderConfig for provider-kubernetes.
+# This file lives in crossplane/compositions/ so it is applied by the
+# crossplane-compositions ArgoCD app (wave -109), AFTER crossplane-config
+# (wave -111) is Healthy and the provider-kubernetes Package has finished
+# installing its CRDs. Applying this in the same wave as the Package itself
+# causes a "no matches for kind ProviderConfig" error because the CRD is
+# not yet registered when the sync runs.
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: InjectedIdentity

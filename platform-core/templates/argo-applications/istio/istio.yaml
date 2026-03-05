@@ -41,15 +41,40 @@ spec:
       chart: ztunnel
       helm:
         valuesObject: {}
+    # Wave 3 — Wildcard TLS certificate.
+    # ArgoCD tracks cert-manager Certificate health (Ready condition) and will not
+    # advance to wave 5 until the certificate is issued and the TLS secret exists,
+    # eliminating the race condition with the Gateway listener validation.
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"
       chart: raw
       helm:
         valuesObject:
           resources:
-            # Shared ingress gateway using Kubernetes Gateway API.
-            # Istio auto-provisions the backing Deployment and Service (named shared-gateway-istio).
-            # cert-manager auto-provisions the wildcard TLS secret via the annotation below.
+            - apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: shared-gateway-wildcard-tls
+                namespace: istio-system
+                annotations:
+                  argocd.argoproj.io/sync-wave: "3"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                secretName: shared-gateway-wildcard-tls
+                issuerRef:
+                  name: letsencrypt-prd
+                  kind: ClusterIssuer
+                dnsNames:
+                  - "*.{{ .Values.global.clusterName }}.dramisinfo.com"
+    # Wave 5 — Shared ingress gateway.
+    # Istio auto-provisions the backing Deployment and Service (named shared-gateway-istio).
+    # The TLS secret is guaranteed to exist by the time this wave is applied.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
             - apiVersion: gateway.networking.k8s.io/v1
               kind: Gateway
               metadata:
@@ -58,9 +83,6 @@ spec:
                 annotations:
                   argocd.argoproj.io/sync-wave: "5"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-                  # cert-manager watches this annotation and auto-creates a Certificate
-                  # for each HTTPS listener hostname, then populates the referenced secret.
-                  cert-manager.io/cluster-issuer: letsencrypt-prd
               spec:
                 gatewayClassName: istio
                 listeners:
@@ -82,6 +104,13 @@ spec:
                     allowedRoutes:
                       namespaces:
                         from: All
+    # Wave 10 — HTTP routes.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
             # Redirect all HTTP traffic to HTTPS
             - apiVersion: gateway.networking.k8s.io/v1
               kind: HTTPRoute

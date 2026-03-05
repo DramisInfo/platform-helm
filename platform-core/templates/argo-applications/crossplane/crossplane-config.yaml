@@ -37,6 +37,11 @@ spec:
                 spec:
                   selector: {}
                   template:
+                    metadata:
+                      labels:
+                        # Required: Azure WI webhook selects pods with this label
+                        # to inject the OIDC token volume mount.
+                        azure.workload.identity/use: "true"
                     spec:
                       serviceAccountName: crossplane
                       # Crossplane 2.x ValidatingWebhook requires at least one container entry.

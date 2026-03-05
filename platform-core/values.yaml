@@ -45,6 +45,8 @@ bootstrap:
     azure:
       # Azure subscription ID where Crossplane will create resources
       subscriptionId: "c1d22d5c-418b-4bd9-ba23-5e806c376b56"
+      # Default Azure region for resources created by Crossplane (e.g. UMIs, role assignments)
+      location: "canadacentral"
       # Upbound provider-family-azure version tag (applied to all sub-providers)
       providerVersion: "v1.10.0"
       # DNS resource group containing Azure DNS zones (used for cert-manager role assignment)
@@ -53,6 +55,19 @@ bootstrap:
     functionPatchAndTransformVersion: "v0.8.0"
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     providerKubernetesVersion: "v0.15.0"
+    # Provision the per-cluster cert-manager Managed Identity via Crossplane.
+    # Values here are cluster-specific and should be injected via the overlay patch
+    # (overlays/<cluster>/patches/platform-core.yaml) rather than set globally.
+    certManagerIdentity:
+      # Set enabled: true in the cluster overlay patch (overlays/<cluster>/patches/platform-core.yaml)
+      # to provision the cert-manager Managed Identity for that cluster.
+      # No other values are needed — all fields are fully derived:
+      #   resourceGroup  → rg-{clusterName}
+      #   identityName   → umi-{clusterName}-certmanager
+      #   dnsRoleScope   → /subscriptions/{azure.subscriptionId}/resourceGroups/{azure.dnsResourceGroup}
+      #   location       → bootstrap.crossplane.azure.location
+      #   oidcIssuer     → observed at runtime from azure-clusterconfig-wi ConfigMap (azure-arc namespace)
+      enabled: true
   terraformOperator:
     enabled: true
   externalSecretOperator:

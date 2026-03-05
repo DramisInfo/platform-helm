@@ -24,7 +24,6 @@ spec:
                 - resourceGroup
                 - location
                 - dnsRoleScope
-                - oidcIssuer
                 - identityName
                 - clusterName
               properties:
@@ -40,9 +39,6 @@ spec:
                 dnsRoleScope:
                   type: string
                   description: Full ARM scope for DNS Zone Contributor (/subscriptions/.../resourceGroups/rg-dns)
-                oidcIssuer:
-                  type: string
-                  description: Arc OIDC issuer URL (az connectedk8s show --query oidcIssuerProfile.issuerUrl)
                 identityName:
                   type: string
                   description: Azure UMI name (e.g. umi-cace-1-dev-certmanager)
@@ -69,6 +65,9 @@ spec:
             status:
               type: object
               properties:
+                oidcIssuer:
+                  type: string
+                  description: OIDC issuer URL observed from azure-clusterconfig-wi ConfigMap in azure-arc namespace
                 clientId:
                   type: string
                   description: Client ID of the created cert-manager UMI

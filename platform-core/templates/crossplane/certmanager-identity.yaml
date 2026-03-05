@@ -1,0 +1,30 @@
+{{- if and .Values.bootstrap.crossplane.enabled .Values.bootstrap.crossplane.certManagerIdentity.enabled -}}
+{{- $az := .Values.bootstrap.crossplane.azure -}}
+{{- /* oidcIssuer is NOT rendered here — the Composition observes it at runtime */}}
+{{- /* from azure-clusterconfig-wi ConfigMap in the azure-arc namespace.         */}}
+# XCertManagerIdentity — drives the Crossplane Composition that creates:
+#   1. The cert-manager User Assigned Managed Identity in Azure
+#   2. DNS Zone Contributor role assignment on the DNS resource group
+#   3. Federated Identity Credential binding the cert-manager SA to the UMI
+#
+# All fields are derived: clusterName, azure.* globals, and the OIDC issuer URL
+# is observed at runtime from the azure-clusterconfig-wi ConfigMap in azure-arc.
+# No cluster-specific values are needed in the overlay patch beyond enabled: true.
+#
+# Sync-wave -108: runs after crossplane-compositions (-109) so the XRD and
+# Composition are registered before this composite resource is created.
+# SkipDryRunOnMissingResource=true on the platform-core app handles the
+# transient period before the XRD CRD is first installed.
+apiVersion: platform.dramisinfo.com/v1alpha1
+kind: XCertManagerIdentity
+metadata:
+  name: {{ .Values.global.clusterName }}-certmanager
+  annotations:
+    argocd.argoproj.io/sync-wave: "-108"
+spec:
+  clusterName: {{ .Values.global.clusterName }}
+  resourceGroup: rg-{{ .Values.global.clusterName }}
+  location: {{ $az.location }}
+  dnsRoleScope: /subscriptions/{{ $az.subscriptionId }}/resourceGroups/{{ $az.dnsResourceGroup }}
+  identityName: umi-{{ .Values.global.clusterName }}-certmanager
+{{- end }}

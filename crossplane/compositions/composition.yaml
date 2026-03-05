@@ -8,6 +8,42 @@ spec:
     kind: XCertManagerIdentity
   mode: Pipeline
   pipeline:
+    # ── Step 1: Observe OIDC issuer URL from the Arc Workload Identity ConfigMap ──
+    # Reads azure-clusterconfig-wi in the azure-arc namespace (written by the
+    # wiextension Helm release on every Arc-enabled cluster) and propagates
+    # ISSUER_URL into status.oidcIssuer so downstream steps can use it without
+    # any cluster-specific spec fields.
+    - step: observe-oidc-config
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: observe-oidc-config
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              spec:
+                managementPolicies:
+                  - Observe
+                providerConfigRef:
+                  name: default
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                      name: azure-clusterconfig-wi
+                      namespace: azure-arc
+            patches:
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.manifest.data.ISSUER_URL
+                toFieldPath: status.oidcIssuer
+                policy:
+                  fromFieldPath: Optional
+
+    # ── Step 2: Create/patch all Azure and in-cluster resources ──
     - step: patch-and-transform
       functionRef:
         name: function-patch-and-transform
@@ -98,14 +134,16 @@ spec:
                 forProvider:
                   audience:
                     - api://AzureADTokenExchange
-                  issuer: ""            # patched from spec.oidcIssuer
+                  issuer: ""            # patched from status.oidcIssuer (observed from azure-clusterconfig-wi)
                   parentId: ""          # patched from status.umiId (full ARM resource ID)
                   resourceGroupName: "" # patched from spec.resourceGroup
                   subject: system:serviceaccount:cert-manager:cert-manager
             patches:
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.oidcIssuer
+                fromFieldPath: status.oidcIssuer
                 toFieldPath: spec.forProvider.issuer
+                policy:
+                  fromFieldPath: Required
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.resourceGroup
                 toFieldPath: spec.forProvider.resourceGroupName

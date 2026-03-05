@@ -22,7 +22,7 @@ spec:
         resources:
           - name: observe-oidc-config
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
@@ -161,7 +161,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: certmanager-sa
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
@@ -200,7 +200,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: certmanager-deployment
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
@@ -228,7 +228,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: certmanager-clusterissuer
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.crossplane.io/v1alpha1
               kind: Object
               spec:
                 providerConfigRef:

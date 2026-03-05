@@ -73,6 +73,7 @@ spec:
               package: xpkg.upbound.io/upbound/provider-azure-authorization:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
+              skipDependencyResolution: true
 
           - apiVersion: pkg.crossplane.io/v1
             kind: Provider
@@ -82,6 +83,7 @@ spec:
               package: xpkg.upbound.io/upbound/provider-azure-managedidentity:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
+              skipDependencyResolution: true
 
           - apiVersion: pkg.crossplane.io/v1
             kind: Provider
@@ -91,6 +93,7 @@ spec:
               package: xpkg.upbound.io/upbound/provider-azure-keyvault:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
+              skipDependencyResolution: true
 
           # ProviderConfig: WI-based auth via the OIDC token file projected
           # by the Azure Workload Identity webhook.

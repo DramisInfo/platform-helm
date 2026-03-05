@@ -9,8 +9,8 @@ metadata:
   annotations:
     # Wave -109: runs after crossplane-config (-111) is Healthy so all provider
     # CRDs and function-patch-and-transform are available.
-    # cert-manager (-110) deploys in parallel; its WI setup and ClusterIssuer are
-    # managed via the XCertManagerIdentity Composition in this app.
+    # cert-manager (-107) runs after this app so XCertManagerIdentity (embedded
+    # in the cert-manager multi-source app) can apply cleanly once the XRD is registered.
     argocd.argoproj.io/sync-wave: "-109"
 spec:
   destination:

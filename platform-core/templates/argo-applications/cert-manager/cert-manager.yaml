@@ -9,7 +9,10 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "-110"
+    # Wave -107: after crossplane-compositions (-109) has registered the XRD so the
+    # XCertManagerIdentity CR in this app's multi-source can apply cleanly.
+    # cert-manager itself has no dependency on crossplane, so the wave change is safe.
+    argocd.argoproj.io/sync-wave: "-107"
 spec:
   destination:
     namespace: cert-manager
@@ -36,9 +39,11 @@ spec:
     # cert-manager UMI, DNS Zone Contributor role assignment, and Federated
     # Identity Credential in Azure. Placed here so cert-manager and its Azure
     # identity lifecycle are managed together.
-    # Sync-wave -108: after crossplane-compositions (-109) has registered the XRD,
-    # so the CRD is available. SkipDryRunOnMissingResource=true handles the
-    # transient window on first install.
+    # Inner sync-wave -108: syncs before the cert-manager Helm resources (wave 0)
+    # within this app. The parent cert-manager Application is at wave -107, which
+    # is after crossplane-compositions (-109), so the XRD CRD is guaranteed to
+    # exist before this CR is applied.
+    # SkipDryRunOnMissingResource=true handles any edge cases on first bootstrap.
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"
       chart: raw

@@ -52,6 +52,9 @@ spec:
 
           # provider-family-azure: base family provider (must come first; owns the
           # ProviderConfig CRD and shared controllers).
+          # skipDependencyResolution: true prevents Crossplane from auto-creating a
+          # second `upbound-provider-family-azure` Provider object to satisfy the
+          # sub-providers' declared dependency — all providers are explicitly managed here.
           - apiVersion: pkg.crossplane.io/v1
             kind: Provider
             metadata:
@@ -60,6 +63,7 @@ spec:
               package: xpkg.upbound.io/upbound/provider-family-azure:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
               runtimeConfigRef:
                 name: azure-workload-identity
+              skipDependencyResolution: true
 
           # Sub-providers for bootstrapping:
           #   authorization   → role assignments

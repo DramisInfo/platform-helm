@@ -1,4 +1,6 @@
 {{- if .Values.bootstrap.certManager.enabled -}}
+{{- $certManagerIdentityEnabled := and .Values.bootstrap.crossplane.enabled .Values.bootstrap.crossplane.certManagerIdentity.enabled -}}
+{{- $az := .Values.bootstrap.crossplane.azure -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -13,26 +15,50 @@ spec:
     namespace: cert-manager
     server: "https://kubernetes.default.svc"
   project: default
-  source:
-    repoURL: "https://charts.jetstack.io"
-    targetRevision: "v1.16.2"
-    chart: cert-manager
-    helm:
-      valuesObject:
-        crds:
-          enabled: true
-          keep: true
-        config:
-          apiVersion: controller.config.cert-manager.io/v1alpha1
-          kind: ControllerConfiguration
-          enableGatewayAPI: true
-        global:
-          leaderElection:
-            namespace: cert-manager
-        # Note: Azure Workload Identity (SA annotation + pod label) and the
-        # ClusterIssuer are managed by the crossplane-compositions app via the
-        # XCertManagerIdentity Composition. This avoids the chicken-and-egg problem
-        # of needing the UMI client ID at cert-manager deploy time.
+  sources:
+    - repoURL: "https://charts.jetstack.io"
+      targetRevision: "v1.16.2"
+      chart: cert-manager
+      helm:
+        valuesObject:
+          crds:
+            enabled: true
+            keep: true
+          config:
+            apiVersion: controller.config.cert-manager.io/v1alpha1
+            kind: ControllerConfiguration
+            enableGatewayAPI: true
+          global:
+            leaderElection:
+              namespace: cert-manager
+    {{- if $certManagerIdentityEnabled }}
+    # XCertManagerIdentity: drives the Crossplane Composition that creates the
+    # cert-manager UMI, DNS Zone Contributor role assignment, and Federated
+    # Identity Credential in Azure. Placed here so cert-manager and its Azure
+    # identity lifecycle are managed together.
+    # Sync-wave -108: after crossplane-compositions (-109) has registered the XRD,
+    # so the CRD is available. SkipDryRunOnMissingResource=true handles the
+    # transient window on first install.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: platform.dramisinfo.com/v1alpha1
+              kind: XCertManagerIdentity
+              metadata:
+                name: {{ .Values.global.clusterName }}-certmanager
+                annotations:
+                  argocd.argoproj.io/sync-wave: "-108"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                clusterName: {{ .Values.global.clusterName }}
+                resourceGroup: rg-{{ .Values.global.clusterName }}
+                location: {{ $az.location }}
+                dnsRoleScope: /subscriptions/{{ $az.subscriptionId }}/resourceGroups/{{ $az.dnsResourceGroup }}
+                identityName: umi-{{ .Values.global.clusterName }}-certmanager
+    {{- end }}
   syncPolicy:
     automated:
       prune: true
@@ -40,6 +66,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
       - SkipHooks=true
       - Timeout=600
       - Validate=false

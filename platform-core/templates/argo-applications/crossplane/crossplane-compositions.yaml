@@ -32,5 +32,5 @@ spec:
       - ServerSideApply=true
       - SkipDryRunOnMissingResource=true
       - Validate=false
-    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+    {{- include "platform-core.extendedRetry" . | nindent 4 }}
 {{- end }}

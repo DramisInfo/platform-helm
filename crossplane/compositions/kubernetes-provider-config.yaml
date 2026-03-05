@@ -5,10 +5,14 @@
 # installing its CRDs. Applying this in the same wave as the Package itself
 # causes a "no matches for kind ProviderConfig" error because the CRD is
 # not yet registered when the sync runs.
+# SkipDryRunOnMissingResource lets ArgoCD skip this resource gracefully on
+# the first pass when the CRD is still being registered by the provider pod.
 apiVersion: kubernetes.crossplane.io/v1alpha2
 kind: ProviderConfig
 metadata:
   name: default
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   credentials:
     source: InjectedIdentity

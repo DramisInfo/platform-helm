@@ -10,3 +10,17 @@ retry:
     factor: 2
     maxDuration: 30s
 {{- end }}
+
+{{/*
+Extended ArgoCD retry policy for apps that depend on CRDs registered
+asynchronously by Crossplane providers (e.g. crossplane-compositions).
+Usage: {{- include "platform-core.extendedRetry" . | nindent 4 }}
+*/}}
+{{- define "platform-core.extendedRetry" -}}
+retry:
+  limit: 30
+  backoff:
+    duration: 10s
+    factor: 2
+    maxDuration: 3m
+{{- end }}

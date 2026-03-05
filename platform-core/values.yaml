@@ -245,7 +245,7 @@ bootstrap:
     # Deploy KubeVela via Argo CD (kubevela/vela-core 1.10.7)
     # KubeVela is an application-centric platform that abstracts workload delivery
     # over Kubernetes using the Open Application Model (OAM).
-    enabled: true
+    enabled: false
     # Number of controller replicas
     replicaCount: 1
     # Enable multi-cluster mode (requires additional cluster registration)

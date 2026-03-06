@@ -26,6 +26,8 @@ spec:
             metadata:
               name: crossplane
               namespace: monitoring
+              labels:
+                release: prometheus
               annotations:
                 argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
             spec:
@@ -45,6 +47,8 @@ spec:
             metadata:
               name: crossplane-providers
               namespace: monitoring
+              labels:
+                release: prometheus
               annotations:
                 argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
             spec:

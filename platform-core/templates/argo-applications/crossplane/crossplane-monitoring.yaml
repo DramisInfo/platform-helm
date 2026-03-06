@@ -57,7 +57,7 @@ spec:
                   - crossplane-system
               selector:
                 matchExpressions:
-                  - key: pkg.crossplane.io/revision
+                  - key: pkg.crossplane.io/provider
                     operator: Exists
               podMetricsEndpoints:
                 - port: metrics

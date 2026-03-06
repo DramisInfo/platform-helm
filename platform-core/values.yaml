@@ -68,6 +68,22 @@ bootstrap:
       #   location       → bootstrap.crossplane.azure.location
       #   oidcIssuer     → observed at runtime from azure-clusterconfig-wi ConfigMap (azure-arc namespace)
       enabled: true
+    # Deploy the product-workspace-composition XRD and Composition via Argo CD.
+    # Enabled by default when Crossplane is enabled.
+    productWorkspaceComposition:
+      enabled: true
+      # Git ref to deploy (branch, tag, or commit SHA)
+      targetRevision: HEAD
+      # GitHub organization where product team resources will be created
+      githubOrg: dramisinfo
+      # ArgoCD source repositories allowed for all product projects
+      argocdSourceRepos:
+        - "https://github.com/dramisinfo/*"
+      # ProviderConfig names expected on the cluster for each backend
+      providerConfigs:
+        github: github-provider-config
+        kubernetes: kubernetes-provider-config
+        argocd: argocd-provider-config
   terraformOperator:
     enabled: true
   externalSecretOperator:

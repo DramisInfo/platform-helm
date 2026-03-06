@@ -129,10 +129,9 @@ spec:
               runtimeConfigRef:
                 name: azure-workload-identity
 
-          # function-go-templating: provides conditional / dynamic resource rendering
-          # via Go text/template syntax. Used by the generic XAzureWorkloadIdentity
-          # Composition to conditionally render optional resources (ClusterSecretStore,
-          # ClusterIssuer, annotateDeployment, outputConfigMap).
+          # function-go-templating: conditional / dynamic resource rendering via Go
+          # text/template syntax. Used by XAzureWorkloadIdentity and any other
+          # Composition that needs conditional resource generation.
           - apiVersion: pkg.crossplane.io/v1beta1
             kind: Function
             metadata:
@@ -141,6 +140,18 @@ spec:
                 argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
             spec:
               package: xpkg.upbound.io/crossplane-contrib/function-go-templating:{{ .Values.bootstrap.crossplane.functionGoTemplatingVersion }}
+
+          # function-auto-ready: marks the XR as Ready once all composed resources
+          # are ready. Required as the last pipeline step in all Platform Compositions
+          # (XAzureWorkloadIdentity, XProductWorkspace, etc.).
+          - apiVersion: pkg.crossplane.io/v1beta1
+            kind: Function
+            metadata:
+              name: function-auto-ready
+              annotations:
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:{{ .Values.bootstrap.crossplane.functionAutoReadyVersion }}
 
           # provider-kubernetes: manages in-cluster Kubernetes objects from Compositions
           # (e.g. annotating the cert-manager ServiceAccount with WI client ID).

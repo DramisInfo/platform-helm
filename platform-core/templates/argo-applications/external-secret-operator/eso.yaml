@@ -22,9 +22,9 @@ spec:
       targetRevision: "2.0.1"
       chart: external-secrets
     {{- if $esoIdentityEnabled }}
-    # XEsoIdentity: drives the Crossplane Composition that creates the ESO UMI,
-    # Key Vault Secrets User role assignment on the shared AKV, Federated Identity
-    # Credential, WI annotations on the ESO SA, and the ClusterSecretStore.
+    # XAzureWorkloadIdentity (generic): creates the ESO UMI, grants Key Vault Secrets
+    # User on the shared AKV, binds the federated credential, annotates the ESO SA
+    # with WI credentials, and creates the ClusterSecretStore.
     # Placed here so ESO and its Azure identity lifecycle are managed together.
     # Inner sync-wave -91: syncs before ESO Helm resources (wave 0) within this app.
     # SkipDryRunOnMissingResource=true handles any edge cases on first bootstrap.
@@ -35,7 +35,7 @@ spec:
         valuesObject:
           resources:
             - apiVersion: platform.dramisinfo.com/v1alpha1
-              kind: XEsoIdentity
+              kind: XAzureWorkloadIdentity
               metadata:
                 name: {{ .Values.global.clusterName }}-eso
                 annotations:
@@ -46,8 +46,14 @@ spec:
                 resourceGroup: rg-{{ .Values.global.clusterName }}
                 location: {{ $az.location }}
                 identityName: umi-{{ .Values.global.clusterName }}-eso
-                sharedAkvScope: {{ .Values.bootstrap.crossplane.esoIdentity.sharedAkvScope }}
-                sharedAkvUrl: {{ .Values.bootstrap.crossplane.esoIdentity.sharedAkvUrl }}
+                serviceAccount:
+                  name: external-secrets
+                  namespace: eso
+                roleAssignment:
+                  scope: {{ .Values.bootstrap.crossplane.esoIdentity.sharedAkvScope }}
+                  roleName: Key Vault Secrets User
+                clusterSecretStore:
+                  vaultUrl: {{ .Values.bootstrap.crossplane.esoIdentity.sharedAkvUrl }}
     {{- end }}
   ignoreDifferences:
     - group: apiextensions.k8s.io

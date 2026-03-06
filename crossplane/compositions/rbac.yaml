@@ -1,15 +1,22 @@
 # RBAC for provider-kubernetes running under the Crossplane service account.
-# Grants permissions to Observe/Update cert-manager SA and Deployment,
-# and to fully manage cert-manager ClusterIssuers (created by the Composition).
+# Grants permissions for all resources managed by XAzureWorkloadIdentity compositions:
+#   • ServiceAccounts        (Observe+Update WI annotations)
+#   • Deployments            (Observe+Update WI label — cert-manager pattern)
+#   • ClusterIssuers         (full lifecycle — cert-manager)
+#   • ClusterSecretStores    (full lifecycle — ESO)
+#   • ConfigMaps             (full lifecycle — optional outputConfigMap)
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: crossplane-certmanager-wi-manager
+  name: crossplane-workload-identity-manager
 rules:
   - apiGroups: [""]
     resources: ["serviceaccounts"]
     verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "watch", "update", "patch"]
@@ -23,11 +30,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: crossplane-certmanager-wi-manager
+  name: crossplane-workload-identity-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: crossplane-certmanager-wi-manager
+  name: crossplane-workload-identity-manager
 subjects:
   # provider-kubernetes uses the crossplane service account when ProviderConfig
   # source is InjectedIdentity.

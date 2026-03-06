@@ -35,10 +35,10 @@ spec:
             leaderElection:
               namespace: cert-manager
     {{- if $certManagerIdentityEnabled }}
-    # XCertManagerIdentity: drives the Crossplane Composition that creates the
-    # cert-manager UMI, DNS Zone Contributor role assignment, and Federated
-    # Identity Credential in Azure. Placed here so cert-manager and its Azure
-    # identity lifecycle are managed together.
+    # XAzureWorkloadIdentity (generic): creates the cert-manager UMI, grants DNS Zone
+    # Contributor on the DNS resource group, binds the federated credential, annotates
+    # the cert-manager SA and Deployment with WI labels, and creates the ClusterIssuer.
+    # Placed here so cert-manager and its Azure identity lifecycle are managed together.
     # Inner sync-wave -108: syncs before the cert-manager Helm resources (wave 0)
     # within this app. The parent cert-manager Application is at wave -107, which
     # is after crossplane-compositions (-109), so the XRD CRD is guaranteed to
@@ -51,7 +51,7 @@ spec:
         valuesObject:
           resources:
             - apiVersion: platform.dramisinfo.com/v1alpha1
-              kind: XCertManagerIdentity
+              kind: XAzureWorkloadIdentity
               metadata:
                 name: {{ .Values.global.clusterName }}-certmanager
                 annotations:
@@ -61,8 +61,17 @@ spec:
                 clusterName: {{ .Values.global.clusterName }}
                 resourceGroup: rg-{{ .Values.global.clusterName }}
                 location: {{ $az.location }}
-                dnsRoleScope: /subscriptions/{{ $az.subscriptionId }}/resourceGroups/{{ $az.dnsResourceGroup }}
                 identityName: umi-{{ .Values.global.clusterName }}-certmanager
+                serviceAccount:
+                  name: cert-manager
+                  namespace: cert-manager
+                roleAssignment:
+                  scope: /subscriptions/{{ $az.subscriptionId }}/resourceGroups/{{ $az.dnsResourceGroup }}
+                  roleName: DNS Zone Contributor
+                annotateDeployment:
+                  name: cert-manager
+                  namespace: cert-manager
+                clusterIssuer: {}
     {{- end }}
   syncPolicy:
     automated:

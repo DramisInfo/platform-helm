@@ -1,0 +1,152 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: xazureworkloadidentities.platform.dramisinfo.com
+spec:
+  # Cluster-scoped: one XAzureWorkloadIdentity per UMI (e.g. one for ESO, one for cert-manager).
+  # No claimNames — instances are created directly as cluster-scoped objects.
+  scope: Cluster
+  group: platform.dramisinfo.com
+  names:
+    kind: XAzureWorkloadIdentity
+    plural: xazureworkloadidentities
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - clusterName
+                - resourceGroup
+                - location
+                - identityName
+                - serviceAccount
+                - roleAssignment
+              properties:
+                clusterName:
+                  type: string
+                  description: Cluster name used for tagging and DNS zone derivation (e.g. cace-1-dev).
+                resourceGroup:
+                  type: string
+                  description: Azure resource group where the UMI is created (e.g. rg-cace-1-dev).
+                location:
+                  type: string
+                  description: Azure region for the UMI (e.g. canadacentral).
+                identityName:
+                  type: string
+                  description: Azure UMI name (e.g. umi-cace-1-dev-eso).
+                tenantId:
+                  type: string
+                  description: Azure tenant ID used for the WI SA annotation.
+                  default: "b66f9c3b-d384-4932-92fd-444edca3620f"
+
+                serviceAccount:
+                  type: object
+                  description: Kubernetes ServiceAccount to annotate with Azure WI credentials.
+                  required: [name, namespace]
+                  properties:
+                    name:
+                      type: string
+                      description: ServiceAccount name.
+                    namespace:
+                      type: string
+                      description: ServiceAccount namespace.
+
+                roleAssignment:
+                  type: object
+                  description: Azure RBAC role assignment to grant the UMI's principal.
+                  required: [scope, roleName]
+                  properties:
+                    scope:
+                      type: string
+                      description: Full ARM resource scope for the role assignment (e.g. /subscriptions/.../resourceGroups/rg-shared/providers/Microsoft.KeyVault/vaults/akv-shared).
+                    roleName:
+                      type: string
+                      description: Azure built-in or custom role definition name (e.g. "Key Vault Secrets User", "DNS Zone Contributor").
+
+                # Optional: also patches a Deployment with azure.workload.identity/use: "true"
+                # so the WI webhook injects the OIDC token into pods on restart.
+                annotateDeployment:
+                  type: object
+                  description: If set, patches the named Deployment with the azure.workload.identity/use label to trigger WI token injection on pod restart.
+                  properties:
+                    name:
+                      type: string
+                      description: Deployment name.
+                    namespace:
+                      type: string
+                      description: Deployment namespace.
+
+                # Optional: creates an ESO ClusterSecretStore backed by Azure Key Vault.
+                clusterSecretStore:
+                  type: object
+                  description: If set, creates an ESO ClusterSecretStore using WorkloadIdentity auth against the given Key Vault.
+                  properties:
+                    name:
+                      type: string
+                      description: ClusterSecretStore name.
+                      default: "azure-keyvault-shared"
+                    vaultUrl:
+                      type: string
+                      description: Azure Key Vault URL (e.g. https://akv-shared.vault.azure.net/).
+
+                # Optional: creates a cert-manager ClusterIssuer with Azure DNS01 ACME solver.
+                clusterIssuer:
+                  type: object
+                  description: If set, creates a cert-manager ClusterIssuer that uses AzureDNS DNS01 with the provisioned UMI's clientId.
+                  properties:
+                    name:
+                      type: string
+                      description: ClusterIssuer name.
+                      default: "letsencrypt-prd"
+                    email:
+                      type: string
+                      description: ACME account email.
+                      default: "frederic.simard@dramisinfo.com"
+                    acmeServer:
+                      type: string
+                      description: ACME directory URL.
+                      default: "https://acme-v02.api.letsencrypt.org/directory"
+                    subscriptionId:
+                      type: string
+                      description: Azure subscription ID for the AzureDNS solver.
+                      default: "c1d22d5c-418b-4bd9-ba23-5e806c376b56"
+                    dnsResourceGroup:
+                      type: string
+                      description: Azure resource group containing the DNS zones.
+                      default: "rg-dns"
+
+                # Optional: writes UMI outputs to a ConfigMap for downstream consumers
+                # (e.g. other Compositions that need the clientId without being in the same XR).
+                outputConfigMap:
+                  type: object
+                  description: If set, creates a ConfigMap containing the UMI clientId, principalId, umiId and tenantId.
+                  required: [name, namespace]
+                  properties:
+                    name:
+                      type: string
+                      description: ConfigMap name.
+                    namespace:
+                      type: string
+                      description: Namespace where the ConfigMap is created.
+
+            status:
+              type: object
+              properties:
+                oidcIssuer:
+                  type: string
+                  description: OIDC issuer URL observed from azure-clusterconfig-wi ConfigMap in the azure-arc namespace.
+                clientId:
+                  type: string
+                  description: Client ID of the provisioned UMI.
+                principalId:
+                  type: string
+                  description: Principal (Object) ID of the provisioned UMI.
+                umiId:
+                  type: string
+                  description: Full ARM resource ID of the UMI (used as parentId for FederatedIdentityCredential).

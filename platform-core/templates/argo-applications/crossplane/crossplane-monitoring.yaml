@@ -72,7 +72,7 @@ spec:
                 matchLabels:
                   dashboards: "grafana"
               url: "https://grafana.com/api/dashboards/24549/revisions/3/download"
-              folder: "Crossplane"
+              folder: "monitoring"
   syncPolicy:
     automated:
       prune: true

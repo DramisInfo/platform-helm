@@ -1,0 +1,84 @@
+{{- if and .Values.bootstrap.crossplane.enabled .Values.bootstrap.monitoring.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-monitoring
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-65"
+spec:
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  project: platform-observability
+  source:
+    repoURL: "https://dysnix.github.io/charts"
+    targetRevision: "0.3.2"
+    chart: raw
+    helm:
+      valuesObject:
+        resources:
+          # Scrape the Crossplane core pod (exposes function pipeline + circuit breaker metrics)
+          - apiVersion: monitoring.coreos.com/v1
+            kind: PodMonitor
+            metadata:
+              name: crossplane
+              namespace: monitoring
+              annotations:
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              namespaceSelector:
+                matchNames:
+                  - crossplane-system
+              selector:
+                matchLabels:
+                  app: crossplane
+              podMetricsEndpoints:
+                - port: metrics
+                  path: /metrics
+
+          # Scrape all Crossplane provider pods (exposes crossplane_managed_resource_* metrics)
+          - apiVersion: monitoring.coreos.com/v1
+            kind: PodMonitor
+            metadata:
+              name: crossplane-providers
+              namespace: monitoring
+              annotations:
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              namespaceSelector:
+                matchNames:
+                  - crossplane-system
+              selector:
+                matchExpressions:
+                  - key: pkg.crossplane.io/revision
+                    operator: Exists
+              podMetricsEndpoints:
+                - port: metrics
+                  path: /metrics
+
+          # Crossplane Metrics dashboard (https://grafana.com/grafana/dashboards/24549)
+          - apiVersion: grafana.integreatly.org/v1beta1
+            kind: GrafanaDashboard
+            metadata:
+              name: crossplane-metrics
+              namespace: monitoring
+              annotations:
+                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+            spec:
+              instanceSelector:
+                matchLabels:
+                  dashboards: "grafana"
+              url: "https://grafana.com/api/dashboards/24549/revisions/3/download"
+              folder: "Crossplane"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+{{- end -}}

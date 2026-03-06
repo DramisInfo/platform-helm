@@ -19,6 +19,8 @@ spec:
     chart: crossplane
     helm:
       valuesObject:
+        metrics:
+          enabled: true
 {{- if and .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") }}
         # Azure Workload Identity for the Crossplane controller SA.
         # Provider pods reuse this SA via DeploymentRuntimeConfig in the

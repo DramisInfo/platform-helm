@@ -1,4 +1,6 @@
 {{- if .Values.bootstrap.externalSecretOperator.enabled }}
+{{- $esoIdentityEnabled := and .Values.bootstrap.crossplane.enabled .Values.bootstrap.crossplane.esoIdentity.enabled -}}
+{{- $az := .Values.bootstrap.crossplane.azure -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -7,16 +9,46 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
+    # Wave -90: after crossplane-compositions (-109) has registered the XRD so the
+    # XEsoIdentity CR in this app's multi-source can apply cleanly.
     argocd.argoproj.io/sync-wave: "-90"
 spec:
   destination:
     namespace: eso
     server: "https://kubernetes.default.svc"
   project: platform-foundations
-  source:
-    repoURL: "https://charts.external-secrets.io"
-    targetRevision: "2.0.1"
-    chart: external-secrets
+  sources:
+    - repoURL: "https://charts.external-secrets.io"
+      targetRevision: "2.0.1"
+      chart: external-secrets
+    {{- if $esoIdentityEnabled }}
+    # XEsoIdentity: drives the Crossplane Composition that creates the ESO UMI,
+    # Key Vault Secrets User role assignment on the shared AKV, Federated Identity
+    # Credential, WI annotations on the ESO SA, and the ClusterSecretStore.
+    # Placed here so ESO and its Azure identity lifecycle are managed together.
+    # Inner sync-wave -91: syncs before ESO Helm resources (wave 0) within this app.
+    # SkipDryRunOnMissingResource=true handles any edge cases on first bootstrap.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: platform.dramisinfo.com/v1alpha1
+              kind: XEsoIdentity
+              metadata:
+                name: {{ .Values.global.clusterName }}-eso
+                annotations:
+                  argocd.argoproj.io/sync-wave: "-91"
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                clusterName: {{ .Values.global.clusterName }}
+                resourceGroup: rg-{{ .Values.global.clusterName }}
+                location: {{ $az.location }}
+                identityName: umi-{{ .Values.global.clusterName }}-eso
+                sharedAkvScope: {{ .Values.bootstrap.crossplane.esoIdentity.sharedAkvScope }}
+                sharedAkvUrl: {{ .Values.bootstrap.crossplane.esoIdentity.sharedAkvUrl }}
+    {{- end }}
   ignoreDifferences:
     - group: apiextensions.k8s.io
       kind: CustomResourceDefinition

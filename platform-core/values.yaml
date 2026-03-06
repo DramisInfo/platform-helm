@@ -68,6 +68,15 @@ bootstrap:
       #   location       → bootstrap.crossplane.azure.location
       #   oidcIssuer     → observed at runtime from azure-clusterconfig-wi ConfigMap (azure-arc namespace)
       enabled: true
+    # Provision the per-cluster ESO Managed Identity and ClusterSecretStore via Crossplane.
+    # The UMI gets Key Vault Secrets User on the shared AKV so ESO can sync secrets.
+    esoIdentity:
+      # Set enabled: false in the cluster overlay patch to disable for that cluster.
+      enabled: true
+      # Full ARM scope of the shared AKV for the role assignment
+      sharedAkvScope: /subscriptions/c1d22d5c-418b-4bd9-ba23-5e806c376b56/resourceGroups/rg-shared/providers/Microsoft.KeyVault/vaults/akv-dramisinfo-shared
+      # Vault URL used by the ClusterSecretStore
+      sharedAkvUrl: "https://akv-dramisinfo-shared.vault.azure.net/"
     # Deploy the product-workspace-composition XRD and Composition via Argo CD.
     # Enabled by default when Crossplane is enabled.
     productWorkspaceComposition:
@@ -82,7 +91,7 @@ bootstrap:
       # ProviderConfig names expected on the cluster for each backend
       providerConfigs:
         github: github-provider-config
-        kubernetes: kubernetes-provider-config
+        kubernetes: default
         argocd: argocd-provider-config
   terraformOperator:
     enabled: true

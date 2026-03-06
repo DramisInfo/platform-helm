@@ -1,0 +1,224 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xesoidentity-azure
+spec:
+  compositeTypeRef:
+    apiVersion: platform.dramisinfo.com/v1alpha1
+    kind: XEsoIdentity
+  mode: Pipeline
+  pipeline:
+    # ── Step 1: Observe OIDC issuer URL from the Arc Workload Identity ConfigMap ──
+    # Reads azure-clusterconfig-wi in the azure-arc namespace (written by the
+    # wiextension Helm release on every Arc-enabled cluster) and propagates
+    # ISSUER_URL into status.oidcIssuer so downstream steps can use it without
+    # any cluster-specific spec fields.
+    - step: observe-oidc-config
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: observe-oidc-config
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              spec:
+                managementPolicies:
+                  - Observe
+                providerConfigRef:
+                  name: default
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                      name: azure-clusterconfig-wi
+                      namespace: azure-arc
+            patches:
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.manifest.data.ISSUER_URL
+                toFieldPath: status.oidcIssuer
+                policy:
+                  fromFieldPath: Optional
+
+    # ── Step 2: Create/patch all Azure and in-cluster resources ──
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+
+          # ──────────────────────────────────────────────────────────────────
+          # 1. User Assigned Identity for ESO
+          #    Outputs clientId, principalId, and full ARM resource ID to XR status.
+          # ──────────────────────────────────────────────────────────────────
+          - name: umi
+            base:
+              apiVersion: managedidentity.azure.upbound.io/v1beta1
+              kind: UserAssignedIdentity
+              spec:
+                forProvider:
+                  name: ""            # patched from spec.identityName
+                  location: ""        # patched from spec.location
+                  resourceGroupName: ""   # patched from spec.resourceGroup
+                  tags:
+                    managed-by: crossplane
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.identityName
+                toFieldPath: spec.forProvider.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.location
+                toFieldPath: spec.forProvider.location
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.resourceGroup
+                toFieldPath: spec.forProvider.resourceGroupName
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.clusterName
+                toFieldPath: spec.forProvider.tags.cluster
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.clientId
+                toFieldPath: status.clientId
+                policy:
+                  fromFieldPath: Optional
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.principalId
+                toFieldPath: status.principalId
+                policy:
+                  fromFieldPath: Optional
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.id
+                toFieldPath: status.umiId
+                policy:
+                  fromFieldPath: Optional
+
+          # ──────────────────────────────────────────────────────────────────
+          # 2. Role Assignment: Key Vault Secrets User on the shared AKV
+          #    Grants ESO the right to read secrets from akv-dramisinfo-shared.
+          # ──────────────────────────────────────────────────────────────────
+          - name: akv-role-assignment
+            base:
+              apiVersion: authorization.azure.upbound.io/v1beta1
+              kind: RoleAssignment
+              spec:
+                forProvider:
+                  scope: ""                       # patched from spec.sharedAkvScope
+                  roleDefinitionName: Key Vault Secrets User
+                  principalId: ""                 # patched from status.principalId (once UMI exists)
+                  principalType: ServicePrincipal
+                  skipServicePrincipalAadCheck: true
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.sharedAkvScope
+                toFieldPath: spec.forProvider.scope
+              - type: FromCompositeFieldPath
+                fromFieldPath: status.principalId
+                toFieldPath: spec.forProvider.principalId
+                policy:
+                  fromFieldPath: Required
+
+          # ──────────────────────────────────────────────────────────────────
+          # 3. Federated Identity Credential
+          #    Binds ESO's SA to the UMI via the cluster's OIDC issuer.
+          # ──────────────────────────────────────────────────────────────────
+          - name: federated-credential
+            base:
+              apiVersion: managedidentity.azure.upbound.io/v1beta1
+              kind: FederatedIdentityCredential
+              spec:
+                forProvider:
+                  audience:
+                    - api://AzureADTokenExchange
+                  issuer: ""            # patched from status.oidcIssuer
+                  parentId: ""          # patched from status.umiId
+                  resourceGroupName: "" # patched from spec.resourceGroup
+                  subject: system:serviceaccount:eso:external-secrets
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: status.oidcIssuer
+                toFieldPath: spec.forProvider.issuer
+                policy:
+                  fromFieldPath: Required
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.resourceGroup
+                toFieldPath: spec.forProvider.resourceGroupName
+              - type: FromCompositeFieldPath
+                fromFieldPath: status.umiId
+                toFieldPath: spec.forProvider.parentId
+                policy:
+                  fromFieldPath: Required
+
+          # ──────────────────────────────────────────────────────────────────
+          # 4. ESO ServiceAccount — add Azure WI annotations
+          #    The Azure WI webhook reads these at pod creation time to inject
+          #    the OIDC token. managementPolicies Observe+Update: ESO Helm still
+          #    owns this SA; we just add the WI fields.
+          # ──────────────────────────────────────────────────────────────────
+          - name: eso-serviceaccount
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              spec:
+                managementPolicies:
+                  - Observe
+                  - Update
+                providerConfigRef:
+                  name: default
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: ServiceAccount
+                    metadata:
+                      name: external-secrets
+                      namespace: eso
+                      annotations:
+                        azure.workload.identity/client-id: ""   # patched from status.clientId
+                        azure.workload.identity/tenant-id: ""   # patched from spec.tenantId
+                      labels:
+                        azure.workload.identity/use: "true"
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: status.clientId
+                toFieldPath: "spec.forProvider.manifest.metadata.annotations[azure.workload.identity/client-id]"
+                policy:
+                  fromFieldPath: Required
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.tenantId
+                toFieldPath: "spec.forProvider.manifest.metadata.annotations[azure.workload.identity/tenant-id]"
+
+          # ──────────────────────────────────────────────────────────────────
+          # 5. ClusterSecretStore — AKV-backed, WI auth
+          #    Created once clientId is available and the ESO SA is annotated.
+          #    Named "azure-keyvault-shared" for use by all ExternalSecrets.
+          # ──────────────────────────────────────────────────────────────────
+          - name: cluster-secret-store
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              spec:
+                providerConfigRef:
+                  name: default
+                forProvider:
+                  manifest:
+                    apiVersion: external-secrets.io/v1beta1
+                    kind: ClusterSecretStore
+                    metadata:
+                      name: azure-keyvault-shared
+                    spec:
+                      provider:
+                        azurekv:
+                          authType: WorkloadIdentity
+                          vaultUrl: ""    # patched from spec.sharedAkvUrl
+                          serviceAccountRef:
+                            name: external-secrets
+                            namespace: eso
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.sharedAkvUrl
+                toFieldPath: spec.forProvider.manifest.spec.provider.azurekv.vaultUrl
+                policy:
+                  fromFieldPath: Required

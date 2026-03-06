@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: envoy-gateway-system
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-networking
   sources:
     - repoURL: "docker.io/envoyproxy"
       targetRevision: "v1.7.0"

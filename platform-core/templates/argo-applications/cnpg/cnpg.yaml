@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: cnpg-system
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-data
   source:
     repoURL: "https://cloudnative-pg.github.io/charts"
     targetRevision: "0.27.1"

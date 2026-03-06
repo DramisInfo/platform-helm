@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: default
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-foundations
   sources:
     # Install the standard Gateway API CRDs from the official kubernetes-sigs release.
     # This must run before cert-manager (wave -110) when enableGatewayAPI is set to true

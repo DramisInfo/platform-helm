@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-foundations
   sources:
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"

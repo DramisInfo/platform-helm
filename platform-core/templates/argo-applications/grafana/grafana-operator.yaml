@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-observability
   sources:
     - repoURL: "https://grafana.github.io/helm-charts"
       targetRevision: "v5.15.1"

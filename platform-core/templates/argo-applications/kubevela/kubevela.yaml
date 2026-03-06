@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: vela-system
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-infra
   source:
     repoURL: "https://kubevela.github.io/charts"
     targetRevision: "1.10.7"

@@ -16,7 +16,7 @@ spec:
     # which conflicts with psp-privileged-container and psp-pods-must-run-as-nonroot.
     namespace: beyla
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-observability
   sources:
     # ── Grafana Beyla (eBPF auto-instrumentation) ────────────────────────────
     # Instruments ALL processes on every node at the kernel level via eBPF.

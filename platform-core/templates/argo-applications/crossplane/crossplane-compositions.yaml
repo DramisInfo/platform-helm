@@ -16,7 +16,7 @@ spec:
   destination:
     namespace: crossplane-system
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-infra
   source:
     repoURL: "https://github.com/DramisInfo/platform-helm.git"
     targetRevision: HEAD

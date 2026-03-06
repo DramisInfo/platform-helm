@@ -17,7 +17,7 @@ spec:
   destination:
     namespace: cert-manager
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-foundations
   sources:
     - repoURL: "https://charts.jetstack.io"
       targetRevision: "v1.16.2"

@@ -15,7 +15,7 @@ spec:
   destination:
     namespace: crossplane-system
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-infra
   source:
     repoURL: "https://github.com/DramisInfo/product-workspace-composition.git"
     targetRevision: {{ .Values.bootstrap.crossplane.productWorkspaceComposition.targetRevision }}

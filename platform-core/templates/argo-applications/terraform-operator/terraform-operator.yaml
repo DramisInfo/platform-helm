@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: hcp-terraform-operator
     server: "https://kubernetes.default.svc"
-  project: default
+  project: platform-infra
   source:
     repoURL: "https://helm.releases.hashicorp.com"
     targetRevision: "2.11.3"

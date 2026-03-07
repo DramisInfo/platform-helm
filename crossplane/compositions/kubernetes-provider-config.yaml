@@ -7,8 +7,11 @@
 # not yet registered when the sync runs.
 # SkipDryRunOnMissingResource lets ArgoCD skip this resource gracefully on
 # the first pass when the CRD is still being registered by the provider pod.
-apiVersion: kubernetes.crossplane.io/v1alpha1
-kind: ProviderConfig
+# Uses the v2 kubernetes.m.crossplane.io API which supports both
+# ClusterProviderConfig (platform-wide) and namespace-scoped ProviderConfig
+# (per-team in-cluster access isolation).
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: ClusterProviderConfig
 metadata:
   name: default
   annotations:

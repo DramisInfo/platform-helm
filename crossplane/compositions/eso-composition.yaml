@@ -22,13 +22,14 @@ spec:
         resources:
           - name: observe-oidc-config
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
                   - Observe
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: v1
@@ -58,7 +59,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: umi
             base:
-              apiVersion: managedidentity.azure.upbound.io/v1beta1
+              apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: UserAssignedIdentity
               spec:
                 forProvider:
@@ -102,7 +103,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: akv-role-assignment
             base:
-              apiVersion: authorization.azure.upbound.io/v1beta1
+              apiVersion: authorization.azure.m.upbound.io/v1beta1
               kind: RoleAssignment
               spec:
                 forProvider:
@@ -127,7 +128,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: federated-credential
             base:
-              apiVersion: managedidentity.azure.upbound.io/v1beta1
+              apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: FederatedIdentityCredential
               spec:
                 forProvider:
@@ -160,7 +161,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: eso-serviceaccount
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
@@ -168,6 +169,7 @@ spec:
                   - Update
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: v1
@@ -197,11 +199,12 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: cluster-secret-store
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: external-secrets.io/v1

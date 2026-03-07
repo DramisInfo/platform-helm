@@ -99,12 +99,14 @@ spec:
                 name: azure-workload-identity
               skipDependencyResolution: true
 
-          # ProviderConfig: WI-based auth via the OIDC token file projected
-          # by the Azure Workload Identity webhook.
+          # ClusterProviderConfig: WI-based auth via the OIDC token file projected
+          # by the Azure Workload Identity webhook. Uses the v2 azure.m.upbound.io
+          # API which supports both ClusterProviderConfig (platform-wide) and
+          # namespace-scoped ProviderConfig (per-team credentials).
           # CRD is installed by provider-family-azure; SkipDryRunOnMissingResource
           # lets the initial sync pass and self-heal handles the retry.
-          - apiVersion: azure.upbound.io/v1beta1
-            kind: ProviderConfig
+          - apiVersion: azure.m.upbound.io/v1beta1
+            kind: ClusterProviderConfig
             metadata:
               name: default
               annotations:

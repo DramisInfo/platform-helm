@@ -22,13 +22,14 @@ spec:
         resources:
           - name: observe-oidc-config
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
                   - Observe
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: v1
@@ -58,7 +59,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: umi
             base:
-              apiVersion: managedidentity.azure.upbound.io/v1beta1
+              apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: UserAssignedIdentity
               spec:
                 forProvider:
@@ -103,7 +104,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: dns-role-assignment
             base:
-              apiVersion: authorization.azure.upbound.io/v1beta1
+              apiVersion: authorization.azure.m.upbound.io/v1beta1
               kind: RoleAssignment
               spec:
                 forProvider:
@@ -128,7 +129,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: federated-credential
             base:
-              apiVersion: managedidentity.azure.upbound.io/v1beta1
+              apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: FederatedIdentityCredential
               spec:
                 forProvider:
@@ -161,7 +162,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: certmanager-sa
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
@@ -169,6 +170,7 @@ spec:
                   - Update
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: v1
@@ -200,7 +202,7 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: certmanager-deployment
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 managementPolicies:
@@ -208,6 +210,7 @@ spec:
                   - Update
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: apps/v1
@@ -228,11 +231,12 @@ spec:
           # ──────────────────────────────────────────────────────────────────
           - name: certmanager-clusterissuer
             base:
-              apiVersion: kubernetes.crossplane.io/v1alpha2
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
               spec:
                 providerConfigRef:
                   name: default
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: cert-manager.io/v1

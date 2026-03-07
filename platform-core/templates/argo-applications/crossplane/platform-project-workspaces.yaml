@@ -12,7 +12,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "-108"
 spec:
   destination:
-    namespace: product-workspaces
+    # No namespace here — XProductWorkspace is cluster-scoped.
+    # Each manifest declares its own namespace if needed.
     server: "https://kubernetes.default.svc"
   project: product-workspaces
   source:

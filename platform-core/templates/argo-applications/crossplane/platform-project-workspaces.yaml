@@ -31,5 +31,6 @@ spec:
       - SkipDryRunOnMissingResource=true
       - Validate=false
       - RespectIgnoreDifferences=true
+      - Replace=true
     {{- include "platform-core.extendedRetry" . | nindent 4 }}
 {{- end }}

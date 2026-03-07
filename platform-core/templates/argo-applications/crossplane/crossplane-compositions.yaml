@@ -31,4 +31,11 @@ spec:
       - SkipDryRunOnMissingResource=true
       - Validate=false
     {{- include "platform-core.extendedRetry" . | nindent 4 }}
+  ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jqPathExpressions:
+        - '.spec.data[].remoteRef.conversionStrategy'
+        - '.spec.data[].remoteRef.decodingStrategy'
+        - '.spec.data[].remoteRef.metadataPolicy'
 {{- end }}

@@ -28,8 +28,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
       - SkipDryRunOnMissingResource=true
       - Validate=false
+      - RespectIgnoreDifferences=true
     {{- include "platform-core.extendedRetry" . | nindent 4 }}
 {{- end }}

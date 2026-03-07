@@ -80,7 +80,7 @@ spec:
       kind: '*'
 ---
 # platform-infra: Infrastructure automation, control planes, and runtime operators.
-# Apps: crossplane, crossplane-config, crossplane-compositions, product-workspace-composition,
+# Apps: crossplane, crossplane-config, platform-crossplane-compositions,
 #        terraform-operator, kubevela, keda
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject

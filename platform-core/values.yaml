@@ -82,22 +82,6 @@ bootstrap:
       sharedAkvScope: /subscriptions/c1d22d5c-418b-4bd9-ba23-5e806c376b56/resourceGroups/rg-shared/providers/Microsoft.KeyVault/vaults/akv-dramisinfo-shared
       # Vault URL used by the ClusterSecretStore
       sharedAkvUrl: "https://akv-dramisinfo-shared.vault.azure.net/"
-    # Deploy the product-workspace-composition XRD and Composition via Argo CD.
-    # Enabled by default when Crossplane is enabled.
-    productWorkspaceComposition:
-      enabled: true
-      # Git ref to deploy (branch, tag, or commit SHA)
-      targetRevision: HEAD
-      # GitHub organization where product team resources will be created
-      githubOrg: dramisinfo
-      # ArgoCD source repositories allowed for all product projects
-      argocdSourceRepos:
-        - "https://github.com/dramisinfo/*"
-      # ProviderConfig names expected on the cluster for each backend
-      providerConfigs:
-        github: github-provider-config
-        kubernetes: default
-        argocd: argocd-provider-config
   terraformOperator:
     enabled: true
   externalSecretOperator:

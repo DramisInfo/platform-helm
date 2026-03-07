@@ -30,6 +30,8 @@ spec:
       - ServerSideApply=true
       - SkipDryRunOnMissingResource=true
       - Validate=false
+      - Wait=true
+      - PruneEmpty=true
     {{- include "platform-core.extendedRetry" . | nindent 4 }}
   ignoreDifferences:
     - group: external-secrets.io

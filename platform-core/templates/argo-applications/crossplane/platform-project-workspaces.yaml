@@ -7,9 +7,10 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    # Wave -108: runs after platform-crossplane-compositions (-109) is Healthy
-    # so the XProductWorkspace XRD is registered before any claims are applied.
-    argocd.argoproj.io/sync-wave: "-108"
+    # Wave -1: last application to sync before wave 0, ensuring the full platform
+    # bootstrap (cert-manager, ESO, ingress, monitoring, etc.) is healthy first.
+    # Product workspace claims should only be provisioned once the platform is stable.
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   destination:
     # No namespace here — XProductWorkspace is cluster-scoped.

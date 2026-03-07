@@ -9,8 +9,9 @@ metadata:
   annotations:
     # Wave -111: runs after `crossplane` (wave -112) is Healthy.
     # At this point all Crossplane CRDs (DeploymentRuntimeConfig, Provider) are available.
-    # ProviderConfig CRD (azure.upbound.io) is installed by provider-family-azure once it
-    # starts up — SkipDryRunOnMissingResource=true handles the initial sync until it appears.
+    # ProviderConfig CRDs (azure.upbound.io, kubernetes.m.crossplane.io) are installed by
+    # their respective providers once they start up — SkipDryRunOnMissingResource=true handles
+    # the initial sync until they appear; selfHeal ensures they are applied on retry.
     argocd.argoproj.io/sync-wave: "-111"
 spec:
   destination:
@@ -18,160 +19,22 @@ spec:
     server: "https://kubernetes.default.svc"
   project: platform-infra
   source:
-    repoURL: "https://dysnix.github.io/charts"
-    targetRevision: "0.3.2"
-    chart: raw
+    repoURL: "https://github.com/DramisInfo/crossplane-providers-and-functions.git"
+    targetRevision: HEAD
+    path: chart
     helm:
       valuesObject:
-        resources:
-          # DeploymentRuntimeConfig: instructs all Azure provider pods to reuse the
-          # already-annotated `crossplane` SA so the Azure WI webhook injects the
-          # OIDC token. Federated credential subject stays
-          # system:serviceaccount:crossplane-system:crossplane.
-          - apiVersion: pkg.crossplane.io/v1beta1
-            kind: DeploymentRuntimeConfig
-            metadata:
-              name: azure-workload-identity
-            spec:
-              deploymentTemplate:
-                spec:
-                  selector: {}
-                  template:
-                    metadata:
-                      labels:
-                        # Required: Azure WI webhook selects pods with this label
-                        # to inject the OIDC token volume mount.
-                        azure.workload.identity/use: "true"
-                    spec:
-                      serviceAccountName: crossplane
-                      # Crossplane 2.x ValidatingWebhook requires at least one container entry.
-                      # `package-runtime` is the standard container name for upbound providers.
-                      # Only the serviceAccountName override is meaningful here.
-                      containers:
-                        - name: package-runtime
-
-          # provider-family-azure: base family provider (must come first; owns the
-          # ProviderConfig CRD and shared controllers).
-          # skipDependencyResolution: true prevents Crossplane from auto-creating a
-          # second `upbound-provider-family-azure` Provider object to satisfy the
-          # sub-providers' declared dependency — all providers are explicitly managed here.
-          - apiVersion: pkg.crossplane.io/v1
-            kind: Provider
-            metadata:
-              name: provider-family-azure
-            spec:
-              package: xpkg.upbound.io/upbound/provider-family-azure:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-              runtimeConfigRef:
-                name: azure-workload-identity
-              skipDependencyResolution: true
-
-          # Sub-providers for bootstrapping:
-          #   authorization   → role assignments
-          #   managedidentity → UMIs + federated credentials
-          #   keyvault        → Key Vault
-          - apiVersion: pkg.crossplane.io/v1
-            kind: Provider
-            metadata:
-              name: provider-azure-authorization
-            spec:
-              package: xpkg.upbound.io/upbound/provider-azure-authorization:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-              runtimeConfigRef:
-                name: azure-workload-identity
-              skipDependencyResolution: true
-
-          - apiVersion: pkg.crossplane.io/v1
-            kind: Provider
-            metadata:
-              name: provider-azure-managedidentity
-            spec:
-              package: xpkg.upbound.io/upbound/provider-azure-managedidentity:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-              runtimeConfigRef:
-                name: azure-workload-identity
-              skipDependencyResolution: true
-
-          - apiVersion: pkg.crossplane.io/v1
-            kind: Provider
-            metadata:
-              name: provider-azure-keyvault
-            spec:
-              package: xpkg.upbound.io/upbound/provider-azure-keyvault:{{ .Values.bootstrap.crossplane.azure.providerVersion }}
-              runtimeConfigRef:
-                name: azure-workload-identity
-              skipDependencyResolution: true
-
-          # ClusterProviderConfig: WI-based auth via the OIDC token file projected
-          # by the Azure Workload Identity webhook. Uses the v2 azure.m.upbound.io
-          # API which supports both ClusterProviderConfig (platform-wide) and
-          # namespace-scoped ProviderConfig (per-team credentials).
-          # CRD is installed by provider-family-azure; SkipDryRunOnMissingResource
-          # lets the initial sync pass and self-heal handles the retry.
-          - apiVersion: azure.m.upbound.io/v1beta1
-            kind: ClusterProviderConfig
-            metadata:
-              name: default
-              annotations:
-                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-            spec:
-              subscriptionID: {{ .Values.bootstrap.crossplane.azure.subscriptionId }}
-              tenantID: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
-              clientID: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
-              credentials:
-                source: OIDCTokenFile
-
-          # function-patch-and-transform: enables Pipeline mode Compositions.
-          # Required for the crossplane-compositions app (XClusterWorkloadIdentity).
-          - apiVersion: pkg.crossplane.io/v1beta1
-            kind: Function
-            metadata:
-              name: function-patch-and-transform
-              annotations:
-                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-            spec:
-              package: xpkg.upbound.io/crossplane-contrib/function-patch-and-transform:{{ .Values.bootstrap.crossplane.functionPatchAndTransformVersion }}
-              runtimeConfigRef:
-                name: azure-workload-identity
-
-          # function-go-templating: conditional / dynamic resource rendering via Go
-          # text/template syntax. Used by XAzureWorkloadIdentity and any other
-          # Composition that needs conditional resource generation.
-          - apiVersion: pkg.crossplane.io/v1beta1
-            kind: Function
-            metadata:
-              name: function-go-templating
-              annotations:
-                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-            spec:
-              package: xpkg.upbound.io/crossplane-contrib/function-go-templating:{{ .Values.bootstrap.crossplane.functionGoTemplatingVersion }}
-
-          # function-auto-ready: marks the XR as Ready once all composed resources
-          # are ready. Required as the last pipeline step in all Platform Compositions
-          # (XAzureWorkloadIdentity, XProductWorkspace, etc.).
-          - apiVersion: pkg.crossplane.io/v1beta1
-            kind: Function
-            metadata:
-              name: function-auto-ready
-              annotations:
-                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-            spec:
-              package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:{{ .Values.bootstrap.crossplane.functionAutoReadyVersion }}
-
-          # provider-kubernetes: manages in-cluster Kubernetes objects from Compositions
-          # (e.g. annotating the cert-manager ServiceAccount with WI client ID).
-          - apiVersion: pkg.crossplane.io/v1
-            kind: Provider
-            metadata:
-              name: provider-kubernetes
-              annotations:
-                argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-            spec:
-              package: xpkg.upbound.io/crossplane-contrib/provider-kubernetes:{{ .Values.bootstrap.crossplane.providerKubernetesVersion }}
-              runtimeConfigRef:
-                name: azure-workload-identity
-
-          # NOTE: kubernetes.crossplane.io/v1alpha2 ProviderConfig is NOT here.
-          # It lives in crossplane/compositions/kubernetes-provider-config.yaml
-          # and is applied by the crossplane-compositions app (wave -109), after
-          # this app (wave -111) is Healthy and the CRD is registered.
+        azure:
+          providerVersion: {{ .Values.bootstrap.crossplane.azure.providerVersion }}
+          subscriptionId: {{ .Values.bootstrap.crossplane.azure.subscriptionId }}
+          tenantId: {{ .Values.bootstrap.crossplane.workloadIdentity.tenantId }}
+          clientId: {{ .Values.bootstrap.crossplane.workloadIdentity.clientId }}
+        functions:
+          patchAndTransformVersion: {{ .Values.bootstrap.crossplane.functionPatchAndTransformVersion }}
+          goTemplatingVersion: {{ .Values.bootstrap.crossplane.functionGoTemplatingVersion }}
+          autoReadyVersion: {{ .Values.bootstrap.crossplane.functionAutoReadyVersion }}
+        providers:
+          kubernetesVersion: {{ .Values.bootstrap.crossplane.providerKubernetesVersion }}
   syncPolicy:
     automated:
       prune: true

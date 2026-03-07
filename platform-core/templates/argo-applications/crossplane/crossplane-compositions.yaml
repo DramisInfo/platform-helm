@@ -18,7 +18,7 @@ spec:
   source:
     repoURL: "https://github.com/DramisInfo/platform-crossplane-compositions.git"
     targetRevision: HEAD
-    path: compositions
+    path: .
     directory:
       recurse: true
   syncPolicy:

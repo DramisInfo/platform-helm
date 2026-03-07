@@ -96,6 +96,8 @@ spec:
   destinations:
     - namespace: crossplane-system
       server: "https://kubernetes.default.svc"
+    - namespace: platform-tools
+      server: "https://kubernetes.default.svc"
     - namespace: hcp-terraform-operator
       server: "https://kubernetes.default.svc"
     - namespace: vela-system

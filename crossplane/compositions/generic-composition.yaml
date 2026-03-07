@@ -26,6 +26,8 @@ spec:
             base:
               apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
+              metadata:
+                namespace: platform-tools
               spec:
                 managementPolicies:
                   - Observe
@@ -50,6 +52,8 @@ spec:
             base:
               apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: UserAssignedIdentity
+              metadata:
+                namespace: platform-tools
               spec:
                 forProvider:
                   name: ""
@@ -124,6 +128,7 @@ spec:
             apiVersion: authorization.azure.m.upbound.io/v1beta1
             kind: RoleAssignment
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: role-assignment
             spec:
@@ -142,6 +147,7 @@ spec:
             apiVersion: managedidentity.azure.m.upbound.io/v1beta1
             kind: FederatedIdentityCredential
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: federated-credential
             spec:
@@ -162,6 +168,7 @@ spec:
             apiVersion: kubernetes.m.crossplane.io/v1alpha1
             kind: Object
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: workload-identity-sa
             spec:
@@ -193,6 +200,7 @@ spec:
             apiVersion: kubernetes.m.crossplane.io/v1alpha1
             kind: Object
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: workload-identity-deployment
             spec:
@@ -224,6 +232,7 @@ spec:
             apiVersion: kubernetes.m.crossplane.io/v1alpha1
             kind: Object
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: cluster-secret-store
             spec:
@@ -255,6 +264,7 @@ spec:
             apiVersion: kubernetes.m.crossplane.io/v1alpha1
             kind: Object
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: cert-manager-clusterissuer
             spec:
@@ -293,6 +303,7 @@ spec:
             apiVersion: kubernetes.m.crossplane.io/v1alpha1
             kind: Object
             metadata:
+              namespace: platform-tools
               annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: umi-output-configmap
             spec:

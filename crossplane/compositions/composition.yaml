@@ -24,6 +24,8 @@ spec:
             base:
               apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
+              metadata:
+                namespace: platform-tools
               spec:
                 managementPolicies:
                   - Observe
@@ -61,6 +63,8 @@ spec:
             base:
               apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: UserAssignedIdentity
+              metadata:
+                namespace: platform-tools
               spec:
                 forProvider:
                   name: ""            # patched from spec.identityName
@@ -106,6 +110,8 @@ spec:
             base:
               apiVersion: authorization.azure.m.upbound.io/v1beta1
               kind: RoleAssignment
+              metadata:
+                namespace: platform-tools
               spec:
                 forProvider:
                   scope: ""                       # patched from spec.dnsRoleScope
@@ -131,6 +137,8 @@ spec:
             base:
               apiVersion: managedidentity.azure.m.upbound.io/v1beta1
               kind: FederatedIdentityCredential
+              metadata:
+                namespace: platform-tools
               spec:
                 forProvider:
                   audience:
@@ -164,6 +172,8 @@ spec:
             base:
               apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
+              metadata:
+                namespace: platform-tools
               spec:
                 managementPolicies:
                   - Observe
@@ -204,6 +214,8 @@ spec:
             base:
               apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
+              metadata:
+                namespace: platform-tools
               spec:
                 managementPolicies:
                   - Observe
@@ -233,6 +245,8 @@ spec:
             base:
               apiVersion: kubernetes.m.crossplane.io/v1alpha1
               kind: Object
+              metadata:
+                namespace: platform-tools
               spec:
                 providerConfigRef:
                   name: default

@@ -306,3 +306,8 @@ spec:
                     umiId: "{{ $umiId }}"
                     tenantId: "{{ $spec.tenantId }}"
             {{ end }}
+
+    # ── Step 3: Mark XR ready when all composed resources are ready ──────────
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

@@ -58,7 +58,8 @@ bootstrap:
     # crossplane-contrib function-auto-ready version (marks XR ready when all composed resources are ready)
     functionAutoReadyVersion: "v0.5.0"
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
-    providerKubernetesVersion: "v0.15.0"
+    # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
+    providerKubernetesVersion: "v1.2.1"
     # Provision the per-cluster cert-manager Managed Identity via Crossplane.
     # Values here are cluster-specific and should be injected via the overlay patch
     # (overlays/<cluster>/patches/platform-core.yaml) rather than set globally.

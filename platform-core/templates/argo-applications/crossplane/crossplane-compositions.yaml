@@ -2,15 +2,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: crossplane-compositions
+  name: platform-crossplane-compositions
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     # Wave -109: runs after crossplane-config (-111) is Healthy so all provider
-    # CRDs and function-patch-and-transform are available.
-    # cert-manager (-107) runs after this app so XCertManagerIdentity (embedded
-    # in the cert-manager multi-source app) can apply cleanly once the XRD is registered.
+    # CRDs and functions are installed and their CRDs are registered.
     argocd.argoproj.io/sync-wave: "-109"
 spec:
   destination:
@@ -18,9 +16,9 @@ spec:
     server: "https://kubernetes.default.svc"
   project: platform-infra
   source:
-    repoURL: "https://github.com/DramisInfo/platform-helm.git"
+    repoURL: "https://github.com/DramisInfo/platform-crossplane-compositions.git"
     targetRevision: HEAD
-    path: crossplane/compositions
+    path: compositions
     directory:
       recurse: true
   syncPolicy:

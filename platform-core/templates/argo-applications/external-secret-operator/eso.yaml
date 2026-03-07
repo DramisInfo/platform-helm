@@ -10,7 +10,9 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     # Wave -90: after crossplane-compositions (-109) has registered the XRD so the
-    # XEsoIdentity CR in this app's multi-source can apply cleanly.
+    # XAzureWorkloadIdentity CR in this app's multi-source can apply cleanly.
+    # Within this app, ESO Helm runs at wave 0, then XAzureWorkloadIdentity at wave 1
+    # — ensuring ESO CRDs (ClusterSecretStore) exist before the composition uses them.
     argocd.argoproj.io/sync-wave: "-90"
 spec:
   destination:
@@ -26,7 +28,9 @@ spec:
     # User on the shared AKV, binds the federated credential, annotates the ESO SA
     # with WI credentials, and creates the ClusterSecretStore.
     # Placed here so ESO and its Azure identity lifecycle are managed together.
-    # Inner sync-wave -91: syncs before ESO Helm resources (wave 0) within this app.
+    # Inner sync-wave 1: syncs AFTER ESO Helm resources (wave 0) within this app,
+    # ensuring ESO CRDs (ClusterSecretStore) and the Deployment exist before the
+    # composition tries to create the ClusterSecretStore or annotate the SA.
     # SkipDryRunOnMissingResource=true handles any edge cases on first bootstrap.
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"
@@ -39,7 +43,7 @@ spec:
               metadata:
                 name: {{ .Values.global.clusterName }}-eso
                 annotations:
-                  argocd.argoproj.io/sync-wave: "-91"
+                  argocd.argoproj.io/sync-wave: "1"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               spec:
                 clusterName: {{ .Values.global.clusterName }}

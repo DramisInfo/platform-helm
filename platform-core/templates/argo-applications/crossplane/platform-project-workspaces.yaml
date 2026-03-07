@@ -1,0 +1,34 @@
+{{- if and .Values.bootstrap.crossplane.enabled .Values.bootstrap.crossplane.workloadIdentity.enabled (ne .Values.bootstrap.crossplane.workloadIdentity.clientId "") -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-project-workspaces
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Wave -108: runs after platform-crossplane-compositions (-109) is Healthy
+    # so the XProductWorkspace XRD is registered before any claims are applied.
+    argocd.argoproj.io/sync-wave: "-108"
+spec:
+  destination:
+    namespace: product-workspaces
+    server: "https://kubernetes.default.svc"
+  project: product-workspaces
+  source:
+    repoURL: "https://github.com/DramisInfo/platform-project-workspaces.git"
+    targetRevision: HEAD
+    path: workspaces
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
+      - Validate=false
+    {{- include "platform-core.extendedRetry" . | nindent 4 }}
+{{- end }}

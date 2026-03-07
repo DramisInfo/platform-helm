@@ -108,6 +108,26 @@ spec:
     - group: '*'
       kind: '*'
 ---
+# product-workspaces: XProductWorkspace claim instances managed by platform teams.
+# Apps: platform-project-workspaces
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: product-workspaces
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-200"
+spec:
+  description: "XProductWorkspace claim instances managed by platform teams"
+  sourceRepos:
+    - 'https://github.com/DramisInfo/platform-project-workspaces.git'
+  destinations:
+    - namespace: product-workspaces
+      server: "https://kubernetes.default.svc"
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
 # platform-data: Stateful data and messaging infrastructure.
 # Apps: cnpg, nats, nack
 apiVersion: argoproj.io/v1alpha1

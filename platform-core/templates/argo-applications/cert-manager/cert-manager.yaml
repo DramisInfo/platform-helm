@@ -10,8 +10,10 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     # Wave -107: after crossplane-compositions (-109) has registered the XRD so the
-    # XCertManagerIdentity CR in this app's multi-source can apply cleanly.
-    # cert-manager itself has no dependency on crossplane, so the wave change is safe.
+    # XAzureWorkloadIdentity CR in this app's multi-source can apply cleanly.
+    # Within this app, cert-manager Helm runs at wave 0, then XAzureWorkloadIdentity
+    # at wave 1 — ensuring CRDs and the Deployment exist before the composition
+    # tries to patch them or create the ClusterIssuer.
     argocd.argoproj.io/sync-wave: "-107"
 spec:
   destination:
@@ -39,10 +41,11 @@ spec:
     # Contributor on the DNS resource group, binds the federated credential, annotates
     # the cert-manager SA and Deployment with WI labels, and creates the ClusterIssuer.
     # Placed here so cert-manager and its Azure identity lifecycle are managed together.
-    # Inner sync-wave -108: syncs before the cert-manager Helm resources (wave 0)
-    # within this app. The parent cert-manager Application is at wave -107, which
-    # is after crossplane-compositions (-109), so the XRD CRD is guaranteed to
-    # exist before this CR is applied.
+    # Inner sync-wave 1: syncs AFTER the cert-manager Helm resources (wave 0) within
+    # this app, ensuring cert-manager CRDs and the Deployment exist before the
+    # composition tries to patch the Deployment and create the ClusterIssuer.
+    # The parent cert-manager Application is at wave -107, which is after
+    # crossplane-compositions (-109), so the XRD CRD is guaranteed to exist.
     # SkipDryRunOnMissingResource=true handles any edge cases on first bootstrap.
     - repoURL: "https://dysnix.github.io/charts"
       targetRevision: "0.3.2"
@@ -55,7 +58,7 @@ spec:
               metadata:
                 name: {{ .Values.global.clusterName }}-certmanager
                 annotations:
-                  argocd.argoproj.io/sync-wave: "-108"
+                  argocd.argoproj.io/sync-wave: "1"
                   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
               spec:
                 clusterName: {{ .Values.global.clusterName }}

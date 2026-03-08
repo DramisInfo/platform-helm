@@ -20,9 +20,7 @@ spec:
   source:
     repoURL: "https://github.com/DramisInfo/platform-project-workspaces.git"
     targetRevision: HEAD
-    path: workspaces
-    directory:
-      recurse: true
+    path: bootstrap
   syncPolicy:
     automated:
       prune: true

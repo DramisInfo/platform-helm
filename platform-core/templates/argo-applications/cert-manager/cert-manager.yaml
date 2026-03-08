@@ -74,7 +74,8 @@ spec:
                 annotateDeployment:
                   name: cert-manager
                   namespace: cert-manager
-                clusterIssuer: {}
+                clusterIssuer:
+                  acmeServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
     {{- end }}
   syncPolicy:
     automated:

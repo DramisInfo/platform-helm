@@ -130,6 +130,8 @@ spec:
       server: "https://kubernetes.default.svc"
     - namespace: argocd
       server: "https://kubernetes.default.svc"
+    - namespace: platform-tools
+      server: "https://kubernetes.default.svc"
     - namespace: ""
       server: "https://kubernetes.default.svc"
   clusterResourceWhitelist:

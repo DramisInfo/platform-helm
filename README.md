@@ -29,6 +29,7 @@ All components are opt-in and controlled through `values.yaml`. Enable only what
 | [Terraform Operator](https://github.com/isaaguilar/terraform-operator) | Run Terraform workspaces from Kubernetes | disabled |
 | [External Secrets Operator](https://external-secrets.io/) | Sync secrets from Vault, AWS SM, GCP SM, and more | disabled |
 | [CNPG](https://cloudnative-pg.io/) | CloudNativePG — production-grade PostgreSQL on Kubernetes | disabled |
+| [Atlas Operator](https://atlasgo.io/integrations/kubernetes) | Database schema migrations as Kubernetes resources | disabled |
 | [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) | Policy enforcement via OPA with community library support | **enabled** |
 | [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) | NGINX-based Kubernetes ingress controller | disabled |
 | [Istio](https://istio.io/) | Service mesh with mTLS, traffic management, and observability | disabled |
@@ -109,6 +110,7 @@ platform-helm/
     ├── GATEKEEPER-POLICIES.md        # Enforced OPA policies and exclusions
     └── templates/
         └── argo-applications/        # One Argo CD Application per component
+            ├── atlas/
             ├── cert-manager/
             ├── cnpg/
             ├── crossplane/

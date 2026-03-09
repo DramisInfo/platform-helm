@@ -88,6 +88,11 @@ bootstrap:
     enabled: true
   cnpg:
     enabled: true
+  atlas:
+    # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.15)
+    # Atlas Operator manages database schema migrations as Kubernetes resources (AtlasSchema, AtlasMigration CRDs).
+    # It complements CNPG by handling schema lifecycle independently of the database operator.
+    enabled: false
   gatekeeper:
     enabled: true
     policies:

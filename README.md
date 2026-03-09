@@ -20,23 +20,32 @@ Rather than deploying workloads directly, every template renders an Argo CD `App
 
 ## Components
 
-All components are opt-in and controlled through `values.yaml`. Enable only what your cluster needs.
+Each component is controlled through a toggle in `values.yaml`. The table below lists all available components and their default activation state.
 
 | Component | Description | Default |
 |---|---|:---:|
-| [cert-manager](https://cert-manager.io/) | Automated TLS certificate management | disabled |
-| [Crossplane](https://www.crossplane.io/) | Infrastructure provisioning via Kubernetes CRDs | disabled |
-| [Terraform Operator](https://github.com/isaaguilar/terraform-operator) | Run Terraform workspaces from Kubernetes | disabled |
-| [External Secrets Operator](https://external-secrets.io/) | Sync secrets from Vault, AWS SM, GCP SM, and more | disabled |
-| [CNPG](https://cloudnative-pg.io/) | CloudNativePG — production-grade PostgreSQL on Kubernetes | disabled |
+| [Gateway API](https://gateway-api.sigs.k8s.io/) | Kubernetes Gateway API CRDs (required by cert-manager and Envoy Gateway) | **enabled** |
+| [cert-manager](https://cert-manager.io/) | Automated TLS certificate management | **enabled** |
+| [Crossplane](https://www.crossplane.io/) | Infrastructure provisioning via Kubernetes CRDs | **enabled** |
+| [Terraform Operator](https://github.com/isaaguilar/terraform-operator) | Run Terraform workspaces from Kubernetes | **enabled** |
+| [External Secrets Operator](https://external-secrets.io/) | Sync secrets from Vault, AWS SM, GCP SM, and more | **enabled** |
+| [CNPG](https://cloudnative-pg.io/) | CloudNativePG — production-grade PostgreSQL on Kubernetes | **enabled** |
 | [Atlas Operator](https://atlasgo.io/integrations/kubernetes) | Database schema migrations as Kubernetes resources | disabled |
 | [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) | Policy enforcement via OPA with community library support | **enabled** |
 | [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) | NGINX-based Kubernetes ingress controller | disabled |
-| [Istio](https://istio.io/) | Service mesh with mTLS, traffic management, and observability | disabled |
+| [Istio](https://istio.io/) | Service mesh with mTLS, traffic management, and observability | **enabled** |
+| [Envoy Gateway](https://gateway.envoyproxy.io/) | Kubernetes Gateway API-native ingress backed by Envoy | disabled |
+| [Kong](https://konghq.com/) | API gateway with ingress controller and Kong Manager | disabled |
 | [Prometheus](https://prometheus.io/) | Metrics collection, alerting, and long-term storage | **enabled** |
 | [Grafana](https://grafana.com/) | Metrics dashboards with plugin and datasource provisioning | **enabled** |
+| [Loki](https://grafana.com/oss/loki/) | Log aggregation with Alloy collector | **enabled** |
+| [Tempo](https://grafana.com/oss/tempo/) | Distributed tracing backend | **enabled** |
+| [Beyla](https://grafana.com/oss/beyla-ebpf/) | eBPF-based automatic application instrumentation | **enabled** |
 | [KEDA](https://keda.sh/) | Event-driven autoscaling for Kubernetes workloads | **enabled** |
 | [NATS](https://nats.io/) | Cloud-native messaging with JetStream persistence | **enabled** |
+| [KubeVela](https://kubevela.io/) | Application delivery platform based on Open Application Model | disabled |
+
+> **Note:** Loki, Tempo, Beyla, Prometheus, and Grafana are all gated by the single `bootstrap.monitoring.enabled` toggle.
 
 ---
 
@@ -71,19 +80,19 @@ helm upgrade platform-core ./platform-core \
 ```yaml
 global:
   clusterName: "my-cluster"   # used for resource naming and host templates
-
-bootstrap:
-  ingressNginx:
-    enabled: true
-  monitoring:
-    enabled: true
-  nats:
-    enabled: true
-  istio:
-    enabled: true
 ```
 
-Most components are disabled by default. See [platform-core/values.yaml](platform-core/values.yaml) for the full list of available options and inline documentation.
+Most components are **enabled** by default. To opt out of a component, explicitly disable it:
+
+```yaml
+bootstrap:
+  cnpg:
+    enabled: false
+  terraformOperator:
+    enabled: false
+```
+
+See [platform-core/values.yaml](platform-core/values.yaml) for the full list of available options and inline documentation.
 
 ### 4. Validate before deploying
 
@@ -111,17 +120,24 @@ platform-helm/
     └── templates/
         └── argo-applications/        # One Argo CD Application per component
             ├── atlas/
+            ├── beyla/
             ├── cert-manager/
             ├── cnpg/
             ├── crossplane/
+            ├── envoy-gateway/
             ├── external-secret-operator/
             ├── gatekeeper/
+            ├── gateway-api/
             ├── grafana/
             ├── ingress-nginx/
             ├── istio/
             ├── keda/
+            ├── kong/
+            ├── kubevela/
+            ├── loki/
             ├── nats/
             ├── prometheus/
+            ├── tempo/
             └── terraform-operator/
 ```
 

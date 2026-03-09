@@ -55,7 +55,6 @@ jobs:
               bootstrap.crossplane.enabled=true
               bootstrap.externalSecretOperator.enabled=true
               bootstrap.cnpg.enabled=true
-              bootstrap.ingressNginx.enabled=true
               bootstrap.terraformOperator.enabled=true
 
           - name: all-enabled
@@ -67,7 +66,6 @@ jobs:
               bootstrap.crossplane.enabled=true
               bootstrap.externalSecretOperator.enabled=true
               bootstrap.cnpg.enabled=true
-              bootstrap.ingressNginx.enabled=true
               bootstrap.terraformOperator.enabled=true
 
     steps:

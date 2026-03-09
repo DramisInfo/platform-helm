@@ -77,7 +77,7 @@ spec:
                   namespaces:
                     - "*"
                   excludedNamespaces:
-                    {{- $gwExcludedNs := .Values.bootstrap.gatekeeper.policies.excludedNamespaces | default (list "kube-system" "gatekeeper-system" "cert-manager" "istio-system" "ingress-nginx" "argocd") }}
+                    {{- $gwExcludedNs := .Values.bootstrap.gatekeeper.policies.excludedNamespaces | default (list "kube-system" "gatekeeper-system" "cert-manager" "istio-system" "argocd") }}
                     {{- if .Values.bootstrap.monitoring.enabled }}
                     {{- $gwExcludedNs = append $gwExcludedNs "beyla" }}
                     {{- end }}
@@ -103,7 +103,7 @@ spec:
                   namespaces:
                     - "*"
                   excludedNamespaces:
-                    {{- $gwExcludedNs2 := .Values.bootstrap.gatekeeper.policies.excludedNamespaces | default (list "kube-system" "gatekeeper-system" "cert-manager" "istio-system" "ingress-nginx" "argocd") }}
+                    {{- $gwExcludedNs2 := .Values.bootstrap.gatekeeper.policies.excludedNamespaces | default (list "kube-system" "gatekeeper-system" "cert-manager" "istio-system" "argocd") }}
                     {{- if .Values.bootstrap.monitoring.enabled }}
                     {{- $gwExcludedNs2 = append $gwExcludedNs2 "beyla" }}
                     {{- end }}

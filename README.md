@@ -32,10 +32,8 @@ Each component is controlled through a toggle in `values.yaml`. The table below 
 | [CNPG](https://cloudnative-pg.io/) | CloudNativePG — production-grade PostgreSQL on Kubernetes | **enabled** |
 | [Atlas Operator](https://atlasgo.io/integrations/kubernetes) | Database schema migrations as Kubernetes resources | disabled |
 | [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) | Policy enforcement via OPA with community library support | **enabled** |
-| [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) | NGINX-based Kubernetes ingress controller | disabled |
 | [Istio](https://istio.io/) | Service mesh with mTLS, traffic management, and observability | **enabled** |
 | [Envoy Gateway](https://gateway.envoyproxy.io/) | Kubernetes Gateway API-native ingress backed by Envoy | disabled |
-| [Kong](https://konghq.com/) | API gateway with ingress controller and Kong Manager | disabled |
 | [Prometheus](https://prometheus.io/) | Metrics collection, alerting, and long-term storage | **enabled** |
 | [Grafana](https://grafana.com/) | Metrics dashboards with plugin and datasource provisioning | **enabled** |
 | [Loki](https://grafana.com/oss/loki/) | Log aggregation with Alloy collector | **enabled** |
@@ -129,10 +127,8 @@ platform-helm/
             ├── gatekeeper/
             ├── gateway-api/
             ├── grafana/
-            ├── ingress-nginx/
             ├── istio/
             ├── keda/
-            ├── kong/
             ├── kubevela/
             ├── loki/
             ├── nats/

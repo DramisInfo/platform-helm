@@ -54,7 +54,6 @@ bootstrap:
         - gatekeeper-system
         - cert-manager
         - istio-system
-        - ingress-nginx
         - argocd
       exemptImages: []  # List of image patterns to exempt
 ```

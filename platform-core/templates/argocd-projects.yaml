@@ -28,7 +28,7 @@ spec:
       kind: '*'
 ---
 # platform-networking: Service mesh, ingress, and API gateways.
-# Apps: istio, ingress-nginx, envoy-gateway, kong
+# Apps: istio, envoy-gateway
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -43,11 +43,7 @@ spec:
   destinations:
     - namespace: istio-system
       server: "https://kubernetes.default.svc"
-    - namespace: ingress-nginx
-      server: "https://kubernetes.default.svc"
     - namespace: envoy-gateway-system
-      server: "https://kubernetes.default.svc"
-    - namespace: kong
       server: "https://kubernetes.default.svc"
     - namespace: argocd
       server: "https://kubernetes.default.svc"

@@ -111,8 +111,6 @@ bootstrap:
         - azure-arc
       # Image patterns to exempt from policies (e.g., ["gcr.io/k8s-minikube/*"])
       exemptImages: []
-  ingressNginx:
-    enabled: false
   monitoring:
     enabled: true
     grafana:
@@ -212,44 +210,6 @@ bootstrap:
       # Leave empty to use the default: envoy-gateway-tls-<global.clusterName>
       # Create this secret externally (e.g., via cert-manager Certificate resource).
       tlsSecret: ""
-  kong:
-    # Deploy Kong API Gateway via Argo CD (kong/kong 3.0.2, Kong 3.9)
-    enabled: false
-    # Service type for the Kong proxy service.
-    # Use ClusterIP when fronted by Istio gateway (recommended); LoadBalancer for direct external exposure.
-    proxy:
-      type: ClusterIP
-    # Kong Ingress Controller (KIC) — translates Kubernetes Ingress/HTTPRoute/KongPlugin
-    # CRDs into Kong route configuration. Enable if managing Kong via Kubernetes resources.
-    # Disable if configuring Kong purely via its Admin API or declarative files.
-    ingressController:
-      enabled: true
-      # Restrict the controller to a single namespace (leave empty to watch all namespaces)
-      watchNamespace: ""
-    # Admin API — exposes Kong's configuration REST API.
-    # Automatically enabled as ClusterIP when manager.enabled is true (required for Kong Manager).
-    # Set enabled: true independently to also expose it externally via its own VirtualService.
-    admin:
-      enabled: false
-      # Hostname for the Admin API VirtualService.
-      # Leave empty to use the default: kong-admin.<global.clusterName>.dramisinfo.com
-      host: ""
-    # Kong Manager web UI — exposes the Kong Manager dashboard.
-    # In Kong OSS the UI is read-only; in Kong Enterprise it is fully featured.
-    manager:
-      enabled: true
-      # Hostname for the Kong Manager VirtualService.
-      # Leave empty to use the default: kong-manager.<global.clusterName>.dramisinfo.com
-      host: ""
-    # Expose a Prometheus ServiceMonitor for scraping Kong metrics
-    serviceMonitor:
-      enabled: false
-    # Istio VirtualService to expose Kong proxy through the shared Istio ingress gateway
-    virtualService:
-      enabled: true
-      # Hostname that routes to the Kong proxy (must match the shared-gateway wildcard).
-      # Leave empty to use the default: api.<global.clusterName>.dramisinfo.com
-      host: ""
   istio:
     enabled: true
     # Wildcard host pattern for the shared gateway

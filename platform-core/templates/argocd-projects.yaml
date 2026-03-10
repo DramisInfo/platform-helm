@@ -122,6 +122,7 @@ spec:
   sourceRepos:
     - 'https://github.com/DramisInfo/platform-project-workspaces.git'
     - 'https://github.com/DramisInfo/*-workspace.git'
+    - 'git@github.com:DramisInfo/*-workspace.git'
   destinations:
     - namespace: product-workspaces
       server: "https://kubernetes.default.svc"

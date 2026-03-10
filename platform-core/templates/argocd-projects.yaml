@@ -108,8 +108,8 @@ spec:
     - group: '*'
       kind: '*'
 ---
-# product-workspaces: XProductWorkspace claim instances managed by platform teams.
-# Apps: platform-project-workspaces
+# product-workspaces: XProductWorkspace claims discovered from team workspace repos.
+# Apps: discovered via SCM Provider ApplicationSet (*-workspace repos)
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -118,9 +118,10 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-200"
 spec:
-  description: "XProductWorkspace claim instances managed by platform teams"
+  description: "XProductWorkspace claims discovered from team workspace repos"
   sourceRepos:
     - 'https://github.com/DramisInfo/platform-project-workspaces.git'
+    - 'https://github.com/DramisInfo/*-workspace.git'
   destinations:
     - namespace: product-workspaces
       server: "https://kubernetes.default.svc"

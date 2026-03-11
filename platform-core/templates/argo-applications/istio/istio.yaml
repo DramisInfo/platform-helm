@@ -181,8 +181,10 @@ spec:
                   spec:
                     containers:
                       - name: smee-client
-                        image: ghcr.io/amplify-security/smee-client:latest
-                        args:
+                        image: node:20-alpine
+                        command:
+                          - npx
+                          - smee-client
                           - --url
                           - {{ .Values.bootstrap.argocd.smeeUrl | quote }}
                           - --target
@@ -190,9 +192,9 @@ spec:
                         resources:
                           requests:
                             cpu: 10m
-                            memory: 32Mi
-                          limits:
                             memory: 64Mi
+                          limits:
+                            memory: 128Mi
     {{- end }}
   syncPolicy:
     automated:

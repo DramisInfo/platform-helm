@@ -210,6 +210,13 @@ bootstrap:
       # Leave empty to use the default: envoy-gateway-tls-<global.clusterName>
       # Create this secret externally (e.g., via cert-manager Certificate resource).
       tlsSecret: ""
+  argocd:
+    # smee.io channel URL for event-driven webhook relay.
+    # When set, deploys a smee-client pod in the argocd namespace that subscribes
+    # to the smee.io channel and forwards GitHub webhook events to argocd-server
+    # /api/webhook, enabling event-driven refresh instead of polling.
+    # Leave empty (default) to disable.
+    smeeUrl: ""
   istio:
     enabled: true
     # Wildcard host pattern for the shared gateway

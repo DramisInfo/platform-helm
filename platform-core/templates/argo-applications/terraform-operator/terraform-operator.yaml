@@ -13,10 +13,35 @@ spec:
     namespace: hcp-terraform-operator
     server: "https://kubernetes.default.svc"
   project: platform-infra
-  source:
-    repoURL: "https://helm.releases.hashicorp.com"
-    targetRevision: "2.11.3"
-    chart: hcp-terraform-operator
+  sources:
+    - repoURL: "https://helm.releases.hashicorp.com"
+      targetRevision: "2.11.3"
+      chart: hcp-terraform-operator
+    # ExternalSecret: syncs tfc-token from AKV into hcp-terraform-operator namespace
+    # so the operator can reference it in Workspace resources.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: external-secrets.io/v1beta1
+              kind: ExternalSecret
+              metadata:
+                name: tfc-token
+                namespace: hcp-terraform-operator
+              spec:
+                refreshInterval: 1h
+                secretStoreRef:
+                  kind: ClusterSecretStore
+                  name: azure-keyvault-shared
+                target:
+                  name: tfc-token
+                  creationPolicy: Owner
+                data:
+                  - secretKey: token
+                    remoteRef:
+                      key: tfc-token
   syncPolicy:
     automated:
       prune: true

@@ -60,6 +60,8 @@ bootstrap:
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
     providerKubernetesVersion: "v1.2.1"
+    # upbound provider-azure-network version (DNS A records for dynamic DNS)
+    providerNetworkVersion: "v2.5.0"
     # Provision the per-cluster cert-manager Managed Identity via Crossplane.
     # Values here are cluster-specific and should be injected via the overlay patch
     # (overlays/<cluster>/patches/platform-core.yaml) rather than set globally.

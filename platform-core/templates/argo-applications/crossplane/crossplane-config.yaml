@@ -35,6 +35,7 @@ spec:
           autoReadyVersion: {{ .Values.bootstrap.crossplane.functionAutoReadyVersion }}
         providers:
           kubernetesVersion: {{ .Values.bootstrap.crossplane.providerKubernetesVersion }}
+          networkVersion: {{ .Values.bootstrap.crossplane.providerNetworkVersion }}
   syncPolicy:
     automated:
       prune: true

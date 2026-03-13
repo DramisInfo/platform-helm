@@ -14,9 +14,8 @@ spec:
     server: "https://kubernetes.default.svc"
   project: platform-infra
   source:
-    repoURL: "oci://xpkg.upbound.io/upbound"
+    repoURL: "oci://xpkg.upbound.io/upbound/crossplane"
     targetRevision: "2.1.3-up.1"
-    chart: crossplane
     helm:
       valuesObject:
         metrics:

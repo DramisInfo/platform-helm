@@ -60,8 +60,6 @@ bootstrap:
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
     providerKubernetesVersion: "v1.2.1"
-    # upbound provider-azapi version (generic AzRM API; used for DNS A records in dynamic DNS)
-    providerAzapiVersion: "v2.0.1"
     # Dynamic DNS: create an Azure DNS A record pointing to the cluster's ISP public IP.
     # Disabled by default; enable per-cluster via the overlay patch.
     dynamicDns:

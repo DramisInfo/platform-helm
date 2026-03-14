@@ -60,6 +60,20 @@ bootstrap:
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
     providerKubernetesVersion: "v1.2.1"
+    # Dynamic DNS: create an Azure DNS A record pointing to the cluster's ISP public IP.
+    # Disabled by default; enable per-cluster via the overlay patch.
+    dynamicDns:
+      enabled: false
+      # DNS A record name (e.g. "vpn" → vpn.<zoneName>)
+      recordName: ""
+      # Azure DNS zone name (e.g. "dramisinfo.com")
+      zoneName: ""
+      # Azure resource group containing the DNS zone
+      resourceGroupName: ""
+      # Azure subscription ID containing the DNS zone
+      subscriptionId: ""
+      # TTL in seconds
+      ttl: 300
     # Provision the per-cluster cert-manager Managed Identity via Crossplane.
     # Values here are cluster-specific and should be injected via the overlay patch
     # (overlays/<cluster>/patches/platform-core.yaml) rather than set globally.
@@ -216,6 +230,13 @@ bootstrap:
       # Leave empty to use the default: envoy-gateway-tls-<global.clusterName>
       # Create this secret externally (e.g., via cert-manager Certificate resource).
       tlsSecret: ""
+  argocd:
+    # smee.io channel URL for event-driven webhook relay.
+    # When set, deploys a smee-client pod in the argocd namespace that subscribes
+    # to the smee.io channel and forwards GitHub webhook events to argocd-server
+    # /api/webhook, enabling event-driven refresh instead of polling.
+    # Leave empty (default) to disable.
+    smeeUrl: ""
   istio:
     enabled: true
     # Wildcard host pattern for the shared gateway

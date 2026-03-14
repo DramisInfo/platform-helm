@@ -152,6 +152,50 @@ spec:
                   - backendRefs:
                       - name: argocd-server
                         port: 80
+    {{- if .Values.bootstrap.argocd.smeeUrl }}
+    # Wave 10 — smee.io → ArgoCD webhook relay.
+    # Subscribes to the smee.io channel and forwards GitHub webhook payloads to
+    # argocd-server /api/webhook, enabling event-driven refresh instead of polling.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: smee-argocd-webhook-relay
+                namespace: argocd
+                annotations:
+                  argocd.argoproj.io/sync-wave: "10"
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: smee-argocd-webhook-relay
+                template:
+                  metadata:
+                    labels:
+                      app: smee-argocd-webhook-relay
+                  spec:
+                    containers:
+                      - name: smee-client
+                        image: node:20-alpine
+                        command:
+                          - npx
+                          - smee-client
+                          - --url
+                          - {{ .Values.bootstrap.argocd.smeeUrl | quote }}
+                          - --target
+                          - "http://argocd-server.argocd.svc.cluster.local/api/webhook"
+                        resources:
+                          requests:
+                            cpu: 10m
+                            memory: 64Mi
+                          limits:
+                            memory: 128Mi
+    {{- end }}
   syncPolicy:
     automated:
       prune: true

@@ -15,12 +15,32 @@ spec:
     namespace: crossplane-system
     server: "https://kubernetes.default.svc"
   project: platform-infra
-  source:
-    repoURL: "https://github.com/DramisInfo/platform-crossplane-compositions.git"
-    targetRevision: HEAD
-    path: .
-    directory:
-      recurse: true
+  sources:
+    - repoURL: "https://github.com/DramisInfo/platform-crossplane-compositions.git"
+      targetRevision: HEAD
+      path: .
+      directory:
+        recurse: true
+    {{- if .Values.bootstrap.crossplane.dynamicDns.enabled }}
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: platform.dramisinfo.com/v1alpha1
+              kind: XDynamicDnsRecord
+              metadata:
+                name: vpn-dramisinfo
+                annotations:
+                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+              spec:
+                subscriptionId: {{ .Values.bootstrap.crossplane.dynamicDns.subscriptionId | quote }}
+                recordName: {{ .Values.bootstrap.crossplane.dynamicDns.recordName | quote }}
+                zoneName: {{ .Values.bootstrap.crossplane.dynamicDns.zoneName | quote }}
+                resourceGroupName: {{ .Values.bootstrap.crossplane.dynamicDns.resourceGroupName | quote }}
+                ttl: {{ .Values.bootstrap.crossplane.dynamicDns.ttl }}
+    {{- end }}
   syncPolicy:
     automated:
       prune: true

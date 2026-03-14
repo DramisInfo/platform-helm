@@ -17,6 +17,37 @@ spec:
     repoURL: "https://argoproj.github.io/argo-helm"
     targetRevision: "2.4.10"
     chart: argo-events
+    helm:
+      valuesObject:
+        # Security context to comply with Gatekeeper psp-pods-must-run-as-nonroot policy
+        controller:
+          podSecurityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containerSecurityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+        webhook:
+          podSecurityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containerSecurityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
   syncPolicy:
     automated:
       prune: true

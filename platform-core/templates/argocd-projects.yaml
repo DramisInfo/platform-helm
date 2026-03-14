@@ -1,6 +1,6 @@
 ---
 # platform-foundations: Security, policy, CRD bootstrapping, and secret management.
-# Apps: gateway-api, gatekeeper, cert-manager, external-secret-operator
+# Apps: gateway-api, gatekeeper, cert-manager, external-secret-operator, argo-events
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -20,6 +20,8 @@ spec:
     - namespace: cert-manager
       server: "https://kubernetes.default.svc"
     - namespace: eso
+      server: "https://kubernetes.default.svc"
+    - namespace: argo-events
       server: "https://kubernetes.default.svc"
     - namespace: monitoring
       server: "https://kubernetes.default.svc"

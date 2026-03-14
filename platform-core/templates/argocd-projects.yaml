@@ -77,7 +77,7 @@ spec:
 ---
 # platform-infra: Infrastructure automation, control planes, and runtime operators.
 # Apps: crossplane, crossplane-config, platform-crossplane-compositions,
-#        terraform-operator, kubevela, keda
+#        terraform-operator, kubevela, keda, argo-events
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -99,6 +99,8 @@ spec:
     - namespace: vela-system
       server: "https://kubernetes.default.svc"
     - namespace: keda
+      server: "https://kubernetes.default.svc"
+    - namespace: argo-events
       server: "https://kubernetes.default.svc"
     - namespace: kube-system
       server: "https://kubernetes.default.svc"

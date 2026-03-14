@@ -164,6 +164,12 @@ bootstrap:
         storageClass: ""
   keda:
     enabled: true
+  argoEvents:
+    # Deploy Argo Events via Argo CD (argoproj/argo-helm argo-events 2.4.10)
+    # Argo Events is an event-driven workflow automation framework for Kubernetes.
+    # It provides EventSources, Sensors, and EventBus to trigger workflows and
+    # other Kubernetes objects in response to various events (webhooks, queues, etc.).
+    enabled: true
   nats:
     enabled: true
     jetstream:

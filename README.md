@@ -40,6 +40,7 @@ Each component is controlled through a toggle in `values.yaml`. The table below 
 | [Tempo](https://grafana.com/oss/tempo/) | Distributed tracing backend | **enabled** |
 | [Beyla](https://grafana.com/oss/beyla-ebpf/) | eBPF-based automatic application instrumentation | **enabled** |
 | [KEDA](https://keda.sh/) | Event-driven autoscaling for Kubernetes workloads | **enabled** |
+| [Argo Events](https://argoproj.github.io/argo-events/) | Event-driven workflow automation framework for Kubernetes | **enabled** |
 | [NATS](https://nats.io/) | Cloud-native messaging with JetStream persistence | **enabled** |
 | [KubeVela](https://kubevela.io/) | Application delivery platform based on Open Application Model | disabled |
 
@@ -117,6 +118,7 @@ platform-helm/
     ├── GATEKEEPER-POLICIES.md        # Enforced OPA policies and exclusions
     └── templates/
         └── argo-applications/        # One Argo CD Application per component
+            ├── argo-events/
             ├── atlas/
             ├── beyla/
             ├── cert-manager/

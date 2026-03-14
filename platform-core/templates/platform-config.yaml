@@ -14,3 +14,4 @@ metadata:
     argocd.argoproj.io/sync-wave: "-200"
 data:
   baseDomain: "{{ .Values.global.clusterName }}.dramisinfo.com"
+  clusterName: "{{ .Values.global.clusterName }}"

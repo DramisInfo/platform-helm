@@ -42,6 +42,13 @@ spec:
                   - secretKey: token
                     remoteRef:
                       key: tfc-token
+  ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jsonPointers:
+        - /spec/data/0/remoteRef/conversionStrategy
+        - /spec/data/0/remoteRef/decodingStrategy
+        - /spec/data/0/remoteRef/metadataPolicy
   syncPolicy:
     automated:
       prune: true

@@ -131,6 +131,9 @@ spec:
       server: "https://kubernetes.default.svc"
     - namespace: platform-tools
       server: "https://kubernetes.default.svc"
+    # Argo Events EventBus/EventSource/Sensor bootstrap resources.
+    - namespace: argo-events
+      server: "https://kubernetes.default.svc"
     - namespace: ""
       server: "https://kubernetes.default.svc"
   clusterResourceWhitelist:

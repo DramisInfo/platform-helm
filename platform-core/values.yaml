@@ -150,6 +150,12 @@ bootstrap:
         storageClass: ""
   keda:
     enabled: true
+  k6Operator:
+    # Deploy Grafana k6 Operator via Argo CD (grafana/k6-operator 4.3.0)
+    # The k6 Operator enables application teams to automate distributed load testing
+    # by running k6 TestRun resources as Kubernetes jobs. It manages the lifecycle
+    # of k6 test runs (initializer + runner pods) declaratively via CRDs.
+    enabled: true
   argoEvents:
     # Deploy Argo Events via Argo CD (argoproj/argo-helm argo-events 2.4.10)
     # Argo Events is an event-driven workflow automation framework for Kubernetes.

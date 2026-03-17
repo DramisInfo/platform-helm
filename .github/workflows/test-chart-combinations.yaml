@@ -24,6 +24,7 @@ jobs:
               bootstrap.monitoring.enabled=false
               bootstrap.keda.enabled=false
               bootstrap.nats.enabled=false
+              bootstrap.k6Operator.enabled=false
 
           - name: gatekeeper-only
             set: >-
@@ -67,6 +68,7 @@ jobs:
               bootstrap.externalSecretOperator.enabled=true
               bootstrap.cnpg.enabled=true
               bootstrap.terraformOperator.enabled=true
+              bootstrap.k6Operator.enabled=true
 
     steps:
       - name: Checkout

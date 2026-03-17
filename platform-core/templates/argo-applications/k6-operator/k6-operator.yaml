@@ -1,0 +1,60 @@
+{{- if .Values.bootstrap.k6Operator.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k6-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-90"
+spec:
+  destination:
+    namespace: k6-operator
+    server: "https://kubernetes.default.svc"
+  project: platform-infra
+  source:
+    repoURL: "https://grafana.github.io/helm-charts"
+    targetRevision: "4.3.0"
+    chart: k6-operator
+    helm:
+      valuesObject:
+        # Disable in-chart namespace creation; Argo CD handles it via CreateNamespace=true
+        namespace:
+          create: false
+        manager:
+          # Security context to comply with Gatekeeper policies (run-as-nonroot, privileged-container)
+          podSecurityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containerSecurityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          # Use production JSON logging
+          logging:
+            development: false
+        # Enable Prometheus ServiceMonitor for metrics scraping
+        metrics:
+          serviceMonitor:
+            enabled: true
+            namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+{{- end -}}

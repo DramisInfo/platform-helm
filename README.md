@@ -40,6 +40,7 @@ Each component is controlled through a toggle in `values.yaml`. The table below 
 | [Tempo](https://grafana.com/oss/tempo/) | Distributed tracing backend | **enabled** |
 | [Beyla](https://grafana.com/oss/beyla-ebpf/) | eBPF-based automatic application instrumentation | **enabled** |
 | [KEDA](https://keda.sh/) | Event-driven autoscaling for Kubernetes workloads | **enabled** |
+| [k6 Operator](https://grafana.com/docs/k6/latest/set-up/set-up-distributed-k6/) | Distributed load testing via Grafana k6 on Kubernetes | **enabled** |
 | [Argo Events](https://argoproj.github.io/argo-events/) | Event-driven workflow automation framework for Kubernetes | **enabled** |
 | [NATS](https://nats.io/) | Cloud-native messaging with JetStream persistence | **enabled** |
 | [KubeVela](https://kubevela.io/) | Application delivery platform based on Open Application Model | disabled |
@@ -130,6 +131,7 @@ platform-helm/
             ├── gateway-api/
             ├── grafana/
             ├── istio/
+            ├── k6-operator/
             ├── keda/
             ├── kubevela/
             ├── loki/

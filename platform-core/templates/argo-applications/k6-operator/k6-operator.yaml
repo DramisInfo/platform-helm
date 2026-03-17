@@ -12,7 +12,7 @@ spec:
   destination:
     namespace: k6-operator
     server: "https://kubernetes.default.svc"
-  project: platform-infra
+  project: platform-observability
   source:
     repoURL: "https://grafana.github.io/helm-charts"
     targetRevision: "4.3.0"

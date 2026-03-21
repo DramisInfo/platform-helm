@@ -21,7 +21,7 @@ spec:
     - .spec.names.singular
   sources:
     - repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
-      targetRevision: "3.17.1"
+      targetRevision: "3.22.0"
       chart: gatekeeper
       helm:
         valuesObject:
@@ -39,7 +39,7 @@ spec:
           # Alloy ships these to Loki when monitoring is enabled.
           logDenies: {{ .Values.bootstrap.monitoring.enabled }}
           image:
-            release: v3.17.1
+            release: v3.22.0
           podAnnotations:
             prometheus.io/scrape: "true"
             prometheus.io/port: "8888"

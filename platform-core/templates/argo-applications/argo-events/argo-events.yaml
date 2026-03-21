@@ -15,7 +15,7 @@ spec:
   project: platform-foundations
   source:
     repoURL: "https://argoproj.github.io/argo-helm"
-    targetRevision: "2.4.10"
+    targetRevision: "2.4.21"
     chart: argo-events
     helm:
       valuesObject:

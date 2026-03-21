@@ -16,7 +16,7 @@ spec:
   sources:
     # ── Grafana Tempo (single binary, filesystem storage) ────────────────────
     - repoURL: "https://grafana.github.io/helm-charts"
-      targetRevision: "1.16.0"
+      targetRevision: "1.24.0"
       chart: tempo
       helm:
         valuesObject:

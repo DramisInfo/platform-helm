@@ -9,6 +9,11 @@ permissions:
 tools:
   github:
     toolsets: [repos, pull_requests]
+    mode: remote
+    toolsets: [repos, issues, pull_requests]
+    github-app:
+      app-id: ${{ vars.APP_ID }}
+      private-key: ${{ secrets.APP_PRIVATE_KEY }}
 safe-outputs:
   create-pull-request:
     base-branch: main

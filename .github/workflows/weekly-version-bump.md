@@ -1,5 +1,5 @@
 ---
-name: Daily Run
+name: Weekly Version Bump
 description: |
   This workflow checks the versions of all Helm charts referenced in the ArgoCD applications that compose the platform-core helm chart, then opens a pull request to bump any that have newer releases.
 

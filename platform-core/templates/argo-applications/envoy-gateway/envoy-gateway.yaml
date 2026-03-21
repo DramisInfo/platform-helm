@@ -15,7 +15,7 @@ spec:
   project: platform-networking
   sources:
     - repoURL: "docker.io/envoyproxy"
-      targetRevision: "v1.7.0"
+      targetRevision: "v1.7.1"
       chart: gateway-helm
       helm:
         valuesObject:

@@ -9,9 +9,9 @@ bootstrap:
     # CRDs exist before the cert-manager controller starts its Gateway API check.
     enabled: true
     # Gateway API release tag to install (https://github.com/kubernetes-sigs/gateway-api/releases)
-    targetRevision: "v1.2.1"
+    targetRevision: "v1.5.1"
   certManager:
-    # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.16.2)
+    # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.20.0)
     enabled: true
     # Configure Azure Workload Identity on the cert-manager service account
     # Required for DNS01 challenges via AzureDNS managed identity.
@@ -48,15 +48,15 @@ bootstrap:
       # Default Azure region for resources created by Crossplane (e.g. UMIs, role assignments)
       location: "canadacentral"
       # Upbound provider-family-azure version tag (applied to all sub-providers)
-      providerVersion: "v2.4.0"
+      providerVersion: "v2.5.0"
       # DNS resource group containing Azure DNS zones (used for cert-manager role assignment)
       dnsResourceGroup: "rg-dns"
     # crossplane-contrib function-patch-and-transform version (Pipeline mode Compositions)
-    functionPatchAndTransformVersion: "v0.8.0"
+    functionPatchAndTransformVersion: "v0.10.2"
     # crossplane-contrib function-go-templating version (conditional / dynamic resource rendering)
-    functionGoTemplatingVersion: "v0.7.0"
+    functionGoTemplatingVersion: "v0.11.5"
     # crossplane-contrib function-auto-ready version (marks XR ready when all composed resources are ready)
-    functionAutoReadyVersion: "v0.5.0"
+    functionAutoReadyVersion: "v0.6.2"
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
     providerKubernetesVersion: "v1.2.1"
@@ -89,7 +89,7 @@ bootstrap:
   cnpg:
     enabled: true
   atlas:
-    # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.15)
+    # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.28)
     # Atlas Operator manages database schema migrations as Kubernetes resources (AtlasSchema, AtlasMigration CRDs).
     # It complements CNPG by handling schema lifecycle independently of the database operator.
     enabled: false
@@ -157,7 +157,7 @@ bootstrap:
     # of k6 test runs (initializer + runner pods) declaratively via CRDs.
     enabled: true
   argoEvents:
-    # Deploy Argo Events via Argo CD (argoproj/argo-helm argo-events 2.4.10)
+    # Deploy Argo Events via Argo CD (argoproj/argo-helm argo-events 2.4.21)
     # Argo Events is an event-driven workflow automation framework for Kubernetes.
     # It provides EventSources, Sensors, and EventBus to trigger workflows and
     # other Kubernetes objects in response to various events (webhooks, queues, etc.).
@@ -207,7 +207,7 @@ bootstrap:
       # Gateway port (defaults to 7222)
       port: 7222
   envoyGateway:
-    # Deploy Envoy Gateway via Argo CD (docker.io/envoyproxy/gateway-helm v1.7.0)
+    # Deploy Envoy Gateway via Argo CD (docker.io/envoyproxy/gateway-helm v1.7.1)
     # Provides a Kubernetes Gateway API-native ingress gateway backed by Envoy.
     # Operates independently from Istio: Envoy Gateway handles north-south traffic;
     # Istio manages east-west service mesh traffic. Both can coexist.

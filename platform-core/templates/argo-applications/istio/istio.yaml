@@ -15,13 +15,13 @@ spec:
   project: platform-networking
   sources:
     - repoURL: "https://istio-release.storage.googleapis.com/charts"
-      targetRevision: "1.28.4"
+      targetRevision: "1.29.1"
       chart: base
       helm:
         valuesObject:
           defaultRevision: default
     - repoURL: "https://istio-release.storage.googleapis.com/charts"
-      targetRevision: "1.28.4"
+      targetRevision: "1.29.1"
       chart: istiod
       helm:
         valuesObject:
@@ -29,7 +29,7 @@ spec:
           global:
             istioNamespace: istio-system
     - repoURL: "https://istio-release.storage.googleapis.com/charts"
-      targetRevision: "1.28.4"
+      targetRevision: "1.29.1"
       chart: cni
       helm:
         valuesObject:
@@ -37,7 +37,7 @@ spec:
           global:
             platform: {{ .Values.bootstrap.istio.platform | default "k3s" | quote }}
     - repoURL: "https://istio-release.storage.googleapis.com/charts"
-      targetRevision: "1.28.4"
+      targetRevision: "1.29.1"
       chart: ztunnel
       helm:
         valuesObject: {}

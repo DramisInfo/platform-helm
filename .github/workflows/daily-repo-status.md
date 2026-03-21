@@ -19,6 +19,9 @@ tools:
     lockdown: false
     min-integrity: none
     repos: all
+    github-app:
+      app-id: ${{ vars.APP_ID }}
+      private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
 safe-outputs:
   mentions: false
@@ -28,6 +31,7 @@ safe-outputs:
     labels: [dependencies, automated]
     draft: true
     fallback-as-issue: false
+    github-token-for-extra-empty-commit: app
 engine: copilot
 ---
 

@@ -44,7 +44,13 @@ For each pinned version you find, figure out which upstream project it belongs t
 
 Compare the current pinned version to the latest release. If the latest is newer, the component needs a bump. Update the version string in whichever file it lives in, making sure to update every occurrence for that component. Do not touch anything else in the files.
 
-If you found at least one component to bump, open a draft pull request. The title should briefly list what changed. The body should contain a table showing each component alongside its old version, new version, and a link to the release page, followed by a short note reminding reviewers to check for breaking changes before merging.
+If you found at least one component to bump, open a draft pull request. The title should briefly list what changed. The body should contain:
+
+1. A table showing each component alongside its old version, new version, and a link to the release page.
+
+2. For each bumped component, a **"Release notes summary"** section. Fetch the GitHub release notes for every version between the old version (exclusive) and the new version (inclusive). Summarize the key changes — new features, deprecations, breaking changes, and notable bug fixes — in a concise bullet list. If multiple intermediate versions exist, group the highlights together rather than listing every release individually. Clearly call out any breaking changes or required migration steps.
+
+3. A closing note reminding reviewers to consult the full release notes and changelogs before merging, especially for major or large minor version jumps.
 
 If everything is already up to date, do nothing.
 

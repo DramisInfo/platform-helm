@@ -15,7 +15,7 @@ spec:
   project: platform-data
   source:
     repoURL: "https://cloudnative-pg.github.io/charts"
-    targetRevision: "0.27.1"
+    targetRevision: "0.27.0"
     chart: cloudnative-pg
   syncPolicy:
     automated:

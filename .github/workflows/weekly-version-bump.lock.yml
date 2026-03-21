@@ -22,9 +22,9 @@
 #
 # This workflow checks the versions of all Helm charts referenced in the ArgoCD applications that compose the platform-core helm chart, then opens a pull request to bump any that have newer releases.
 #
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"d73490ae97aae3eaffcbc2f4dc1dddb0d9bbd563a1cf96e0f1d8e0cf73d48dfd","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"17c8e74c657d40a42a9b568fc2b3b37205281870af6b170c60bc3224d116ae19","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
 
-name: "Daily Run"
+name: "Weekly Version Bump"
 "on":
   schedule:
   - cron: "0 21 * * 5"
@@ -35,7 +35,7 @@ permissions: {}
 concurrency:
   group: "gh-aw-${{ github.workflow }}"
 
-run-name: "Daily Run"
+run-name: "Weekly Version Bump"
 
 jobs:
   activation:
@@ -62,7 +62,7 @@ jobs:
           GH_AW_INFO_VERSION: ""
           GH_AW_INFO_AGENT_VERSION: "latest"
           GH_AW_INFO_CLI_VERSION: "v0.62.5"
-          GH_AW_INFO_WORKFLOW_NAME: "Daily Run"
+          GH_AW_INFO_WORKFLOW_NAME: "Weekly Version Bump"
           GH_AW_INFO_EXPERIMENTAL: "false"
           GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: "true"
           GH_AW_INFO_STAGED: "false"
@@ -96,7 +96,7 @@ jobs:
       - name: Check workflow file timestamps
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          GH_AW_WORKFLOW_FILE: "daily-repo-status.lock.yml"
+          GH_AW_WORKFLOW_FILE: "weekly-version-bump.lock.yml"
         with:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
@@ -166,7 +166,7 @@ jobs:
           </system>
           GH_AW_PROMPT_EOF
           cat << 'GH_AW_PROMPT_EOF'
-          {{#runtime-import .github/workflows/daily-repo-status.md}}
+          {{#runtime-import .github/workflows/weekly-version-bump.md}}
           GH_AW_PROMPT_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
@@ -245,7 +245,7 @@ jobs:
       GH_AW_ASSETS_BRANCH: ""
       GH_AW_ASSETS_MAX_SIZE_KB: 0
       GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
-      GH_AW_WORKFLOW_ID_SANITIZED: dailyrepostatus
+      GH_AW_WORKFLOW_ID_SANITIZED: weeklyversionbump
     outputs:
       checkout_pr_success: ${{ steps.checkout-pr.outputs.checkout_pr_success || 'true' }}
       detection_conclusion: ${{ steps.detection_conclusion.outputs.conclusion }}
@@ -757,7 +757,7 @@ jobs:
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          WORKFLOW_NAME: "Daily Run"
+          WORKFLOW_NAME: "Weekly Version Bump"
           WORKFLOW_DESCRIPTION: "This workflow checks the versions of all Helm charts referenced in the ArgoCD applications that compose the platform-core helm chart, then opens a pull request to bump any that have newer releases."
           HAS_PATCH: ${{ steps.collect_output.outputs.has_patch }}
         with:
@@ -870,7 +870,7 @@ jobs:
       contents: write
       pull-requests: write
     concurrency:
-      group: "gh-aw-conclusion-daily-repo-status"
+      group: "gh-aw-conclusion-weekly-version-bump"
       cancel-in-progress: false
     outputs:
       noop_message: ${{ steps.noop.outputs.noop_message }}
@@ -900,7 +900,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
           GH_AW_NOOP_MAX: "1"
-          GH_AW_WORKFLOW_NAME: "Daily Run"
+          GH_AW_WORKFLOW_NAME: "Weekly Version Bump"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -913,7 +913,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Daily Run"
+          GH_AW_WORKFLOW_NAME: "Weekly Version Bump"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -927,10 +927,10 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Daily Run"
+          GH_AW_WORKFLOW_NAME: "Weekly Version Bump"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
-          GH_AW_WORKFLOW_ID: "daily-repo-status"
+          GH_AW_WORKFLOW_ID: "weekly-version-bump"
           GH_AW_SECRET_VERIFICATION_RESULT: ${{ needs.activation.outputs.secret_verification_result }}
           GH_AW_CHECKOUT_PR_SUCCESS: ${{ needs.agent.outputs.checkout_pr_success }}
           GH_AW_INFERENCE_ACCESS_ERROR: ${{ needs.agent.outputs.inference_access_error }}
@@ -952,7 +952,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Daily Run"
+          GH_AW_WORKFLOW_NAME: "Weekly Version Bump"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_NOOP_MESSAGE: ${{ steps.noop.outputs.noop_message }}
@@ -969,7 +969,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Daily Run"
+          GH_AW_WORKFLOW_NAME: "Weekly Version Bump"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
@@ -990,10 +990,10 @@ jobs:
       pull-requests: write
     timeout-minutes: 15
     env:
-      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/daily-repo-status"
+      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/weekly-version-bump"
       GH_AW_ENGINE_ID: "copilot"
-      GH_AW_WORKFLOW_ID: "daily-repo-status"
-      GH_AW_WORKFLOW_NAME: "Daily Run"
+      GH_AW_WORKFLOW_ID: "weekly-version-bump"
+      GH_AW_WORKFLOW_NAME: "Weekly Version Bump"
     outputs:
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
       code_push_failure_errors: ${{ steps.process_safe_outputs.outputs.code_push_failure_errors }}

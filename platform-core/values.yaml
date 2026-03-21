@@ -1,5 +1,12 @@
 global:
   clusterName: "dev"
+  azure:
+    # Default Azure region for all resources provisioned on this cluster.
+    location: "canadacentral"
+    # Azure tenant ID (shared across all clusters in the org).
+    tenantId: "b66f9c3b-d384-4932-92fd-444edca3620f"
+    # Azure subscription ID for this cluster.
+    subscriptionId: "c1d22d5c-418b-4bd9-ba23-5e806c376b56"
 
 bootstrap:
   gatewayAPI:

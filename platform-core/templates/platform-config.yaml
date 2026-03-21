@@ -15,3 +15,6 @@ metadata:
 data:
   baseDomain: "{{ .Values.global.clusterName }}.dramisinfo.com"
   clusterName: "{{ .Values.global.clusterName }}"
+  azureLocation: "{{ .Values.global.azure.location }}"
+  azureTenantId: "{{ .Values.global.azure.tenantId }}"
+  azureSubscriptionId: "{{ .Values.global.azure.subscriptionId }}"

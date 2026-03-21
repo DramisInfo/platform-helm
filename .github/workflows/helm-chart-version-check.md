@@ -6,9 +6,9 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  issues: read
 tools:
   github:
-    toolsets: [repos, pull_requests]
     mode: remote
     toolsets: [repos, issues, pull_requests]
     github-app:

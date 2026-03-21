@@ -4,7 +4,7 @@ description: >-
   Meta Helm chart that deploys platform components as Argo CD Applications,
   enabling GitOps-driven lifecycle management on Kubernetes.
 type: application
-version: 0.68.0
+version: 0.69.0
 appVersion: 1.6.0
 home: https://github.com/DramisInfo/platform-helm
 sources:
@@ -18,4 +18,3 @@ keywords:
 maintainers:
   - name: platform-helm maintainers
     url: https://github.com/DramisInfo/platform-helm
-

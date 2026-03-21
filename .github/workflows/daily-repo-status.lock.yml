@@ -22,7 +22,7 @@
 #
 # This workflow checks the versions of all Helm charts referenced in the ArgoCD applications that compose the platform-core helm chart, then opens a pull request to bump any that have newer releases.
 #
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"90d6d8ca2a5b3472045710af7fd83572267eff36b1f3da93df3835965e5679a0","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"45e7188d24881a475bb53c281e9df1b54552effb2cde6cda2b4c32493c5316ba","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
 
 name: "Daily Run"
 "on":
@@ -312,7 +312,7 @@ jobs:
         id: github-mcp-app-token
         uses: actions/create-github-app-token@a7f885bf4560200d03183ed941cb6fb072e4b343 # v3.0.0-beta.4
         with:
-          app-id: ${{ vars.APP_ID }}
+          app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
@@ -638,7 +638,8 @@ jobs:
             const { main } = require('${{ runner.temp }}/gh-aw/actions/redact_secrets.cjs');
             await main();
         env:
-          GH_AW_SECRET_NAMES: 'APP_PRIVATE_KEY,COPILOT_GITHUB_TOKEN,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN'
+          GH_AW_SECRET_NAMES: 'APP_ID,APP_PRIVATE_KEY,COPILOT_GITHUB_TOKEN,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN'
+          SECRET_APP_ID: ${{ secrets.APP_ID }}
           SECRET_APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
           SECRET_COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
           SECRET_GH_AW_GITHUB_MCP_SERVER_TOKEN: ${{ secrets.GH_AW_GITHUB_MCP_SERVER_TOKEN }}

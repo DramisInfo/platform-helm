@@ -20,7 +20,7 @@ tools:
     min-integrity: none
     repos: all
     github-app:
-      app-id: ${{ vars.APP_ID }}
+      app-id: ${{ secrets.APP_ID }}
       private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
 safe-outputs:

@@ -22,13 +22,12 @@
 #
 # This workflow checks the versions of all Helm charts referenced in the ArgoCD applications that compose the platform-core helm chart, then opens a pull request to bump any that have newer releases.
 #
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"45e7188d24881a475bb53c281e9df1b54552effb2cde6cda2b4c32493c5316ba","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"d73490ae97aae3eaffcbc2f4dc1dddb0d9bbd563a1cf96e0f1d8e0cf73d48dfd","compiler_version":"v0.62.5","strict":true,"agent_id":"copilot"}
 
 name: "Daily Run"
 "on":
   schedule:
-  - cron: "44 11 * * *"
-    # Friendly format: daily (scattered)
+  - cron: "0 21 * * 5"
   workflow_dispatch:
 
 permissions: {}

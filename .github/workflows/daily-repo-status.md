@@ -4,7 +4,8 @@ description: |
   This workflow checks the versions of all Helm charts referenced in the ArgoCD applications that compose the platform-core helm chart, then opens a pull request to bump any that have newer releases.
 
 on:
-  schedule: daily
+  schedule:
+    - cron: "0 21 * * 5"  # Every Friday at 17:00 Eastern (UTC-4)
   workflow_dispatch:
 
 permissions:

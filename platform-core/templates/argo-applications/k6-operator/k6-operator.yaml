@@ -42,7 +42,7 @@ spec:
         # Enable Prometheus ServiceMonitor for metrics scraping
         metrics:
           serviceMonitor:
-            enabled: true
+            enabled: {{ .Values.bootstrap.monitoring.enabled }}
             namespace: monitoring
   syncPolicy:
     automated:

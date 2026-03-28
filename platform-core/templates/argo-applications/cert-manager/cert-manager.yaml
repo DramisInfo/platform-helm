@@ -68,9 +68,9 @@ spec:
                 serviceAccount:
                   name: cert-manager
                   namespace: cert-manager
-                roleAssignment:
-                  scope: /subscriptions/{{ $az.subscriptionId }}/resourceGroups/{{ $az.dnsResourceGroup }}
-                  roleName: DNS Zone Contributor
+                roleAssignments:
+                  - scope: /subscriptions/{{ $az.subscriptionId }}/resourceGroups/{{ $az.dnsResourceGroup }}
+                    roleName: DNS Zone Contributor
                 annotateDeployment:
                   name: cert-manager
                   namespace: cert-manager

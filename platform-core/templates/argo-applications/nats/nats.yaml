@@ -15,7 +15,7 @@ spec:
   project: platform-data
   sources:
     - repoURL: "https://nats-io.github.io/k8s/helm/charts/"
-      targetRevision: "2.12.5"
+      targetRevision: "2.12.6"
       chart: nats
       helm:
         valuesObject:

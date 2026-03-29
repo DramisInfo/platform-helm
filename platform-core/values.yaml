@@ -158,7 +158,7 @@ bootstrap:
   keda:
     enabled: true
   k6Operator:
-    # Deploy Grafana k6 Operator via Argo CD (grafana/k6-operator 4.3.0)
+    # Deploy Grafana k6 Operator via Argo CD (grafana/k6-operator 4.3.1)
     # The k6 Operator enables application teams to automate distributed load testing
     # by running k6 TestRun resources as Kubernetes jobs. It manages the lifecycle
     # of k6 test runs (initializer + runner pods) declaratively via CRDs.

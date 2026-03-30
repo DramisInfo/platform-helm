@@ -59,11 +59,11 @@ bootstrap:
       # DNS resource group containing Azure DNS zones (used for cert-manager role assignment)
       dnsResourceGroup: "rg-dns"
     # crossplane-contrib function-patch-and-transform version (Pipeline mode Compositions)
-    functionPatchAndTransformVersion: "v0.10.2"
+    functionPatchAndTransformVersion: "v0.10.3"
     # crossplane-contrib function-go-templating version (conditional / dynamic resource rendering)
-    functionGoTemplatingVersion: "v0.11.5"
+    functionGoTemplatingVersion: "v0.12.0"
     # crossplane-contrib function-auto-ready version (marks XR ready when all composed resources are ready)
-    functionAutoReadyVersion: "v0.6.2"
+    functionAutoReadyVersion: "v0.6.3"
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
     providerKubernetesVersion: "v1.2.1"

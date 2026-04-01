@@ -19,10 +19,6 @@ spec:
     jqPathExpressions:
     - .spec.preserveUnknownFields
     - .spec.names.singular
-  - group: admissionregistration.k8s.io
-    kind: ValidatingAdmissionPolicy
-    jsonPointers:
-    - /spec/failurePolicy
   sources:
     - repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
       targetRevision: "3.22.0"
@@ -119,45 +115,6 @@ spec:
                   exemptImages:
                     {{- toYaml .Values.bootstrap.gatekeeper.policies.exemptImages | nindent 20 }}
                   {{- end }}
-            {{- end }}
-    {{- end }}
-    {{- if .Values.bootstrap.gatekeeper.policies.enabled }}
-    # Patch all gatekeeper-library ValidatingAdmissionPolicies to failurePolicy: Ignore.
-    # Without this, a cold boot (e.g. after a power outage) deadlocks: the VAPs fire before
-    # gatekeeper pods are running, blocking k3s from updating its own CRDs → fatal crash loop.
-    # ignoreDifferences above prevents ArgoCD from reverting this patch on each sync.
-    - repoURL: "https://dysnix.github.io/charts"
-      targetRevision: "0.3.2"
-      chart: raw
-      helm:
-        valuesObject:
-          resources:
-            {{- range list
-              "gatekeeper-k8spspallowprivilegeescalationcontainer"
-              "gatekeeper-k8spspapparmor"
-              "gatekeeper-k8spspcapabilities"
-              "gatekeeper-k8spspforbiddensysctls"
-              "gatekeeper-k8spspfsgroup"
-              "gatekeeper-k8spsphostfilesystem"
-              "gatekeeper-k8spsphostnamespace"
-              "gatekeeper-k8spsphostnetworkingports"
-              "gatekeeper-k8spsphostprobeslifecycle"
-              "gatekeeper-k8spsphostprocess"
-              "gatekeeper-k8spspprivilegedcontainer"
-              "gatekeeper-k8spspprocmount"
-              "gatekeeper-k8spspreadonlyrootfilesystem"
-              "gatekeeper-k8spspseccomp"
-              "gatekeeper-k8spspseccompv2"
-            }}
-            - apiVersion: admissionregistration.k8s.io/v1
-              kind: ValidatingAdmissionPolicy
-              metadata:
-                name: {{ . }}
-                annotations:
-                  argocd.argoproj.io/sync-wave: "10"
-                  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Replace=true
-              spec:
-                failurePolicy: Ignore
             {{- end }}
     {{- end }}
   syncPolicy:

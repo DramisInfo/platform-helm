@@ -247,7 +247,7 @@ bootstrap:
     # Defaults to k3s if not set.
     platform: k3s
   kubevela:
-    # Deploy KubeVela via Argo CD (kubevela/vela-core 1.10.7)
+    # Deploy KubeVela via Argo CD (kubevela/vela-core 1.10.8)
     # KubeVela is an application-centric platform that abstracts workload delivery
     # over Kubernetes using the Open Application Model (OAM).
     enabled: false

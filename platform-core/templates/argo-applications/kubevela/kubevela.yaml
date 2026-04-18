@@ -15,7 +15,7 @@ spec:
   project: platform-infra
   source:
     repoURL: "https://kubevela.github.io/charts"
-    targetRevision: "1.10.7"
+    targetRevision: "1.10.8"
     chart: vela-core
     helm:
       valuesObject:

@@ -38,6 +38,10 @@ spec:
           # Log each admission denial as structured JSON to the controller pod logs.
           # Alloy ships these to Loki when monitoring is enabled.
           logDenies: {{ .Values.bootstrap.monitoring.enabled }}
+          # Disable the K8s-native ValidatingAdmissionPolicy integration during bootstrap.
+          # We keep classic webhook-based Gatekeeper enforcement to avoid bootstrap deadlocks
+          # caused by early VAP/VAPBinding readiness ordering.
+          enableK8sNativeValidation: {{ .Values.bootstrap.gatekeeper.enableK8sNativeValidation | default false }}
           image:
             release: v3.22.0
           podAnnotations:
@@ -50,7 +54,8 @@ spec:
             prometheus.io/path: "/metrics"
     {{- if .Values.bootstrap.gatekeeper.policies.enabled }}
     - repoURL: "https://github.com/open-policy-agent/gatekeeper-library"
-      targetRevision: "master"
+      # Pinned commit SHA for deterministic policy templates (no floating branch).
+      targetRevision: "b5844698218a05cc253f6c475c62bb991325fd43"
       path: "library/pod-security-policy"
     {{- end }}
     {{- if .Values.bootstrap.gatekeeper.policies.enabled }}

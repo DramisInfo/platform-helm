@@ -102,9 +102,13 @@ bootstrap:
     enabled: false
   gatekeeper:
     enabled: true
+    # Keep classic Gatekeeper webhook enforcement path for bootstrap safety.
+    # Set to true only after validating VAP/VAPBinding behavior in your cluster.
+    enableK8sNativeValidation: false
     policies:
       # Enable policies from the official Gatekeeper Library
       # Uses community-maintained ConstraintTemplates from https://github.com/open-policy-agent/gatekeeper-library
+      # Source is pinned in the Gatekeeper Application template for deterministic bootstrap
       enabled: true
       # Enforcement action: "deny" blocks violations, "dryrun" logs only
       enforcementAction: deny

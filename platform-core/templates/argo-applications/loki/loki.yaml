@@ -16,7 +16,7 @@ spec:
   sources:
     # ── Loki (SingleBinary, filesystem storage) ─────────────────────────────
     - repoURL: "https://grafana.github.io/helm-charts"
-      targetRevision: "6.55.0"
+      targetRevision: "7.0.0"
       chart: loki
       helm:
         valuesObject:
@@ -91,7 +91,7 @@ spec:
     # Uses loki.source.kubernetes (API-based, no host path mounts required)
     # allowing fully non-root operation, compliant with Gatekeeper policies.
     - repoURL: "https://grafana.github.io/helm-charts"
-      targetRevision: "1.7.0"
+      targetRevision: "1.8.0"
       chart: alloy
       helm:
         valuesObject:

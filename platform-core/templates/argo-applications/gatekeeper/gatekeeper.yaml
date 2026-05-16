@@ -21,7 +21,7 @@ spec:
     - .spec.names.singular
   sources:
     - repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
-      targetRevision: "3.22.0"
+      targetRevision: "3.22.2"
       chart: gatekeeper
       helm:
         valuesObject:
@@ -43,7 +43,7 @@ spec:
           # caused by early VAP/VAPBinding readiness ordering.
           enableK8sNativeValidation: {{ .Values.bootstrap.gatekeeper.enableK8sNativeValidation | default false }}
           image:
-            release: v3.22.0
+            release: v3.22.2
           podAnnotations:
             prometheus.io/scrape: "true"
             prometheus.io/port: "8888"

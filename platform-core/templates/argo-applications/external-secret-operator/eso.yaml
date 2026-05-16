@@ -21,7 +21,7 @@ spec:
   project: platform-foundations
   sources:
     - repoURL: "https://charts.external-secrets.io"
-      targetRevision: "2.2.0"
+      targetRevision: "2.4.1"
       chart: external-secrets
     {{- if $esoIdentityEnabled }}
     # XAzureWorkloadIdentity (generic): creates the ESO UMI, grants Key Vault Secrets

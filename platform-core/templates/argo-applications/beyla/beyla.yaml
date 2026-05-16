@@ -23,7 +23,7 @@ spec:
     # No code changes or SDK injection required.
     # Generates OTLP traces → Tempo and RED metrics → Prometheus.
     - repoURL: "https://grafana.github.io/helm-charts"
-      targetRevision: "1.16.0"
+      targetRevision: "1.16.5"
       chart: beyla
       helm:
         valuesObject:

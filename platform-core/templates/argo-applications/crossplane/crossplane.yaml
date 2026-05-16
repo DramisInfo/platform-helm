@@ -15,7 +15,7 @@ spec:
   project: platform-infra
   source:
     repoURL: "https://charts.crossplane.io/stable"
-    targetRevision: "2.2.0"
+    targetRevision: "2.2.1"
     chart: crossplane
     helm:
       valuesObject:

@@ -90,7 +90,7 @@ bootstrap:
       # Vault URL used by the ClusterSecretStore
       sharedAkvUrl: "https://akv-dramisinfo-shared.vault.azure.net/"
   terraformOperator:
-    enabled: true
+    enabled: false
   externalSecretOperator:
     enabled: true
   cnpg:

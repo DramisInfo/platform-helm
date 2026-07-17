@@ -1,0 +1,76 @@
+{{- if .Values.bootstrap.hermesSre.enabled -}}
+# hermes-sre: read-only cluster investigation access for Hermes Agent
+# profiles. No secrets access, no write/delete/exec anywhere — this
+# ServiceAccount's token is meant to be handed to an autonomous LLM
+# sandbox, so its blast radius is deliberately capped at "look, don't
+# touch." See DramisInfo/platform-helm PR that introduced this file for
+# the full rationale (avoiding forwarding the admin kubeconfig or the
+# homelab host's SSH key into an agent sandbox).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hermes-sre
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hermes-sre-readonly
+  namespace: hermes-sre
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hermes-sre-readonly-token
+  namespace: hermes-sre
+  annotations:
+    kubernetes.io/service-account.name: hermes-sre-readonly
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hermes-sre-readonly
+rules:
+  # Read-only. Never add "secrets" to any rule here.
+  - apiGroups: [""]
+    resources:
+      - pods
+      - pods/log
+      - events
+      - nodes
+      - services
+      - endpoints
+      - configmaps
+      - namespaces
+      - persistentvolumeclaims
+      - replicationcontrollers
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications", "applicationsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apiextensions.crossplane.io", "platform.dramisinfo.com"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hermes-sre-readonly
+subjects:
+  - kind: ServiceAccount
+    name: hermes-sre-readonly
+    namespace: hermes-sre
+roleRef:
+  kind: ClusterRole
+  name: hermes-sre-readonly
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

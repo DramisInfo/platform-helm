@@ -1,169 +1,158 @@
-# Platform Helm
+# platform-helm
+A meta Helm chart that bootstraps the DramisInfo Kubernetes platform through Argo CD.
+[![Build](https://github.com/DramisInfo/platform-helm/actions/workflows/helm-lint.yaml/badge.svg)](https://github.com/DramisInfo/platform-helm/actions/workflows/helm-lint.yaml) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Last commit](https://img.shields.io/github/last-commit/DramisInfo/platform-helm)](https://github.com/DramisInfo/platform-helm/commits/main)
 
-**platform-core** is an open-source meta Helm chart that bootstraps shared platform components on Kubernetes clusters using a GitOps-first approach powered by [Argo CD](https://argo-cd.readthedocs.io/).
+## Overview
 
-Rather than deploying workloads directly, every template renders an Argo CD `Application` CRD that points to an upstream Helm chart or Git repository. Argo CD then owns the full lifecycle of each component — upgrades, rollbacks, and drift detection — across one or more clusters.
+`platform-helm` provides the `platform-core` chart used to establish a cluster's shared platform layer. It keeps component selection and cluster-specific settings in Helm values while delegating ongoing reconciliation to Argo CD.
 
----
+## What this repo is
 
-## Table of Contents
+The chart renders Argo CD `Application` resources for platform services instead of installing those services directly. Argo CD then owns installation, upgrades, rollback, pruning, self-healing, and drift detection for components such as Gateway API, Gatekeeper, cert-manager, Crossplane, Istio, External Secrets Operator, CNPG, KEDA, NATS, and the monitoring stack.
 
-- [Components](#components)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [Repository Structure](#repository-structure)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
+`platform-core` also creates six `AppProject` boundaries for foundations, networking, observability, infrastructure, product workspaces, and data. Component templates are controlled by `bootstrap.*.enabled` values, use dependency-aware sync waves, and pin upstream chart or source revisions.
 
----
+## Architecture
 
-## Components
-
-Each component is controlled through a toggle in `values.yaml`. The table below lists all available components and their default activation state.
-
-| Component | Description | Default |
-|---|---|:---:|
-| [Gateway API](https://gateway-api.sigs.k8s.io/) | Kubernetes Gateway API CRDs (required by cert-manager and Envoy Gateway) | **enabled** |
-| [cert-manager](https://cert-manager.io/) | Automated TLS certificate management | **enabled** |
-| [Crossplane](https://www.crossplane.io/) | Infrastructure provisioning via Kubernetes CRDs | **enabled** |
-| [Terraform Operator](https://github.com/isaaguilar/terraform-operator) | Run Terraform workspaces from Kubernetes | **enabled** |
-| [External Secrets Operator](https://external-secrets.io/) | Sync secrets from Vault, AWS SM, GCP SM, and more | **enabled** |
-| [CNPG](https://cloudnative-pg.io/) | CloudNativePG — production-grade PostgreSQL on Kubernetes | **enabled** |
-| [Atlas Operator](https://atlasgo.io/integrations/kubernetes) | Database schema migrations as Kubernetes resources | disabled |
-| [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) | Policy enforcement via OPA with community library support | **enabled** |
-| [Istio](https://istio.io/) | Service mesh with mTLS, traffic management, and observability | **enabled** |
-| [Envoy Gateway](https://gateway.envoyproxy.io/) | Kubernetes Gateway API-native ingress backed by Envoy | disabled |
-| [Prometheus](https://prometheus.io/) | Metrics collection, alerting, and long-term storage | **enabled** |
-| [Grafana](https://grafana.com/) | Metrics dashboards with plugin and datasource provisioning | **enabled** |
-| [Loki](https://grafana.com/oss/loki/) | Log aggregation with Alloy collector | **enabled** |
-| [Tempo](https://grafana.com/oss/tempo/) | Distributed tracing backend | **enabled** |
-| [Beyla](https://grafana.com/oss/beyla-ebpf/) | eBPF-based automatic application instrumentation | **enabled** |
-| [KEDA](https://keda.sh/) | Event-driven autoscaling for Kubernetes workloads | **enabled** |
-| [k6 Operator](https://grafana.com/docs/k6/latest/set-up/set-up-distributed-k6/) | Distributed load testing via Grafana k6 on Kubernetes | **enabled** |
-| [Argo Events](https://argoproj.github.io/argo-events/) | Event-driven workflow automation framework for Kubernetes | **enabled** |
-| [NATS](https://nats.io/) | Cloud-native messaging with JetStream persistence | **enabled** |
-| [KubeVela](https://kubevela.io/) | Application delivery platform based on Open Application Model | disabled |
-
-> **Note:** Loki, Tempo, Beyla, Prometheus, and Grafana are all gated by the single `bootstrap.monitoring.enabled` toggle.
-
----
-
-## Prerequisites
-
-- Kubernetes cluster (v1.24+)
-- [Argo CD](https://argo-cd.readthedocs.io/en/stable/getting_started/) installed in the `argocd` namespace
-- [Helm v3](https://helm.sh/docs/intro/install/)
-
----
-
-## Getting Started
-
-### 1. Install the chart
-
-```bash
-helm install platform-core ./platform-core \
-  --namespace argocd \
-  --values your-values.yaml
+```mermaid
+flowchart LR
+    V[Cluster values] --> H[platform-core Helm release]
+    H --> P[Argo CD AppProjects]
+    H --> A[Argo CD Applications]
+    P --> C[Argo CD reconciliation]
+    A --> C
+    C --> F[Foundations]
+    C --> N[Networking]
+    C --> O[Observability]
+    C --> I[Infrastructure]
+    C --> W[Product workspaces]
+    C --> D[Data services]
 ```
 
-### 2. Upgrade an existing installation
+Helm bootstraps the desired Argo CD control-plane objects in the `argocd` namespace. Argo CD then fetches pinned upstream charts or Git sources and reconciles the downstream platform components into their target namespaces.
 
-```bash
-helm upgrade platform-core ./platform-core \
-  --namespace argocd \
-  --values your-values.yaml
+## Repository layout
+
+```text
+platform-helm/
+├── platform-core/                 — The platform-core Helm chart
+│   ├── Chart.yaml                 — Chart metadata and SemVer version
+│   ├── values.yaml                — Cluster settings and component toggles
+│   ├── GATEKEEPER-POLICIES.md     — Policy behavior and exclusions
+│   ├── README.md                  — Grafana provisioning notes
+│   └── templates/
+│       ├── argo-applications/     — Argo CD Application templates by component
+│       ├── argocd-projects.yaml   — Six platform AppProjects
+│       └── platform-config.yaml   — Shared cluster identity ConfigMap
+├── .github/                       — CI, release automation, prompts, and agents
+├── CONTRIBUTING.md                — Development and pull-request guidance
+├── SECURITY.md                    — Private vulnerability reporting process
+└── LICENSE                        — MIT license
 ```
 
-### 3. Minimal `values.yaml`
+## Getting started
+
+Prerequisites:
+
+- Helm v3 (CI uses v3.14.4).
+- A Kubernetes cluster with Argo CD already installed in the `argocd` namespace.
+- A cluster-specific values file for identity and component overrides.
+
+From a repository checkout, validate and install the chart:
+
+```bash
+helm lint platform-core
+helm template platform-core ./platform-core -f my-values.yaml
+helm install platform-core ./platform-core -n argocd -f my-values.yaml
+```
+
+## Usage
+
+The most common task is rendering and applying a cluster-specific override. For example, start a Gatekeeper policy rollout in audit mode while keeping the Terraform Operator disabled:
 
 ```yaml
 global:
-  clusterName: "my-cluster"   # used for resource naming and host templates
-```
+  clusterName: "cace-1-dev"
 
-Most components are **enabled** by default. To opt out of a component, explicitly disable it:
-
-```yaml
 bootstrap:
-  cnpg:
-    enabled: false
   terraformOperator:
     enabled: false
+  gatekeeper:
+    enabled: true
+    policies:
+      enabled: true
+      enforcementAction: dryrun
 ```
 
-See [platform-core/values.yaml](platform-core/values.yaml) for the full list of available options and inline documentation.
-
-### 4. Validate before deploying
+Review the generated Argo CD resources before upgrading the release:
 
 ```bash
-# Lint the chart
-helm lint platform-core
-
-# Render all templates to stdout
-helm template platform-core ./platform-core
-
-# Render with a custom values override
 helm template platform-core ./platform-core -f my-values.yaml
+helm upgrade --install platform-core ./platform-core \
+  --namespace argocd \
+  --values my-values.yaml
 ```
 
----
+After validating policy behavior on the target cluster, change `enforcementAction` to `deny` and upgrade again.
 
-## Repository Structure
+## Configuration
 
-```
-platform-helm/
-└── platform-core/                    # Main Helm chart
-    ├── Chart.yaml
-    ├── values.yaml                   # All component toggles and configuration
-    ├── GATEKEEPER-POLICIES.md        # Enforced OPA policies and exclusions
-    └── templates/
-        └── argo-applications/        # One Argo CD Application per component
-            ├── argo-events/
-            ├── atlas/
-            ├── beyla/
-            ├── cert-manager/
-            ├── cnpg/
-            ├── crossplane/
-            ├── envoy-gateway/
-            ├── external-secret-operator/
-            ├── gatekeeper/
-            ├── gateway-api/
-            ├── grafana/
-            ├── istio/
-            ├── k6-operator/
-            ├── keda/
-            ├── kubevela/
-            ├── loki/
-            ├── nats/
-            ├── prometheus/
-            ├── tempo/
-            └── terraform-operator/
-```
+The primary configuration surface is [`platform-core/values.yaml`](./platform-core/values.yaml).
 
----
+| Value | Purpose |
+| --- | --- |
+| `global.clusterName` | Drives cluster-scoped names and `*.{cluster}.dramisinfo.com` hosts. |
+| `global.azure` | Sets the Azure location, tenant ID, and subscription ID. |
+| `bootstrap.<component>.enabled` | Includes or omits each component's Argo CD `Application`. |
+| `bootstrap.crossplane.*Identity` | Controls Crossplane-managed workload identities for cert-manager and ESO. |
+| `bootstrap.gatekeeper.policies` | Configures policy deployment, enforcement mode, exclusions, and exemptions. |
+| `bootstrap.monitoring` | Enables Prometheus, Grafana, Loki, Tempo, and Beyla and configures storage or provisioning. |
+| `bootstrap.nats.jetstream` / `gateway` | Configures persistence and optional multi-cluster NATS gateways. |
+| `bootstrap.istio.host` | Sets the wildcard host used by the shared Istio gateway. |
 
-## Documentation
+Keep cluster overrides outside the chart defaults, and never put credentials or API tokens in values files.
 
-Refer to the inline comments in [platform-core/values.yaml](platform-core/values.yaml) and the following component-specific guides:
+## Related repos
 
-- [Gatekeeper Policies](platform-core/GATEKEEPER-POLICIES.md) — enforced constraints, exclusions, and enforcement modes
-- [Grafana Configuration](platform-core/README.md) — plugin and datasource provisioning
+- [home-lab](https://github.com/DramisInfo/home-lab) — Foundational infra and bootstrap orchestration for self-hosted k3s clusters on Proxmox + Azure.
+- [platform-tools](https://github.com/DramisInfo/platform-tools) — GitOps overlays for the DramisInfo platform clusters.
+- [platform-helm](https://github.com/DramisInfo/platform-helm) — Meta Helm chart (`platform-core`) for Argo CD-driven platform bootstrap.
+- [platform-crossplane-compositions](https://github.com/DramisInfo/platform-crossplane-compositions) — Crossplane Compositions (XRDs, compositions, RBAC) for the platform.
+- [crossplane-providers-and-functions](https://github.com/DramisInfo/crossplane-providers-and-functions) — Helm chart that installs the Crossplane providers, composition functions, and ProviderConfigs.
+- [platform-project-workspaces](https://github.com/DramisInfo/platform-project-workspaces) — Bootstrap manifests for the product-workspaces App-of-Apps pattern and the preview/QAS GitHub repository_dispatch pipeline.
+- [platform-standards](https://github.com/DramisInfo/platform-standards) — Canonical schemas and conventions for product workspaces and app repositories.
+- [platform-workflows](https://github.com/DramisInfo/platform-workflows) — Reusable GitHub Actions workflows for the DramisInfo org.
 
----
+## Troubleshooting
+
+- **Helm reports an unknown `Application` kind:** install Argo CD and its CRDs before installing `platform-core`.
+- **A component does not render:** verify its exact case-sensitive `bootstrap.<component>.enabled` key; observability components share `bootstrap.monitoring.enabled`.
+- **An Argo CD app stays OutOfSync or unhealthy:** inspect its AppProject, pinned source revision, destination namespace, and preceding sync-wave applications.
+- **Gatekeeper blocks a new workload:** add the required non-root security context, dropped capabilities, and `RuntimeDefault` seccomp profile; use `dryrun` while validating policy changes.
+- **A first bootstrap fails on a missing CRD:** confirm Gateway API and Crossplane composition applications completed before dependent applications, then resync in wave order.
+
+## Security
+
+- Do not store secrets, tokens, or credentials in `values.yaml`; use External Secrets Operator and the shared Azure Key Vault integration.
+- Pin every `targetRevision` to an exact chart version or commit, never `latest` or a floating branch.
+- Do not widen `hermes-sre-readonly`: it must not gain secret access, write verbs, wildcard rules, or `pods/exec`.
+- Test Gatekeeper policy changes with `bootstrap.gatekeeper.policies.enforcementAction: dryrun` before enforcing `deny`.
+- Keep `bootstrap.terraformOperator` disabled by default and opt in per cluster.
+- Do not manually edit generated `.github/workflows/*.lock.yml` files.
+- Report vulnerabilities privately as described in [`SECURITY.md`](./SECURITY.md), not through public issues.
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. For security issues, see [SECURITY.md](SECURITY.md).
-
-When adding a new component:
-1. Create `platform-core/templates/argo-applications/<component>/<component>.yaml`
-2. Wrap the template with `{{- if .Values.bootstrap.<component>.enabled -}}`
-3. Add the corresponding `enabled: false` default in `values.yaml` with inline comments
-4. Choose an appropriate `argocd.argoproj.io/sync-wave` value based on dependency order
-
----
+Create a focused branch from `main`, use Conventional Commits, and open a pull request back to `main`. Run `helm lint platform-core` and `helm template platform-core ./platform-core` before submitting. Chart changes must update value comments where needed and bump `platform-core/Chart.yaml` according to SemVer; see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+MIT — see [LICENSE](./LICENSE)
+
+## Changelog
+
+Major changes have expanded `platform-core` with Gateway API-based ingress, Crossplane-managed workload identities, observability and data services, policy hardening, load-testing and event components, and read-only investigation RBAC. Dependency and chart-version updates are maintained continuously; run `git log --oneline` for the complete history.
+
+## Acknowledgments
+
+Maintained by DramisInfo platform contributors and built around Kubernetes, Helm, Argo CD, Crossplane, and the upstream projects installed by the chart.

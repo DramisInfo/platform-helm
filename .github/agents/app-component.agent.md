@@ -24,7 +24,7 @@ Your role is to help users add new components to, or upgrade existing components
   - File location: `platform-core/templates/argo-applications/<component>/<component>.yaml`
   - Wrap entire file in: `{{- if .Values.bootstrap.<component>.enabled -}} ... {{- end -}}`
   - Set `namespace: argocd` on Application metadata; deployment namespace in `spec.destination.namespace`
-  - Use `argocd.argoproj.io/sync-wave` annotations for ordering (reference: Gatekeeper `-100`, Prometheus `-92`, KEDA `-90`, NATS `-40`)
+  - Use `argocd.argoproj.io/sync-wave` annotations for ordering (reference: Gatekeeper `-120`, Prometheus `-90`, KEDA `-90`, NATS `-50`)
   - Use `valuesObject:` for inline Helm values in Application source
   - Pin `targetRevision` to exact chart version (never `latest`)
   - Apply Gatekeeper security context requirements: `runAsNonRoot: true`, `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `seccompProfile.type: RuntimeDefault`

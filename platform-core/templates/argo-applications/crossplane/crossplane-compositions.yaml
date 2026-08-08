@@ -21,6 +21,10 @@ spec:
       path: .
       directory:
         recurse: true
+        # Whitelist k8s manifests only. Without this, the directory generator
+        # mis-parses .release-please-manifest.json (valid JSON, no Kind) and
+        # the App has been stuck in ComparisonError since 2026-08-03.
+        include: '{compositions/**,*.yaml,*.yml}'
   syncPolicy:
     automated:
       prune: true

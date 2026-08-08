@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.1](https://github.com/DramisInfo/platform-helm/compare/platform-core-0.70.0...platform-core-v0.70.1) (2026-08-08)
+
+
+### Bug Fixes
+
+* **platform-core:** whitelist k8s manifests in crossplane-compositions source ([#79](https://github.com/DramisInfo/platform-helm/issues/79)) ([d67dc8e](https://github.com/DramisInfo/platform-helm/commit/d67dc8ef8d750a42d9e5c1fad8ef13680a465dc5))
+
 ## [0.70.0](https://github.com/DramisInfo/platform-helm/compare/platform-core-0.69.0...platform-core-v0.70.0) (2026-08-02)
 
 

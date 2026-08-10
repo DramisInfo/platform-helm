@@ -161,6 +161,11 @@ bootstrap:
         storageClass: ""
   keda:
     enabled: true
+  hermesSre:
+    # Read-only cluster investigation access for Hermes Agent profiles
+    # (pods/logs/events/metrics/ArgoCD+Crossplane status). No secrets
+    # access, no write/delete/exec. Flip true once reviewed.
+    enabled: false
   k6Operator:
     # Deploy Grafana k6 Operator via Argo CD (grafana/k6-operator 4.4.1)
     # The k6 Operator enables application teams to automate distributed load testing

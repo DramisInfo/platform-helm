@@ -22,7 +22,7 @@ spec:
   project: platform-foundations
   sources:
     - repoURL: "https://charts.jetstack.io"
-      targetRevision: "v1.20.2"
+      targetRevision: "v1.21.1"
       chart: cert-manager
       helm:
         valuesObject:

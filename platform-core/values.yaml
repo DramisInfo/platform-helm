@@ -16,7 +16,7 @@ bootstrap:
     # CRDs exist before the cert-manager controller starts its Gateway API check.
     enabled: true
     # Gateway API release tag to install (https://github.com/kubernetes-sigs/gateway-api/releases)
-    targetRevision: "v1.5.1"
+    targetRevision: "v1.6.1"
   certManager:
     # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.20.2)
     enabled: true

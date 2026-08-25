@@ -16,7 +16,7 @@ bootstrap:
     # CRDs exist before the cert-manager controller starts its Gateway API check.
     enabled: true
     # Gateway API release tag to install (https://github.com/kubernetes-sigs/gateway-api/releases)
-    targetRevision: "v1.5.1"
+    targetRevision: "v1.6.1"
   certManager:
     # Deploy cert-manager via Argo CD (jetstack/cert-manager v1.20.2)
     enabled: true
@@ -59,14 +59,14 @@ bootstrap:
       # DNS resource group containing Azure DNS zones (used for cert-manager role assignment)
       dnsResourceGroup: "rg-dns"
     # crossplane-contrib function-patch-and-transform version (Pipeline mode Compositions)
-    functionPatchAndTransformVersion: "v0.10.4"
+    functionPatchAndTransformVersion: "v0.10.9"
     # crossplane-contrib function-go-templating version (conditional / dynamic resource rendering)
-    functionGoTemplatingVersion: "v0.12.0"
+    functionGoTemplatingVersion: "v0.12.3"
     # crossplane-contrib function-auto-ready version (marks XR ready when all composed resources are ready)
-    functionAutoReadyVersion: "v0.6.4"
+    functionAutoReadyVersion: "v0.7.0"
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)
     # v1.x: adds Crossplane v2 namespace-scoped MR support; SSA enabled by default since v1.2.0
-    providerKubernetesVersion: "v1.2.1"
+    providerKubernetesVersion: "v1.3.0"
     # Provision the per-cluster cert-manager Managed Identity via Crossplane.
     # Values here are cluster-specific and should be injected via the overlay patch
     # (overlays/<cluster>/patches/platform-core.yaml) rather than set globally.

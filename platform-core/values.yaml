@@ -61,7 +61,7 @@ bootstrap:
     # crossplane-contrib function-patch-and-transform version (Pipeline mode Compositions)
     functionPatchAndTransformVersion: "v0.10.9"
     # crossplane-contrib function-go-templating version (conditional / dynamic resource rendering)
-    functionGoTemplatingVersion: "v0.12.0"
+    functionGoTemplatingVersion: "v0.12.3"
     # crossplane-contrib function-auto-ready version (marks XR ready when all composed resources are ready)
     functionAutoReadyVersion: "v0.6.4"
     # crossplane-contrib provider-kubernetes version (patching in-cluster K8s objects from Compositions)

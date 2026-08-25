@@ -15,7 +15,7 @@ spec:
   project: platform-observability
   sources:
     - repoURL: "https://grafana.github.io/helm-charts"
-      targetRevision: "v5.25.0"
+      targetRevision: "v5.22.2"
       chart: grafana-operator
       helm:
         valuesObject:

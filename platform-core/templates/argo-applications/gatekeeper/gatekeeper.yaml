@@ -21,7 +21,7 @@ spec:
     - .spec.names.singular
   sources:
     - repoURL: "https://open-policy-agent.github.io/gatekeeper/charts"
-      targetRevision: "3.23.0"
+      targetRevision: "3.22.2"
       chart: gatekeeper
       helm:
         valuesObject:

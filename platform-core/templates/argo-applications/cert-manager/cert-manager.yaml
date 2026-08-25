@@ -22,7 +22,7 @@ spec:
   project: platform-foundations
   sources:
     - repoURL: "https://charts.jetstack.io"
-      targetRevision: "v1.20.2"
+      targetRevision: "v1.21.1"
       chart: cert-manager
       helm:
         valuesObject:
@@ -32,7 +32,8 @@ spec:
           config:
             apiVersion: controller.config.cert-manager.io/v1alpha1
             kind: ControllerConfiguration
-            enableGatewayAPI: true
+            gatewayAPI:
+              enabled: true
           global:
             leaderElection:
               namespace: cert-manager

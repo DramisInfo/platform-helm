@@ -3,7 +3,10 @@
     "platform-core": {
       "release-type": "helm",
       "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true
+      "bump-patch-for-minor-pre-major": true,
+      "include-component-in-tag": false,
+      "changelog-path": "platform-core/CHANGELOG.md",
+      "pull-request-title-pattern": "^(chore|feat|fix|docs|refactor|perf|build|ci|test|style|revert)(\\(.+\\))?(!)?:.{0,72}"
     }
   }
 }

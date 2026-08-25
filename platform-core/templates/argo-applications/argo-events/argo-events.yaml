@@ -21,6 +21,14 @@ spec:
       valuesObject:
         # Security context to comply with Gatekeeper psp-pods-must-run-as-nonroot policy
         controller:
+          # AB-PR90-fix: force replicas: 2 to skip the chart's
+          # "strategy: Recreate" branch (chart adds Recreate strategy only when
+          # replicas == 1, which conflicts with the existing RollingUpdate
+          # strategy on this Deployment). With 2 replicas, the strategy block
+          # is not rendered, leader-election is enabled (single-leader pattern).
+          # Trade-off: changes HA model from 1-replica no-leader to 2-replica
+          # leader-elected. Acceptable for a control-plane component.
+          replicas: 2
           podSecurityContext:
             runAsNonRoot: true
             runAsUser: 1000

@@ -15,7 +15,7 @@ spec:
   project: platform-observability
   sources:
     - repoURL: "https://prometheus-community.github.io/helm-charts"
-      targetRevision: "88.5.4"
+      targetRevision: "88.6.1"
       chart: kube-prometheus-stack
       helm:
         valuesObject:

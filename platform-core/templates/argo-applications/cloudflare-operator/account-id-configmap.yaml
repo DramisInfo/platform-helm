@@ -1,0 +1,15 @@
+{{- if and .Values.bootstrap.cloudflareOperator.enabled .Values.bootstrap.cloudflareOperator.accountId }}
+# Non-secret ConfigMap for the Cloudflare account ID. The chart reads
+# this via credentials.accountIdKey (default: CLOUDFLARE_ACCOUNT_ID).
+# Override the value per cluster via platform-tools overlay
+# (bootstrap.cloudflareOperator.accountId).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflare-operator-account-id
+  namespace: cloudflare-operator-system
+  labels:
+    app.kubernetes.io/name: cloudflare-operator
+data:
+  CLOUDFLARE_ACCOUNT_ID: {{ .Values.bootstrap.cloudflareOperator.accountId | quote }}
+{{- end }}

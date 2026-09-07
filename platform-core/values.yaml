@@ -116,6 +116,16 @@ bootstrap:
     enabled: false
     # Chart version (v0.2.0 → appVersion 0.13.1) — bumped by version-bump workflow.
     targetRevision: "0.2.0"
+  tailscaleOperator:
+    # Deploy tailscale/tailscale-operator (https://pkgs.tailscale.com/helmcharts).
+    # Provides CRDs Connector, ProxyClass and Ingress to expose K8s Services via
+    # Tailscale mesh (private) or Tailscale Funnel (public).
+    # Source: https://artifacthub.io/packages/helm/tailscale/tailscale-operator
+    # Off by default — enable per-cluster via overlay patch once a use case exists.
+    # Requires OAuth clientSecret in Secret 'operator-oauth' in operator namespace.
+    enabled: false
+    # Chart version (1.102.3 → appVersion v1.102.3) — bumped by version-bump workflow.
+    targetRevision: "1.102.3"
   atlas:
     # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.28)
     # Atlas Operator manages database schema migrations as Kubernetes resources (AtlasSchema, AtlasMigration CRDs).

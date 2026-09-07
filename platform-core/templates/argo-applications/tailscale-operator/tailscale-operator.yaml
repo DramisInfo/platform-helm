@@ -1,0 +1,89 @@
+{{- if .Values.bootstrap.tailscaleOperator.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-90"
+spec:
+  destination:
+    namespace: tailscale-operator-system
+    server: "https://kubernetes.default.svc"
+  project: platform-infra
+  sources:
+    # Source 1: the operator itself (Helm chart from pkgs.tailscale.com).
+    # oauth.clientSecret mounts a Secret named operator-oauth (rendered by
+    # source 2 below).
+    - repoURL: "https://pkgs.tailscale.com/helmcharts"
+      chart: tailscale-operator
+      targetRevision: {{ .Values.bootstrap.tailscaleOperator.targetRevision | quote }}
+      helm:
+        releaseName: tailscale-operator
+        valuesObject:
+          installCRDs: true
+          oauth:
+            clientId: "k8s-operator"
+            clientSecret: "use-existing-secret"
+          oauthSecretVolume:
+            secret:
+              secretName: operator-oauth
+          operatorConfig:
+            defaultTags:
+              - "tag:k8s"
+              - "tag:k8s-operator"
+    # Source 2: raw chart (dysnix/raw) renders the OAuth Secret in the
+    # operator's namespace. Pulls TS_CLIENT_ID + TS_CLIENT_SECRET from AKV
+    # (akv-dramisinfo-shared / tailscale-operator-client-id and
+    # tailscale-operator-client-secret) via the existing
+    # ClusterSecretStore azure-keyvault-shared.
+    # The chart expects two files in the Secret: 'client_id' and 'client_secret'.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: v1
+              kind: Secret
+              metadata:
+                name: operator-oauth
+                namespace: tailscale-operator-system
+              type: Opaque
+              stringData:
+                client_id: "{{ .Values.bootstrap.tailscaleOperator.clientId | default "k8s-operator" }}"
+                client_secret: "{{ .Values.bootstrap.tailscaleOperator.clientSecretPlaceholder | default "REPLACE_ME_VIA_AKV_OR_SECRET_OVERLAY" }}"
+            - apiVersion: external-secrets.io/v1
+              kind: ExternalSecret
+              metadata:
+                name: tailscale-operator-credentials
+                namespace: tailscale-operator-system
+              spec:
+                refreshInterval: 1h
+                secretStoreRef:
+                  kind: ClusterSecretStore
+                  name: azure-keyvault-shared
+                target:
+                  name: operator-oauth
+                  creationPolicy: Owner
+                data:
+                  - secretKey: client_id
+                    remoteRef:
+                      key: tailscale-operator-client-id
+                  - secretKey: client_secret
+                    remoteRef:
+                      key: tailscale-operator-client-secret
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+{{- end }}

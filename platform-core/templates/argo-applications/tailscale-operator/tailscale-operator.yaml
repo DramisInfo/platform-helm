@@ -48,6 +48,12 @@ spec:
               # state in /.config (created at startup), so the root FS must
               # be writable. Gatekeeper only enforces runAsNonRoot, which is
               # set above.
+            # tsnet (tailscale state library) creates its state dir at
+            # ${HOME}/.config by default. Root FS is not writable as non-root,
+            # so redirect HOME to /tmp so tsnet writes to /tmp/.config.
+            extraEnv:
+              - name: HOME
+                value: /tmp
     # Source 2: raw chart (dysnix/raw) renders the OAuth Secret in the
     # operator's namespace. Pulls TS_CLIENT_ID + TS_CLIENT_SECRET from AKV
     # (akv-dramisinfo-shared / tailscale-operator-client-id and

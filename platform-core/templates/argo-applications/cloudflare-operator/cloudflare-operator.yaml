@@ -23,6 +23,14 @@ spec:
         namespace:
           create: true
         nameOverride: "cloudflare-operator"
+        # Use an externally-managed Secret (rendered by the
+        # external-secret.yaml template in this directory and synced
+        # from AKV `akv-dramisinfo-shared` -> secret `cloudflare-api-token`)
+        # instead of inlining the token via values.
+        credentials:
+          existingSecret: cloudflare-secrets
+          apiTokenKey: CLOUDFLARE_API_TOKEN
+          accountIdKey: CLOUDFLARE_ACCOUNT_ID
   ignoreDifferences:
     - group: external-secrets.io
       kind: ExternalSecret

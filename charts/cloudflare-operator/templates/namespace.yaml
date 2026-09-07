@@ -1,0 +1,10 @@
+{{- if .Values.namespaceEnabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: cloudflare-operator
+    app.kubernetes.io/managed-by: platform-core
+    control-plane: "true"
+{{- end }}

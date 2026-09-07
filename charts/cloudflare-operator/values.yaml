@@ -1,0 +1,40 @@
+# Default values for cloudflare-operator.
+# Override per-cluster via overlays/cace-1-dev/platform-core patch.
+
+# Operator namespace (created by this chart when namespace.enabled=true).
+namespace: cloudflare-operator-system
+
+# Enable creation of the operator namespace by this chart.
+# Disable if the namespace is pre-provisioned out-of-band.
+namespaceEnabled: true
+
+# Adyanth upstream image — bumped by the version-bump workflow.
+image:
+  repository: ghcr.io/adyanth/cloudflare-operator
+  tag: "1.0.5"
+  pullPolicy: IfNotPresent
+
+# Replica count — single replica is enough for a controller (leader election built-in).
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# ExternalSecret reference: syncs cloudflare-api-token from AKV into the operator namespace.
+# The AKV secret (cloudflare-api-token) is provisioned via Terraform (see home-lab).
+externalSecret:
+  enabled: true
+  vaultKey: cloudflare-api-token
+  secretStoreName: azure-keyvault-shared
+  refreshInterval: 1h
+  targetSecretName: cloudflare-api-credentials
+
+# Cloudflare account + zone IDs injected via ConfigMap (not secrets).
+config:
+  accountId: ""
+  zoneId: ""

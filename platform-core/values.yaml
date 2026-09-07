@@ -95,6 +95,15 @@ bootstrap:
     enabled: true
   cnpg:
     enabled: true
+  cloudflareOperator:
+    # Deploy adyanth/cloudflare-operator via Argo CD (GitOps).
+    # Manages CloudflareTunnel / TunnelDNSRecord / CloudflareTunnel CRDs declaratively
+    # inside the cluster.  Used to expose cluster services behind public URLs without
+    # exposing cluster IPs (e.g. webhook ingress from Composio, GitHub, etc.).
+    # OFF by default: only enable per-cluster via overlay patch once a use case exists.
+    enabled: false
+    # Image tag (= appVersion) — bumped by the version-bump workflow (chore/version-bump-*)
+    targetRevision: "1.0.5"
   atlas:
     # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.28)
     # Atlas Operator manages database schema migrations as Kubernetes resources (AtlasSchema, AtlasMigration CRDs).

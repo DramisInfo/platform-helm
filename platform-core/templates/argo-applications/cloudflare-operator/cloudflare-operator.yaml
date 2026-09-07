@@ -1,0 +1,45 @@
+{{- if .Values.bootstrap.cloudflareOperator.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argocd-resource-finalizer
+  annotations:
+    argocd.argoproj.io/sync-wave: "-90"
+spec:
+  destination:
+    namespace: cloudflare-operator-system
+    server: "https://kubernetes.default.svc"
+  project: platform-infra
+  sources:
+    - repoURL: "https://github.com/DramisInfo/platform-helm"
+      targetRevision: HEAD
+      path: charts/cloudflare-operator
+      helm:
+        releaseName: cloudflare-operator
+        valuesObject:
+          image:
+            tag: {{ .Values.bootstrap.cloudflareOperator.targetRevision }}
+          namespace: cloudflare-operator-system
+  ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jsonPointers:
+        - /spec/data/0/remoteRef/conversionStrategy
+        - /spec/data/0/remoteRef/decodingStrategy
+        - /spec/data/0/remoteRef/metadataPolicy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+      - ServerSideApply=true
+{{- end }}

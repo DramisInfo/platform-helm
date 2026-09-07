@@ -106,6 +106,8 @@ spec:
       server: "https://kubernetes.default.svc"
     - namespace: k6-operator
       server: "https://kubernetes.default.svc"
+    - namespace: cloudflare-operator-system
+      server: "https://kubernetes.default.svc"
     - namespace: kube-system
       server: "https://kubernetes.default.svc"
     - namespace: argocd

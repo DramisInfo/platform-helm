@@ -1,0 +1,19 @@
+apiVersion: v2
+name: cloudflare-operator
+description: |
+  Adyanth Cloudflare Operator — manages CloudflareTunnel, TunnelDNSRecord,
+  and CloudflareTunnel CRDs declaratively from inside Kubernetes.
+  Used by platform-core opt-in via `bootstrap.cloudflareOperator.enabled`.
+type: application
+version: 0.1.0
+appVersion: "1.0.5"
+home: https://github.com/adyanth/cloudflare-operator
+sources:
+  - https://github.com/adyanth/cloudflare-operator
+keywords:
+  - cloudflare
+  - tunnel
+  - ingress
+  - operator
+maintainers:
+  - name: platform-watch

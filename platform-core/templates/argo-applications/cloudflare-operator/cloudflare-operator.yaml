@@ -5,7 +5,7 @@ metadata:
   name: cloudflare-operator
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argocd-resource-finalizer
+    - resources-finalizer.argocd.argoproj.io
   annotations:
     argocd.argoproj.io/sync-wave: "-90"
 spec:
@@ -13,24 +13,65 @@ spec:
     namespace: cloudflare-operator-system
     server: "https://kubernetes.default.svc"
   project: platform-infra
-  source:
-    repoURL: "https://ankraio.github.io/ankra-charts"
-    chart: cloudflare-operator
-    targetRevision: {{ .Values.bootstrap.cloudflareOperator.targetRevision | quote }}
-    helm:
-      releaseName: cloudflare-operator
-      valuesObject:
-        namespace:
-          create: true
-        nameOverride: "cloudflare-operator"
-        # Use an externally-managed Secret (rendered by the
-        # external-secret.yaml template in this directory and synced
-        # from AKV `akv-dramisinfo-shared` -> secret `cloudflare-api-token`)
-        # instead of inlining the token via values.
-        credentials:
-          existingSecret: cloudflare-secrets
-          apiTokenKey: CLOUDFLARE_API_TOKEN
-          accountIdKey: CLOUDFLARE_ACCOUNT_ID
+  sources:
+    # Source 1: the operator itself (Helm chart from ankra-charts).
+    # Wires credentials.existingSecret so the chart reads the Secret
+    # rendered by source 2 below instead of inlining a token.
+    - repoURL: "https://ankraio.github.io/ankra-charts"
+      chart: cloudflare-operator
+      targetRevision: {{ .Values.bootstrap.cloudflareOperator.targetRevision | quote }}
+      helm:
+        releaseName: cloudflare-operator
+        valuesObject:
+          namespace:
+            create: true
+          nameOverride: "cloudflare-operator"
+          credentials:
+            existingSecret: cloudflare-secrets
+            apiTokenKey: CLOUDFLARE_API_TOKEN
+            accountIdKey: CLOUDFLARE_ACCOUNT_ID
+    # Source 2: raw chart (dysnix/raw) renders the supporting cluster
+    # resources in the same namespace as the operator:
+    #   - ExternalSecret: pulls CLOUDFLARE_API_TOKEN from AKV
+    #     (akv-dramisinfo-shared / cloudflare-api-token) via the existing
+    #     ClusterSecretStore azure-keyvault-shared.
+    #   - ConfigMap: holds the non-secret CLOUDFLARE_ACCOUNT_ID
+    #     (Cloudflare account IDs are public identifiers, no need for AKV).
+    # Using dysnix/raw inside the same Application keeps everything in one
+    # sync unit, with one Argo CD status instead of N. Sync-wave 1 here
+    # defers the raw resources until after the Helm chart's resources.
+    - repoURL: "https://dysnix.github.io/charts"
+      targetRevision: "0.3.2"
+      chart: raw
+      helm:
+        valuesObject:
+          resources:
+            - apiVersion: external-secrets.io/v1
+              kind: ExternalSecret
+              metadata:
+                name: cloudflare-secrets
+                namespace: cloudflare-operator-system
+              spec:
+                refreshInterval: 1h
+                secretStoreRef:
+                  kind: ClusterSecretStore
+                  name: azure-keyvault-shared
+                target:
+                  name: cloudflare-secrets
+                  creationPolicy: Owner
+                data:
+                  - secretKey: CLOUDFLARE_API_TOKEN
+                    remoteRef:
+                      key: cloudflare-api-token
+            {{- if .Values.bootstrap.cloudflareOperator.accountId }}
+            - apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: cloudflare-operator-account-id
+                namespace: cloudflare-operator-system
+              data:
+                CLOUDFLARE_ACCOUNT_ID: {{ .Values.bootstrap.cloudflareOperator.accountId | quote }}
+            {{- end }}
   ignoreDifferences:
     - group: external-secrets.io
       kind: ExternalSecret

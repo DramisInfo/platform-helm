@@ -34,6 +34,18 @@ spec:
             defaultTags:
               - "tag:k8s"
               - "tag:k8s-operator"
+            # Gatekeeper on cace-1-dev enforces runAsNonRoot.
+            podSecurityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              fsGroup: 1000
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              readOnlyRootFilesystem: true
     # Source 2: raw chart (dysnix/raw) renders the OAuth Secret in the
     # operator's namespace. Pulls TS_CLIENT_ID + TS_CLIENT_SECRET from AKV
     # (akv-dramisinfo-shared / tailscale-operator-client-id and

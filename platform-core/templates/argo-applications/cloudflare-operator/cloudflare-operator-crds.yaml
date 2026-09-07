@@ -1,0 +1,24 @@
+{{- if .Values.bootstrap.cloudflareOperator.enabled }}
+# CRDs for adyanth/cloudflare-operator, installed BEFORE the operator starts.
+# Sync-wave -130 ensures CRDs exist before the operator (sync-wave -90) starts.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-operator-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-130"
+spec:
+  destination:
+    namespace: argocd
+    server: "https://kubernetes.default.svc"
+  project: platform-infra
+  source:
+    repoURL: "https://github.com/adyanth/cloudflare-operator"
+    targetRevision: {{ .Values.bootstrap.cloudflareOperator.targetRevision | quote }}
+    # Empty path: the entire release tarball is the manifest.
+    # Argo CD downloads the tarball and renders it.
+    path: ""
+  # The release tarball at github.com/adyanth/cloudflare-operator/releases/download/v<version>/
+  # contains cloudflare-operator.crds.yaml — the kubectl-style CRD definitions.
+{{- end }}

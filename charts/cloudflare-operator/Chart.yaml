@@ -1,0 +1,24 @@
+apiVersion: v2
+name: cloudflare-operator
+description: |
+  Adyanth Cloudflare Operator — Kubernetes operator that manages
+  CloudflareTunnel, TunnelDNSRecord, and CloudflareTunnel CRDs.
+  Use this to declaratively expose cluster services behind
+  Cloudflare Tunnels, without exposing cluster IPs.
+
+  Unlike community-charts/cloudflared (single DaemonSet), this operator
+  gives you per-endpoint Tunnel CRDs — perfect for multi-service GitOps.
+type: application
+version: 0.1.0
+appVersion: "0.13.1"
+home: https://github.com/adyanth/cloudflare-operator
+sources:
+  - https://github.com/adyanth/cloudflare-operator
+keywords:
+  - cloudflare
+  - tunnel
+  - operator
+  - crd
+maintainers:
+  - name: adyanth
+  - name: platform-watch

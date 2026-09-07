@@ -1,0 +1,48 @@
+# Adyanth Cloudflare Operator
+# https://github.com/adyanth/cloudflare-operator
+# Exposes Tunnel, TunnelDNSRecord, CloudflareTunnel CRDs.
+
+# Operator image — bumped by version-bump workflow.
+image:
+  repository: ghcr.io/adyanth/cloudflare-operator
+  tag: "0.13.1"
+  pullPolicy: IfNotPresent
+
+# Single replica (leader election built-in).
+replicaCount: 1
+
+# Operator namespace (created by this chart).
+namespace: cloudflare-operator-system
+namespaceEnabled: true
+
+# Resources
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# CRDs are NOT installed by this chart.
+# Argo CD installs them via the platform-core raw-resource at sync-wave -130
+# (BEFORE the operator deployment at -90 so CRDs exist when the operator starts).
+# See the templates/cloudflare-operator-crds.yaml Application for the raw
+# resource URL pointing to upstream's cloudflare-operator.crds.yaml.
+
+# Cloudflare account + zone IDs (non-secret) injected via ConfigMap.
+config:
+  accountId: ""
+  zoneId: ""
+
+# Cloudflare API token: synced from AKV via ESO.
+# Required token permissions:
+#   Zone:DNS:Edit
+#   Account:Cloudflare Tunnel:Edit
+#   Account:Account Settings:Read
+externalSecret:
+  enabled: true
+  vaultKey: cloudflare-api-token
+  secretStoreName: azure-keyvault-shared
+  refreshInterval: 1h
+  targetSecretName: cloudflare-operator-api-token

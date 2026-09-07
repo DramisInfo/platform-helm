@@ -47,8 +47,6 @@ spec:
       server: "https://kubernetes.default.svc"
     - namespace: envoy-gateway-system
       server: "https://kubernetes.default.svc"
-    - namespace: cloudflared
-      server: "https://kubernetes.default.svc"
     - namespace: argocd
       server: "https://kubernetes.default.svc"
   clusterResourceWhitelist:
@@ -107,6 +105,8 @@ spec:
     - namespace: keda
       server: "https://kubernetes.default.svc"
     - namespace: k6-operator
+      server: "https://kubernetes.default.svc"
+    - namespace: cloudflare-operator-system
       server: "https://kubernetes.default.svc"
     - namespace: kube-system
       server: "https://kubernetes.default.svc"

@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cloudflare-operator-config
-  namespace: {{ .Values.namespace }}
-data:
-  CLOUDFLARE_ACCOUNT_ID: {{ .Values.config.accountId | quote }}
-  CLOUDFLARE_ZONE_ID: {{ .Values.config.zoneId | quote }}

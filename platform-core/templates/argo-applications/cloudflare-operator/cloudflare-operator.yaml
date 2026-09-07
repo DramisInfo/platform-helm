@@ -13,16 +13,16 @@ spec:
     namespace: cloudflare-operator-system
     server: "https://kubernetes.default.svc"
   project: platform-infra
-  sources:
-    - repoURL: "https://github.com/DramisInfo/platform-helm"
-      targetRevision: HEAD
-      path: charts/cloudflare-operator
-      helm:
-        releaseName: cloudflare-operator
-        valuesObject:
-          image:
-            tag: {{ .Values.bootstrap.cloudflareOperator.targetRevision }}
-          namespace: cloudflare-operator-system
+  source:
+    repoURL: "https://ankraio.github.io/ankra-charts"
+    chart: cloudflare-operator
+    targetRevision: {{ .Values.bootstrap.cloudflareOperator.targetRevision | quote }}
+    helm:
+      releaseName: cloudflare-operator
+      valuesObject:
+        namespace:
+          create: true
+        nameOverride: "cloudflare-operator"
   ignoreDifferences:
     - group: external-secrets.io
       kind: ExternalSecret

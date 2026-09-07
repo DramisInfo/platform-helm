@@ -108,13 +108,14 @@ bootstrap:
     # Optional: pod annotations for Argo CD image updater etc.
     podAnnotations: {}
   cloudflareOperator:
-    # Deploy adyanth/cloudflare-operator (K8s operator managing
-    # Tunnel / TunnelDNSRecord / CloudflareTunnel CRDs).
-    # Source: https://github.com/adyanth/cloudflare-operator (v0.13.1)
+    # Deploy ankra-charts/cloudflare-operator v0.2.0 — Helm chart for
+    # adyanth/cloudflare-operator (K8s operator managing Tunnel /
+    # ClusterTunnel / TunnelBinding / AccessTunnel CRDs).
+    # Source: https://artifacthub.io/packages/helm/ankra-charts/cloudflare-operator
     # Off by default — enable per-cluster via overlay patch once a use case exists.
     enabled: false
-    # Operator image version (= appVersion) — bumped by version-bump workflow.
-    targetRevision: "0.13.1"
+    # Chart version (v0.2.0 → appVersion 0.13.1) — bumped by version-bump workflow.
+    targetRevision: "0.2.0"
   atlas:
     # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.28)
     # Atlas Operator manages database schema migrations as Kubernetes resources (AtlasSchema, AtlasMigration CRDs).

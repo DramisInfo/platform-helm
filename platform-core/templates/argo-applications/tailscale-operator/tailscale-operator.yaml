@@ -24,9 +24,8 @@ spec:
         releaseName: tailscale-operator
         valuesObject:
           installCRDs: true
-          oauth:
-            clientId: "k8s-operator"
-            clientSecret: "use-existing-secret"
+          # oauth block removed: we provide operator-oauth Secret via raw chart
+          # (source 2), so chart's oauth-secret.yaml template won't render it.
           oauthSecretVolume:
             secret:
               secretName: operator-oauth

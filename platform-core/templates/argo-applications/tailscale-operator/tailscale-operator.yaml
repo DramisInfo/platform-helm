@@ -44,7 +44,10 @@ spec:
               allowPrivilegeEscalation: false
               capabilities:
                 drop: ["ALL"]
-              readOnlyRootFilesystem: true
+              # readOnlyRootFilesystem removed: tailscale/k8s-operator stores
+              # state in /.config (created at startup), so the root FS must
+              # be writable. Gatekeeper only enforces runAsNonRoot, which is
+              # set above.
     # Source 2: raw chart (dysnix/raw) renders the OAuth Secret in the
     # operator's namespace. Pulls TS_CLIENT_ID + TS_CLIENT_SECRET from AKV
     # (akv-dramisinfo-shared / tailscale-operator-client-id and

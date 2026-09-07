@@ -95,6 +95,18 @@ bootstrap:
     enabled: true
   cnpg:
     enabled: true
+  cloudflared:
+    # Deploy cloudflared via the community-charts/cloudflared Helm chart
+    # (https://github.com/community-charts/helm-charts).
+    # Provides a `cloudflared` DaemonSet that creates Cloudflare Tunnels to
+    # expose cluster services behind public URLs — without exposing cluster IPs.
+    # OFF by default: enable per-cluster via overlay patch once a use case exists.
+    enabled: false
+    # Chart version (community-charts/cloudflared) — bumped by the version-bump
+    # workflow (chore/version-bump-* branches in this repo).
+    targetRevision: "2.2.17"
+    # Optional: pod annotations for Argo CD image updater etc.
+    podAnnotations: {}
   atlas:
     # Deploy Atlas Operator via Argo CD (oci://ghcr.io/ariga/charts/atlas-operator 0.7.28)
     # Atlas Operator manages database schema migrations as Kubernetes resources (AtlasSchema, AtlasMigration CRDs).

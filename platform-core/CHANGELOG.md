@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.72.1](https://github.com/DramisInfo/platform-helm/compare/v0.72.0...v0.72.1) (2026-09-07)
+
+
+### Features
+
+* **cloudflare-operator:** wire ExternalSecret + ConfigMap for the API token ([#120](https://github.com/DramisInfo/platform-helm/issues/120)) ([9f16de9](https://github.com/DramisInfo/platform-helm/commit/9f16de9daae198904ca67eb6e87f71dc057a576e))
+* **platform-core:** add cloudflare-operator opt-in (adyanth) ([#118](https://github.com/DramisInfo/platform-helm/issues/118)) ([798d7da](https://github.com/DramisInfo/platform-helm/commit/798d7da91c3c4bda963e52f3a5e9a8dce64c8a5d))
+* **platform-core:** add cloudflared opt-in (community-charts) ([#116](https://github.com/DramisInfo/platform-helm/issues/116)) ([527de68](https://github.com/DramisInfo/platform-helm/commit/527de68b263f21190f4eae3ea1f3ad97d2b52be9))
+* **platform-core:** opt-in tailscale-operator (pivot from Cloudflare Tunnel) ([#123](https://github.com/DramisInfo/platform-helm/issues/123)) ([6be198a](https://github.com/DramisInfo/platform-helm/commit/6be198a37ff7ff54a7ca3acfa8683b3b07be019e))
+* **platform-core:** swap cloudflare-operator chart for ankra-charts/cloudflare-operator ([#119](https://github.com/DramisInfo/platform-helm/issues/119)) ([b161475](https://github.com/DramisInfo/platform-helm/commit/b1614751916b24bda0accd6c521f8f001e2fd807))
+
+
+### Bug Fixes
+
+* **cloudflare-operator:** use external-secrets.io/v1 (v1beta1 is deprecated) ([#121](https://github.com/DramisInfo/platform-helm/issues/121)) ([b6cf057](https://github.com/DramisInfo/platform-helm/commit/b6cf0574058f0f79cf82db9ffe81fea59b1f4e81))
+* **platform-core:** add securityContext to tailscale-operator (Gatekeeper runAsNonRoot) ([#124](https://github.com/DramisInfo/platform-helm/issues/124)) ([fc8ae60](https://github.com/DramisInfo/platform-helm/commit/fc8ae60f2fb4f237a6529a4e46a0ca6427aa7014))
+* **platform-core:** reduce tailscale-operator defaultTags to tag:k8s-operator only ([#128](https://github.com/DramisInfo/platform-helm/issues/128)) ([e2e3366](https://github.com/DramisInfo/platform-helm/commit/e2e33665ae9369dd7bac21b28108ca5af3953a90))
+* **platform-core:** remove oauth block from tailscale-operator values (avoid duplicate Secret) ([#125](https://github.com/DramisInfo/platform-helm/issues/125)) ([0ff0476](https://github.com/DramisInfo/platform-helm/commit/0ff0476b9a1040f7175f96da9713a7fad8be92cb))
+* **platform-core:** remove readOnlyRootFilesystem from tailscale-operator (incompatible with tsnet state) ([#126](https://github.com/DramisInfo/platform-helm/issues/126)) ([3b227d6](https://github.com/DramisInfo/platform-helm/commit/3b227d6340d170dd75eb6c36f4233bfb90a3afd9))
+* **platform-core:** set HOME=/tmp for tailscale-operator (tsnet state dir writable) ([#127](https://github.com/DramisInfo/platform-helm/issues/127)) ([6e78740](https://github.com/DramisInfo/platform-helm/commit/6e787404d4e1afdfe23006984298f6d6135c4032))
+
 ## [0.72.0](https://github.com/DramisInfo/platform-helm/compare/v0.71.0...v0.72.0) (2026-08-25)
 
 

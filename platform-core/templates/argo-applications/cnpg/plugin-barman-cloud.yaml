@@ -1,0 +1,42 @@
+{{- /*
+  Barman Cloud CNPG-I plugin: backups + WAL archiving to object storage
+  (Azure Blob, S3, GCS) via barmancloud.cnpg.io/ObjectStore. Replaces the
+  in-tree spec.backup.barmanObjectStore, deprecated in CNPG 1.30 and removed
+  in 1.31. Must run in the CNPG operator namespace and needs cert-manager
+  for the operator<->plugin mTLS certificates. Runs non-root (UID 10001),
+  compatible with the psp-pods-must-run-as-nonroot Gatekeeper policy.
+*/ -}}
+{{- if and .Values.bootstrap.cnpg.enabled .Values.bootstrap.certManager.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cnpg-plugin-barman-cloud
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # After the CNPG operator (-90) and cert-manager (-107).
+    argocd.argoproj.io/sync-wave: "-89"
+spec:
+  destination:
+    namespace: cnpg-system
+    server: "https://kubernetes.default.svc"
+  project: platform-data
+  source:
+    repoURL: "https://cloudnative-pg.github.io/charts"
+    targetRevision: "0.8.1"
+    chart: plugin-barman-cloud
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipHooks=true
+      - Timeout=600
+      - Validate=false
+      - Wait=true
+      - PruneEmpty=true
+    {{- include "platform-core.defaultRetry" . | nindent 4 }}
+{{- end -}}

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.2](https://github.com/DramisInfo/platform-helm/compare/v0.72.1...v0.72.2) (2026-10-12)
+
+
+### Features
+
+* **platform-core:** add CNPG Barman Cloud plugin (plugin-barman-cloud 0.8.1) ([52c4d3a](https://github.com/DramisInfo/platform-helm/commit/52c4d3a81a93d138c4da382e1736ea301b96d1ea))
+
 ## [0.72.1](https://github.com/DramisInfo/platform-helm/compare/v0.72.0...v0.72.1) (2026-09-07)
 
 
